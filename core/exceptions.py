@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from common.response import ErrCode, response_err
-from common.errors import UserNotExist, AccessTokenFail
+from common.errors import UserNotExist, UserNotActive, AccessTokenFail
 from utils.logger import logger
 
 
@@ -13,6 +13,10 @@ def register_exceptions(app: FastAPI):
     @app.exception_handler(UserNotExist)
     async def user_not_exists(request: Request, exc: UserNotExist):
         return response_err(ErrCode.USER_NOT_EXISTS)
+
+    @app.exception_handler(UserNotActive)
+    async def user_not_exists(request: Request, exc: UserNotActive):
+        return response_err(ErrCode.USER_NOT_ACTIVE)
 
     @app.exception_handler(AccessTokenFail)
     async def access_token_error(request: Request, exc: AccessTokenFail):

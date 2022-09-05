@@ -3,15 +3,17 @@ from os.path import abspath, dirname
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 from logging.config import fileConfig
-from apps.model import Base
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from apps.model import Base
+from core.settings import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+config.set_main_option("sqlalchemy.url", "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

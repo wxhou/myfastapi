@@ -10,6 +10,8 @@ class ErrCode(object):
     UNAME_OR_PWD_ERROR = (1002, "用户名或密码错误")
     TOKEN_EXPIRED_ERROR = (1003, 'Token过期')
     TOKEN_INVALID_ERROR = (1004, 'Token错误')
+    USER_NOT_ACTIVE = (1005, '用户未激活')
+    FILE_TYPE_ERROR = (1006, "文件类型错误")
     # params
     REQUEST_PARAMS_ERROR = (2000, "请求参数错误")
     COMMON_INTERNAL_ERR = (2001, '内部错误')

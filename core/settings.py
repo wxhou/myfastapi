@@ -24,9 +24,22 @@ class DevelopmentSettings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
 
+    # email
+    MAIL_SERVER: str = 'smtp.126.com'
+    MAIL_PORT: int = 25
+    MAIL_USERNAME: str = 'twxhou@126.com'
+    MAIL_PASSWORD: str = 'GQWJDUKVWNOJLPOH'
+
     LOGGER_LEVEL: int = debug_mode
     LOGGER_FILE: str = './logs/server.log'
     LOGGER_FORMATTER: str = '[%(asctime)s] %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+
+    # upload
+    UPLOAD_MEDIA_FOLDER = os.path.join(BASEDIR, 'upload')
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024
+    ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg'}
+    ALLOWED_AUDIO_EXTENSIONS = {'.mp3'}
+    ALLOWED_VIDEO_EXTENSIONS = {'.mp4'}
 
 
 class TestingSettings(BaseSettings):

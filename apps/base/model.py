@@ -10,7 +10,9 @@ class BaseUser(Base):
     username = Column(String(64), unique=True, index=True)
     nickname = Column(String(64), unique=True, index=True)
     password_hash = Column(String(255))
-    email = Column(String(254), unique=True, index=True)
+    email = Column(String(254), unique=True, index=True) # 邮箱
+    avatar_id = Column(Integer, index=True) # 头像ID
+    is_active = Column(Boolean, default=0, nullable=False) # 是否激活
     role_id = Column(Integer, index=True)
 
     def to_dict(self):
@@ -18,7 +20,9 @@ class BaseUser(Base):
             "id": self.id,
             "username": self.username,
             "nickname": self.nickname,
-            "email": self.email
+            "email": self.email,
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "update_time": self.update_time.strftime("%Y-%m-%d %H:%M:%S")
         }
 
 
@@ -46,3 +50,17 @@ class RolePermission(Base):
     id = Column(BigInteger, primary_key=True)
     role_id = Column(Integer, nullable=False, index=True)
     permission_id = Column(Integer, nullable=False, index=True)
+
+class UploadModel(Base):
+    """文件上传"""
+    __tablename__ = 't_base_upload'
+    id = Column(Integer, primary_key=True)
+    url = Column(String(256))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "url": self.url,
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "update_time": self.update_time.strftime("%Y-%m-%d %H:%M:%S")
+        }

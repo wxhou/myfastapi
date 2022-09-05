@@ -3,11 +3,19 @@ from sqlalchemy import Column, String, Integer, BigInteger, Boolean, Text
 from apps.model import Base
 
 
-class Category:
+class Category(Base):
     """文章分类"""
     __tablename__ = "t_blog_category"
     id = Column(BigInteger, primary_key=True)
     name = Column(String(32), unique=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "update_time": self.update_time.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
 
 class Post(Base):
