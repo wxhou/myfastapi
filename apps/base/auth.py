@@ -31,9 +31,8 @@ async def get_current_user(security_scopes: SecurityScopes,
             raise AccessTokenFail
         token_scopes = payload.get('scopes', [])
         token_data = TokenData(username=username, scopes=token_scopes)
-        for scope in security_scopes.scopes:
-            if scope not in token_data.scopes:
-                raise PermissionError
+        if not any(scope in token_data.scopes for scope in security_scopes.scopes):
+            raise PermissionError
     except JWTError:
         raise AccessTokenFail
     obj = await db.scalar(select(BaseUser).where(BaseUser.username == token_data.username))
