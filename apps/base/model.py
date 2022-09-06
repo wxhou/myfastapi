@@ -33,6 +33,15 @@ class BaseRole(Base):
     name = Column(String(64), unique=True, index=True)  # 角色名称
     order_num = Column(String(64), unique=True, index=True)  # 排序
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "order_num": self.order_num,
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "update_time": self.update_time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+
 
 class BasePermission(Base):
     """权限表"""
@@ -56,11 +65,3 @@ class UploadModel(Base):
     __tablename__ = 't_base_upload'
     id = Column(Integer, primary_key=True)
     url = Column(String(256))
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "url": self.url,
-            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
-            "update_time": self.update_time.strftime("%Y-%m-%d %H:%M:%S")
-        }

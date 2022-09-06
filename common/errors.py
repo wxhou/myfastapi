@@ -10,6 +10,12 @@ class UserNotActive(Exception):
     def __init__(self, msg: str = "用户未激活"):
         self.msg = msg
 
+class PermissionError(Exception):
+    """无访问权限"""
+
+    def __init__(self, msg: str = "无访问权限"):
+        self.msg = msg
+
 
 class AccessTokenFail(Exception):
     """ 访问令牌失败 """

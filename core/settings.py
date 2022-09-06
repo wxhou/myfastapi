@@ -41,6 +41,15 @@ class DevelopmentSettings(BaseSettings):
     ALLOWED_AUDIO_EXTENSIONS = {'.mp3'}
     ALLOWED_VIDEO_EXTENSIONS = {'.mp4'}
 
+    PERMISSION_DATA = {
+        "admin": "管理员",
+        "author": "作者",
+        "user": "普通用户"
+    }
+
+    SWAGGER_DOCS_URL = '/docs'
+    SWAGGER_REDOC_URL ='/redocs'
+    SWAGGER_SCHEMAS = {"defaultModelsExpandDepth": -1} # https://github.com/tiangolo/fastapi/issues/2633
 
 class TestingSettings(BaseSettings):
     """测试配置"""

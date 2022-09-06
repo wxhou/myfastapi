@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from common.response import ErrCode, response_err
-from common.errors import UserNotExist, UserNotActive, AccessTokenFail
+from common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail
 from utils.logger import logger
 
 
@@ -41,3 +41,8 @@ def register_exceptions(app: FastAPI):
         """数据冲突"""
         logger.critical(traceback.format_exc())
         return response_err(ErrCode.DB_INTEGRITY_ERROR, detail=exc.detail)
+
+    @app.exception_handler(PermissionError)
+    async def permission_error_handler(request: Request, exc: PermissionError):
+        """无访问权限"""
+        return response_err(ErrCode.COMMON_PERMISSION_ERR)

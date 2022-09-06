@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, List
 from pydantic import BaseModel, EmailStr, constr, conint
 
 
@@ -11,7 +11,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """token data"""
     username: Union[str, None] = None
-
+    scopes: List[str] = []
 
 class UserRegister(BaseModel):
     """注册用户"""

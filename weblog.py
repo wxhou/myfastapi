@@ -1,11 +1,13 @@
-import logging
 from fastapi import FastAPI
 from core.settings import settings
 
 app = FastAPI(
-    title='Weblog API',
+    title='Weblog',
     description='Weblog API',
     version='1.0.0',
+    docs_url=settings.SWAGGER_DOCS_URL,
+    redoc_url=settings.SWAGGER_REDOC_URL,
+    swagger_ui_parameters=settings.SWAGGER_SCHEMAS
 )
 
 
@@ -16,7 +18,8 @@ async def startup():
     from core.exceptions import register_exceptions
     from core.middleware import register_middleware
     from apps.router import register_router
-
+    from core.schedule import schedule
+    schedule.start()
     register_router(app)
     register_exceptions(app)
     register_middleware(app)
@@ -29,6 +32,4 @@ async def shutdown():
 
 if __name__ == '__main__':
     import uvicorn
-    print(settings.PORT)
-    uvicorn.run("weblog:app", host="127.0.0.1", port=settings.PORT,
-                reload=settings.RELOAD, workers=1)
+    uvicorn.run("weblog:app", host="127.0.0.1", port=settings.PORT, reload=settings.RELOAD, workers=1)

@@ -5,7 +5,8 @@ from sqlalchemy.orm import as_declarative, declared_attr
 @as_declarative()
 class Base:
 
-    # __mapper_args__ = {"eager_defaults": True}  # 防止 insert 插入后不刷新
+    __mapper_args__ = {"eager_defaults": True}  # 防止 insert 插入后不刷新,如不添加created update不显示,但是会增加性能消耗
+    # https://www.wenjiangs.com/doc/sqlalchemy-orm-mapping_api
 
     @declared_attr
     def status(cls):  # 创建时间
