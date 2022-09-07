@@ -2,7 +2,7 @@ from aioredis import Redis
 from .settings import settings
 
 
-class CustomRedis(Redis):
+class MyRedis(Redis):
     """自定义Redis"""
     pass
 

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Security, Request, Query, Path
 from pydantic import conint
 from apps.deps import get_db, get_redis
-from core.redis import CustomRedis
+from core.redis import MyRedis
 from core.settings import settings
 from common.response import ErrCode, response_ok, response_err
 from utils.logger import logger
@@ -20,7 +20,7 @@ router_blog_admin = APIRouter()
 async def category_list(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    redis: CustomRedis = Depends(get_redis),
+    redis: MyRedis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['user', 'author', 'admin'])
 ):
     """文章分类列表"""
@@ -32,7 +32,7 @@ async def category_list(
 async def post_insert(request: Request,
                       args: PostInsert,
                       db: AsyncSession = Depends(get_db),
-                      redis: CustomRedis = Depends(get_redis),
+                      redis: MyRedis = Depends(get_redis),
                       current_user=Security(get_current_active_user, scopes=['author', 'admin'])):
     """新建文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==args.category_id))
@@ -51,7 +51,7 @@ async def post_insert(request: Request,
 async def post_update(request: Request,
                       post: PostUpdate,
                       db: AsyncSession = Depends(get_db),
-                      redis: CustomRedis = Depends(get_redis),
+                      redis: MyRedis = Depends(get_redis),
                       current_user=Security(get_current_active_user, scopes=['author', 'admin'])):
     """新建文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==post.category_id, Category.status==0))
@@ -75,7 +75,7 @@ async def post_list(request: Request,
                     is_publish: bool = Query(default=None),
                     is_comment: bool = Query(default=None),
                     db: AsyncSession = Depends(get_db),
-                    redis: CustomRedis = Depends(get_redis),
+                    redis: MyRedis = Depends(get_redis),
                     current_user=Security(get_current_active_user, scopes=['author', 'admin'])):
     """文章列表"""
     query_filter = [Post.status==0, Post.user_id==current_user.id]
@@ -127,7 +127,7 @@ async def post_top(request: Request,
                 title: str = Query(default=None),
                 order_type: int = Query(default=1),
                 db: AsyncSession = Depends(get_db),
-                redis: CustomRedis = Depends(get_redis)):
+                redis: MyRedis = Depends(get_redis)):
     """热门文章"""
     query_filter = [Post.status==0, Post.is_publish.is_(True)]
     if order_type == 1:
@@ -163,7 +163,7 @@ async def post_comment(
                 request: Request,
                 comment:CommentInsert,
                 db: AsyncSession = Depends(get_db),
-                redis: CustomRedis = Depends(get_redis),
+                redis: MyRedis = Depends(get_redis),
                 current_user=Security(get_current_active_user, scopes=['user', 'author', 'admin'])):
     """文章评论"""
     post_obj = await db.scalar(select(Post).filter(Post.status==0, Post.id==comment.post_id,
@@ -186,7 +186,7 @@ async def post_comment(
                 post_id: conint(ge=1),
                 comment_id: conint(ge=0) = 0,
                 db: AsyncSession = Depends(get_db),
-                redis: CustomRedis = Depends(get_redis),
+                redis: MyRedis = Depends(get_redis),
                 current_user=Security(get_current_active_user, scopes=['user', 'author', 'admin'])):
     """文章评论列表"""
     post_obj = await db.scalar(select(Post).filter(Post.status==0, Post.id==post_id,

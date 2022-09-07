@@ -15,11 +15,17 @@ class DevelopmentSettings(BaseSettings):
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost']
 
-    # SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
+    # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    # MySQL(同步)
+    SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:6379/2"
+
+    CELERY_BROKER_URL: str = "redis://localhost:6379/6"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
+    CELERY_TIMEZONE:str = ""
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
@@ -58,7 +64,7 @@ class TestingSettings(BaseSettings):
     RELOAD = True
     SECRET_KEY = 'b7c890f9-983d-4950-9d99-228356a17203'
 
-    SQLALCHEMY_DATABASE_URL = "mysql://root:root1234@127.0.0.1/db_weblog"
+    ASYNC_SQLALCHEMY_DATABASE_URL = "mysql://root:root1234@127.0.0.1/db_weblog"
     REDIS_URL = "redis://localhost:6379/2"
 
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -69,7 +75,7 @@ class ProductionSettings(BaseSettings):
     """生产配置"""
     DEBUG = True
     PORT = 8099
-    SQLALCHEMY_DATABASE_URL = ''
+    ASYNC_SQLALCHEMY_DATABASE_URL = ''
     SECRET_KEY = ''
     RELOAD = True
 

@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 from fastapi import Request, Depends, Security
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from apps.deps import get_db, get_redis
-from core.redis import CustomRedis
+from core.redis import MyRedis
 from core.settings import settings
 from common.security import verify_password
 from common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail
@@ -18,7 +18,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/base/admin/user/login/", scopes=
 
 async def get_current_user(security_scopes: SecurityScopes,
                            db: AsyncSession = Depends(get_db),
-                           redis: CustomRedis = Depends(get_redis),
+                           redis: MyRedis = Depends(get_redis),
                            token: str = Depends(oauth2_scheme)):
     """获取当前登录用户"""
     try:

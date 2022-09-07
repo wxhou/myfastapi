@@ -2,12 +2,12 @@
 
 from asyncio import current_task
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session
-from sqlalchemy.orm import as_declarative, sessionmaker, declared_attr
+from sqlalchemy.orm import sessionmaker
 from .settings import settings
 
 
 engine = create_async_engine(
-    url=settings.SQLALCHEMY_DATABASE_URL,
+    url=settings.ASYNC_SQLALCHEMY_DATABASE_URL,
     echo=settings.SQLALCHEMY_ECHO,
     future=True
 )

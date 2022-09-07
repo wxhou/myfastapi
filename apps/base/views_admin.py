@@ -8,14 +8,14 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from apps.deps import get_db, get_redis
-from core.redis import CustomRedis
+from core.redis import MyRedis
 from core.settings import settings
 from common.response import ErrCode, response_ok, response_err
 from common.security import set_password, create_access_token
 from utils.logger import logger
 from .model import BaseUser, UploadModel
 from .auth import authenticate, get_current_active_user
-from .task import send_register_email
+from .tasks import send_register_email
 from .schemas import Token, UserRegister, UserModify
 
 router_base_admin = APIRouter()
@@ -25,7 +25,7 @@ router_base_admin = APIRouter()
 async def login_access_token(
         request: Request,
         db: AsyncSession = Depends(get_db),
-        redis: CustomRedis = Depends(get_redis),
+        redis: MyRedis = Depends(get_redis),
         form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     """登录接口"""
@@ -45,7 +45,7 @@ async def login_access_token(
 
 @router_base_admin.post('/logout/', summary='退出登录')
 async def logout(request: Request,
-                 redis: CustomRedis = Depends(get_redis),
+                 redis: MyRedis = Depends(get_redis),
                  current_user: BaseUser = Security(get_current_active_user, scopes=['user', 'author', 'admin'])):
     """退出登录"""
     if token := request.headers.get('authorization'):
@@ -59,7 +59,7 @@ async def user_register(request: Request,
                         user: UserRegister,
                         background_tasks: BackgroundTasks,
                         db: AsyncSession = Depends(get_db),
-                        redis: CustomRedis = Depends(get_redis)):
+                        redis: MyRedis = Depends(get_redis)):
     """用户注册"""
     async with db.begin():
         obj = await db.execute(select(BaseUser).where(or_(BaseUser.username == user.username,
@@ -84,7 +84,7 @@ async def user_register(request: Request,
 async def user_active(request: Request,
                     token :str = Path(title="激活用户token"),
                     session: AsyncSession = Depends(get_db),
-                    redis: CustomRedis = Depends(get_redis)):
+                    redis: MyRedis = Depends(get_redis)):
     """用户激活"""
     _uid = await redis.get(f"user_register_{token}")
     logger.info(_uid)

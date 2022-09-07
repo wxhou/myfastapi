@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from core.settings import settings
+from core.schedule import scheduler
 
 app = FastAPI(
     title='Weblog',
@@ -18,8 +19,7 @@ async def startup():
     from core.exceptions import register_exceptions
     from core.middleware import register_middleware
     from apps.router import register_router
-    from core.schedule import schedule
-    schedule.start()
+    scheduler.start()
     register_router(app)
     register_exceptions(app)
     register_middleware(app)
@@ -28,6 +28,7 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
+    scheduler.shutdown()
     await app.state.redis.close()  # 关闭 redis
 
 if __name__ == '__main__':
