@@ -25,7 +25,7 @@ class ErrCode(object):
 
 def response_ok(data: Union[List, Dict, None] = None, msg='success', **kwargs) -> Dict:
     """正确返回"""
-    ret = {'code': 0, 'msg': msg}
+    ret = {'code': 0, 'errmsg': msg}
     if data is not None:
         ret['data'] = data
     for k, v in kwargs.items():

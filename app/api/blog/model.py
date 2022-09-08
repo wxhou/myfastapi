@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, BigInteger, Boolean, Text
-from apps.model import Base
+from app.api.model import Base
 
 
 class Category(Base):

@@ -3,15 +3,16 @@ from sqlalchemy import func, or_, select, insert, values, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Security, Request, Query, Path
 from pydantic import conint
-from apps.deps import get_db, get_redis
-from core.redis import MyRedis
-from core.settings import settings
-from common.response import ErrCode, response_ok, response_err
-from utils.logger import logger
-from apps.base.model import BaseUser
-from apps.base.views_admin import get_current_active_user
+from app.core.redis import MyRedis
+from app.core.settings import settings
+from app.common.response import ErrCode, response_ok, response_err
+from app.utils.logger import logger
+from app.api.deps import get_db, get_redis
+from app.api.base.model import BaseUser
+from app.api.base.views_admin import get_current_active_user
 from .model import Category, Post, Comment
 from .schemas import PostInsert, PostUpdate, PostDelete, CommentInsert
+from .tasks import helloworld
 
 router_blog_admin = APIRouter()
 
@@ -129,6 +130,7 @@ async def post_top(request: Request,
                 db: AsyncSession = Depends(get_db),
                 redis: MyRedis = Depends(get_redis)):
     """热门文章"""
+    helloworld.delay(2, 3)
     query_filter = [Post.status==0, Post.is_publish.is_(True)]
     if order_type == 1:
         _order_by = Post.create_time.desc()

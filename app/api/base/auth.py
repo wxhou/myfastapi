@@ -4,11 +4,11 @@ from sqlalchemy import select
 from jose import jwt, JWTError
 from fastapi import Request, Depends, Security
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
-from apps.deps import get_db, get_redis
-from core.redis import MyRedis
-from core.settings import settings
-from common.security import verify_password
-from common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail
+from app.api.deps import get_db, get_redis
+from app.core.redis import MyRedis
+from app.core.settings import settings
+from app.common.security import verify_password
+from app.common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail
 from .model import BaseUser, BaseRole, BasePermission, RolePermission
 from .schemas import TokenData
 

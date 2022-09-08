@@ -3,8 +3,8 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 from email.mime.multipart import MIMEMultipart
-from core.settings import settings
-from utils.logger import logger
+from app.core.settings import settings
+from app.utils.logger import logger
 
 
 def _format_addr(s):

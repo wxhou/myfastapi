@@ -5,8 +5,8 @@ sys.path.append(BASE_DIR)
 import asyncio
 
 from sqlalchemy import select, values
-from apps.blog.model import Category
-from core.db import async_session
+from api.blog.model import Category
+from app.core.db import async_session
 
 
 async def init_category(cname):

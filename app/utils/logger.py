@@ -4,7 +4,7 @@ BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(BASEDIR)
 import logging
 from logging.handlers import RotatingFileHandler
-from core.settings import settings
+from app.core.settings import settings
 
 
 logger = logging.getLogger()

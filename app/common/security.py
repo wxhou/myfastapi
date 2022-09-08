@@ -1,9 +1,9 @@
 from typing import Optional, Union, Any
 from datetime import datetime, timedelta
+from fastapi import Header
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from core.settings import settings
-from fastapi import Header
+from app.core.settings import settings
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")  # 加密密码

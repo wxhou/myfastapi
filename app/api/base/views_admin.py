@@ -7,12 +7,12 @@ from fastapi import APIRouter, Depends, Security, Request, Query, Path, Backgrou
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from apps.deps import get_db, get_redis
-from core.redis import MyRedis
-from core.settings import settings
-from common.response import ErrCode, response_ok, response_err
-from common.security import set_password, create_access_token
-from utils.logger import logger
+from app.api.deps import get_db, get_redis
+from app.core.redis import MyRedis
+from app.core.settings import settings
+from app.common.response import ErrCode, response_ok, response_err
+from app.common.security import set_password, create_access_token
+from app.utils.logger import logger
 from .model import BaseUser, UploadModel
 from .auth import authenticate, get_current_active_user
 from .tasks import send_register_email

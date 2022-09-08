@@ -2,9 +2,9 @@ import traceback
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError, ProgrammingError
-from common.response import ErrCode, response_err
-from common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail
-from utils.logger import logger
+from app.common.response import ErrCode, response_err
+from app.common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail
+from app.utils.logger import logger
 
 
 def register_exceptions(app: FastAPI):

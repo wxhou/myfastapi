@@ -2,8 +2,8 @@ from typing import AsyncGenerator
 
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.db import async_session
-from core.redis import Redis
+from app.core.db import async_session
+from app.core.redis import Redis
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

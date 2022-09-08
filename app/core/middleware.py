@@ -4,9 +4,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import OperationalError
 from aioredis.exceptions import ConnectionError
-from core.settings import settings
-from utils.logger import logger
-from common.response import ErrCode, response_err
+from app.core.settings import settings
+from app.utils.logger import logger
+from app.common.response import ErrCode, response_err
 
 # 权限验证 https://www.cnblogs.com/mazhiyong/p/13433214.html
 # 得到真实ip https://stackoverflow.com/questions/60098005/fastapi-starlette-get-client-real-ip

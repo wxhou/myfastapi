@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from core.settings import settings
-from core.schedule import scheduler
+from app.core.settings import settings
+from app.core.schedule import scheduler
 
 app = FastAPI(
     title='Weblog',
@@ -15,10 +15,10 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup():
     """初始化"""
-    from core.redis import init_redis_pool
-    from core.exceptions import register_exceptions
-    from core.middleware import register_middleware
-    from apps.router import register_router
+    from app.core.redis import init_redis_pool
+    from app.core.exceptions import register_exceptions
+    from app.core.middleware import register_middleware
+    from app.api.router import register_router
     scheduler.start()
     register_router(app)
     register_exceptions(app)

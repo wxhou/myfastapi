@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from apps.base.router import base_router
-from apps.blog.router import blog_router
+from app.api.base.router import base_router
+from app.api.blog.router import blog_router
 
 
 def register_router(app: FastAPI):
