@@ -21,6 +21,7 @@ class DevelopmentSettings(BaseSettings):
     ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     # MySQL(同步)
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:6379/2"
 
@@ -74,6 +75,7 @@ class TestingSettings(BaseSettings):
     ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     # MySQL(同步)
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:6379/2"
 
@@ -128,7 +130,8 @@ class ProductionSettings(BaseSettings):
     ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     # MySQL(同步)
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
-    SQLALCHEMY_ECHO: bool = True
+    SQLALCHEMY_POOL_SIZE: int = 20
+    SQLALCHEMY_ECHO: bool = False
     REDIS_URL: str = "redis://localhost:6379/2"
 
     CELERY_BROKER_URL: str = "redis://localhost:6379/6"

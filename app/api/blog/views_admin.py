@@ -97,12 +97,13 @@ async def post_list(request: Request,
 async def post_info(request: Request,
                        post_id: int = Path(title="文章ID"),
                        db: AsyncSession = Depends(get_db),
-                       current_user=Security(get_current_active_user, scopes=['user', 'author', 'admin'])):
+                       redis: MyRedis = Depends(get_redis)):
     """文章详情"""
     query_filter = [Post.id==post_id, Post.status==0]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
     if post_id is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
+    await redis.zincrby("weblog_post_top", 1, post_id)
     return response_ok(data=post_obj.to_dict())
 
 
@@ -126,21 +127,25 @@ async def post_top(request: Request,
                 page: int = Query(default=1, ge=1),
                 page_size: int = Query(default=100, ge=1),
                 title: str = Query(default=None),
-                order_type: int = Query(default=1),
+                order_type: int = Query(default=1, gt=0, le=3),
                 db: AsyncSession = Depends(get_db),
                 redis: MyRedis = Depends(get_redis)):
     """热门文章"""
-    helloworld.delay(2, 3)
     query_filter = [Post.status==0, Post.is_publish.is_(True)]
-    if order_type == 1:
+    scores = await redis.zrevrange("weblog_post_top", 0, -1)
+    if order_type == 1 and scores:
+        query_filter.append(Post.id.in_(scores))
+        _order_by = func.field(Post.id, *scores)
+    elif order_type == 2:
         _order_by = Post.create_time.desc()
-    # else
-    # TODO 热门文章
+    elif order_type == 3:
+        _order_by = func.rand()
     if title:
         query_filter.append(Post.title.ilike(f"%{title}%"))
     objs = await db.scalars(select(Post).filter(*query_filter).order_by(_order_by))
     _count = await db.scalar(select(func.count(Post.id)).filter(*query_filter))
     _pages = int(ceil(_count / float(page_size)))
+    helloworld.delay(2, 3)
     return response_ok(data=[obj.to_dict() for obj in objs],
                        total=_count, pages=_pages)
 

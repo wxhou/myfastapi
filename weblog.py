@@ -3,8 +3,8 @@ from app.core.settings import settings
 from app.core.schedule import scheduler
 
 app = FastAPI(
-    title='Weblog',
-    description='Weblog API',
+    title=settings.PROJECT_NAME,
+    description='%s-API' % settings.PROJECT_NAME,
     version='1.0.0',
     docs_url=settings.SWAGGER_DOCS_URL,
     redoc_url=settings.SWAGGER_REDOC_URL,
