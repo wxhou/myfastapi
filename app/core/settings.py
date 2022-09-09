@@ -12,7 +12,7 @@ class DevelopmentSettings(BaseSettings):
     DEBUG: bool = True
     PORT: int = 8199
     RELOAD: bool = True
-    SECRET_KEY: str = 'b7c890f9-983d-4950-9d99-228356a17203'
+    SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost']
 
@@ -66,7 +66,7 @@ class TestingSettings(BaseSettings):
     DEBUG: bool = True
     PORT: int = 8199
     RELOAD: bool = True
-    SECRET_KEY: str = 'b1fbb16c-de57-48a7-8ec1-0149d10fbd58'
+    SECRET_KEY: str = 'FPX5zXhNVCbLPmSPnJLgmG'
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost']
 
@@ -121,7 +121,7 @@ class ProductionSettings(BaseSettings):
     DEBUG: bool = False
     PORT: int = 8199
     RELOAD: bool = True
-    SECRET_KEY: str = 'c3ef509e-1ab9-4e94-b6af-68c4c12e4f25'
+    SECRET_KEY: str = 'Xs8nWV1P45jiKrjLV6OSnj'
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost']
 

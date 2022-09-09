@@ -14,6 +14,7 @@ class ErrCode(object):
     FILE_TYPE_ERROR = (1006, "文件类型错误")
     QUERY_NOT_EXISTS = (1007, "数据不存在")
     QUERY_HAS_EXISTS = (1008, "数据已存在")
+    TOO_MANY_REQUEST = (1009, "太多的请求")
     # params
     REQUEST_PARAMS_ERROR = (2000, "请求参数错误")
     COMMON_INTERNAL_ERR = (2001, '内部错误')

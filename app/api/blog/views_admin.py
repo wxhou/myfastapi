@@ -145,7 +145,7 @@ async def post_top(request: Request,
     objs = await db.scalars(select(Post).filter(*query_filter).order_by(_order_by))
     _count = await db.scalar(select(func.count(Post.id)).filter(*query_filter))
     _pages = int(ceil(_count / float(page_size)))
-    helloworld.delay(2, 3)
+    helloworld.apply_async((2, 3), queue='transient', ignore_result=True)
     return response_ok(data=[obj.to_dict() for obj in objs],
                        total=_count, pages=_pages)
 
@@ -165,7 +165,7 @@ async def post_delete(request: Request,
     return response_ok()
 
 
-@router_blog_admin.post('/post/comment', summary='新增评论')
+@router_blog_admin.post('/post/comment/', summary='新增评论')
 async def post_comment(
                 request: Request,
                 comment:CommentInsert,

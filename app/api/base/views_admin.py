@@ -61,11 +61,12 @@ async def user_register(request: Request,
                         db: AsyncSession = Depends(get_db),
                         redis: MyRedis = Depends(get_redis)):
     """用户注册"""
+    obj = await db.execute(select(BaseUser).where(or_(BaseUser.username == user.username,
+                                    BaseUser.email == user.email)))
+    if obj.one_or_none() is not None:
+        return response_err(ErrCode.USER_HAS_EXISTS)
     async with db.begin():
-        obj = await db.execute(select(BaseUser).where(or_(BaseUser.username == user.username,
-                                        BaseUser.email == user.email)))
-        if obj.one_or_none() is not None:
-            return response_err(ErrCode.USER_HAS_EXISTS)
+        """一次异步事务"""
         obj = BaseUser(username=user.username,
                         email=user.email, nickname=user.nickname)
         db.add(obj)
@@ -83,16 +84,15 @@ async def user_register(request: Request,
 @router_base_admin.get('/user/active/{token}', summary='用户激活')
 async def user_active(request: Request,
                     token :str = Path(title="激活用户token"),
-                    session: AsyncSession = Depends(get_db),
+                    db: AsyncSession = Depends(get_db),
                     redis: MyRedis = Depends(get_redis)):
     """用户激活"""
     _uid = await redis.get(f"user_register_{token}")
-    logger.info(_uid)
-    obj = await session.scalar(select(BaseUser).where(BaseUser.id==_uid, BaseUser.status==0))
+    obj = await db.scalar(select(BaseUser).where(BaseUser.id==_uid, BaseUser.status==0))
     if obj is None:
         return response_err(ErrCode.USER_HAS_EXISTS)
     obj.is_active = True
-    await session.commit()
+    await db.commit()
     return response_ok()
 
 
@@ -107,11 +107,12 @@ async def user_update(
     obj = (await db.execute(sql)).scalar_one_or_none()
     if obj is None:
         return response_err(ErrCode.USER_NOT_EXISTS)
-    obj.email = user.username
-    obj.nick_name = user.nick_name
-    obj.email = user.email
-    obj.avatar_id = user.avatar_id
-    await db.commit()
+    async with db.begin():
+        obj.email = user.username
+        obj.nick_name = user.nick_name
+        obj.email = user.email
+        obj.avatar_id = user.avatar_id
+        await db.commit()
     return response_ok(data=obj.to_dict())
 
 

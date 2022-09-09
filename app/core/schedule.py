@@ -4,7 +4,7 @@ from apscheduler.executors.asyncio import AsyncIOExecutor
 from app.core.settings import settings
 
 class Singleton(type):
-    """_summary_
+    """一个单例
     # https://zhuanlan.zhihu.com/p/37534850
     """
     _instances = {}
