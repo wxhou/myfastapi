@@ -3,8 +3,6 @@ from datetime import timedelta
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from sqlalchemy.exc import OperationalError
-from aioredis.exceptions import ConnectionError
 from app.core.settings import settings
 from app.core.redis import MyRedis
 from app.utils.logger import logger
@@ -33,18 +31,11 @@ def register_middleware(app: FastAPI):
 
     @app.middleware("http")
     async def many_request(request: Request, call_next):
-        try:
-            redis: MyRedis = await request.app.state.redis
-            _key_name = request.client.host + str(request.url)
-            amount = await redis.get(_key_name)
-            if amount and int(amount) > 60:
-                return response_err(ErrCode.TOO_MANY_REQUEST)
-            await redis.incr(_key_name)
-            await redis.expire(_key_name, timedelta(minutes=1))
-            return await call_next(request)  # 返回请求(跳过token)
-        except ConnectionError:
-            logger.critical(traceback.format_exc())
-            return response_err(ErrCode.REDIS_CONNECTION_ERROR)
-        except OperationalError:
-            logger.critical(traceback.format_exc())
-            return response_err(ErrCode.DB_CONNECTION_ERROR)
+        redis: MyRedis = await request.app.state.redis
+        _key_name = request.client.host + str(request.url)
+        amount = await redis.get(_key_name)
+        if amount and int(amount) > 60:
+            return response_err(ErrCode.TOO_MANY_REQUEST)
+        await redis.incr(_key_name)
+        await redis.expire(_key_name, timedelta(minutes=1))
+        return await call_next(request)  # 返回请求(跳过token)
