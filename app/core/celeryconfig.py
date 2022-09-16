@@ -2,7 +2,7 @@ from kombu import Queue, Exchange
 from .settings import settings
 # https://docs.celeryq.dev/en/stable/
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html
-security_key = 'R9NrIpN5zbMpbcuzNL75BU'
+security_key = settings.CELERY_SECURITY_KEY
 broker_url = settings.CELERY_BROKER_URL
 result_backend = settings.CELERY_RESULT_BACKEND
 result_serializer = "json"

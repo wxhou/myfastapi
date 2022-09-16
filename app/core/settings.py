@@ -25,9 +25,9 @@ class DevelopmentSettings(BaseSettings):
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:6379/2"
 
-    CELERY_BROKER_URL: str = "redis://localhost:6379/6"
+    CELERY_SECURITY_KEY:str = "'R9NrIpN5zbMpbcuzNL75BU'"
+    CELERY_BROKER_URL: str = "amqp://myuser:mypassword@localhost:5672/myvhost"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
-    CELERY_TIMEZONE:str = ""
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
@@ -79,6 +79,7 @@ class TestingSettings(BaseSettings):
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:6379/2"
 
+    CELERY_SECURITY_KEY: str = "k75rBIhvnZpOtYiH4rJfWv"
     CELERY_BROKER_URL: str = "redis://localhost:6379/6"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
 
@@ -134,6 +135,7 @@ class ProductionSettings(BaseSettings):
     SQLALCHEMY_ECHO: bool = False
     REDIS_URL: str = "redis://localhost:6379/2"
 
+    CELERY_SECURITY_KEY: str = "vGf6eLwM2V5F5Qskoz8G3X"
     CELERY_BROKER_URL: str = "redis://localhost:6379/6"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
 
