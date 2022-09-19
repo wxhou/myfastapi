@@ -4,7 +4,6 @@ from datetime import timedelta
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Security, Request, Query, Path, BackgroundTasks, File, UploadFile
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from app.api.deps import get_db, get_redis
@@ -12,6 +11,7 @@ from app.core.redis import MyRedis
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
+from app.common.encoder import jsonable_encoder
 from app.utils.logger import logger
 from .model import BaseUser, UploadModel
 from .auth import authenticate, get_current_active_user
