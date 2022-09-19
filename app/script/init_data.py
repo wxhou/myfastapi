@@ -1,11 +1,11 @@
 import os
 import sys
-BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 sys.path.append(BASE_DIR)
 import asyncio
 
 from sqlalchemy import select, values
-from api.blog.model import Category
+from app.api.blog.model import Category
 from app.core.db import async_session
 
 

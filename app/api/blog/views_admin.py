@@ -54,16 +54,14 @@ async def post_update(request: Request,
                       db: AsyncSession = Depends(get_db),
                       redis: MyRedis = Depends(get_redis),
                       current_user=Security(get_current_active_user, scopes=['author', 'admin'])):
-    """新建文章"""
+    """更新文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==post.category_id, Category.status==0))
     if cate_obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    args = post.dict()
-    post_obj = await db.scalar(select(Post).filter(Post.id==args.pop("id", None), Post.status==0))
+    post_obj = await db.scalar(select(Post).filter(Post.id==post.id, Post.status==0))
     if post_obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    for k, v in args.items():
-        setattr(post_obj, k, v)
+    await db.execute(update(Post).filter(Post.id==post.id, Post.status==0).values(post.dict(exclude={'id'}, exclude_none=True)))
     await db.commit()
     return response_ok(data=post_obj.to_dict())
 
@@ -87,7 +85,7 @@ async def post_list(request: Request,
     if is_comment:
         query_filter.append(Post.is_comment==is_comment)
     objs = await db.scalars(select(Post).filter(*query_filter).limit(page_size).offset((page - 1) * page))
-    _count = await db.scalar(select(func.count(Post.id)).filter(*query_filter))
+    _count = await db.scalar(select(func.count()).filter(*query_filter))
     _pages = int(ceil(_count / float(page_size)))
     return response_ok(data=[obj.to_dict() for obj in objs],
                        total=_count, pages=_pages)
@@ -133,17 +131,18 @@ async def post_top(request: Request,
     """热门文章"""
     query_filter = [Post.status==0, Post.is_publish.is_(True)]
     scores = await redis.zrevrange("weblog_post_top", 0, -1)
+    _order_by = Post.create_time.desc()
     if order_type == 1 and scores:
+        # 按热度排序
         query_filter.append(Post.id.in_(scores))
         _order_by = func.field(Post.id, *scores)
-    elif order_type == 2:
-        _order_by = Post.create_time.desc()
     elif order_type == 3:
+        # 随机排序
         _order_by = func.rand()
     if title:
         query_filter.append(Post.title.ilike(f"%{title}%"))
     objs = await db.scalars(select(Post).filter(*query_filter).order_by(_order_by))
-    _count = await db.scalar(select(func.count(Post.id)).filter(*query_filter))
+    _count = await db.scalar(select(func.count()).filter(*query_filter))
     _pages = int(ceil(_count / float(page_size)))
     helloworld.apply_async((2, 3), queue='transient', ignore_result=True)
     return response_ok(data=[obj.to_dict() for obj in objs],

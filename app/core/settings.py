@@ -8,7 +8,7 @@ from pydantic import BaseSettings, AnyHttpUrl
 class DevelopmentSettings(BaseSettings):
     """"开发设置"""
     PROJECT_NAME = 'weblog'
-    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
     PORT: int = 8199
     RELOAD: bool = True
@@ -62,7 +62,7 @@ class DevelopmentSettings(BaseSettings):
 class TestingSettings(BaseSettings):
     """测试配置"""
     PROJECT_NAME = 'weblog'
-    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
     PORT: int = 8199
     RELOAD: bool = True
@@ -118,7 +118,7 @@ class TestingSettings(BaseSettings):
 class ProductionSettings(BaseSettings):
     """生产配置"""
     PROJECT_NAME = 'weblog'
-    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = False
     PORT: int = 8199
     RELOAD: bool = True

@@ -1,7 +1,7 @@
 import os, uuid
 from math import ceil
 from datetime import timedelta
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Security, Request, Query, Path, BackgroundTasks, File, UploadFile
 from fastapi.encoders import jsonable_encoder
@@ -65,13 +65,11 @@ async def user_register(request: Request,
                                     BaseUser.email == user.email)))
     if obj.one_or_none() is not None:
         return response_err(ErrCode.USER_HAS_EXISTS)
-    async with db.begin():
-        """一次异步事务"""
-        obj = BaseUser(username=user.username,
-                        email=user.email, nickname=user.nickname)
-        db.add(obj)
-        obj.password_hash = set_password(user.password)
-        await db.commit()
+    obj = BaseUser(username=user.username,
+                    email=user.email, nickname=user.nickname)
+    db.add(obj)
+    obj.password_hash = set_password(user.password)
+    await db.commit()
     expires_delta = 24*60*60
     access_token = create_access_token(
         data={"sub": obj.username}, expires_delta=timedelta(seconds=expires_delta)
@@ -104,15 +102,12 @@ async def user_update(
         current_user: BaseUser = Security(get_current_active_user, scopes=['user', 'author', 'admin'])):
     """更新用户信息"""
     sql = select(BaseUser).where(BaseUser.id == user.id, BaseUser.status == 0)
-    obj = (await db.execute(sql)).scalar_one_or_none()
+    obj = await db.scalar(sql)
     if obj is None:
         return response_err(ErrCode.USER_NOT_EXISTS)
-    async with db.begin():
-        obj.email = user.username
-        obj.nick_name = user.nick_name
-        obj.email = user.email
-        obj.avatar_id = user.avatar_id
-        await db.commit()
+    await db.execute(update(BaseUser).where(BaseUser.id == user.id,
+                                            BaseUser.status == 0).values(user.dict(exclude={'id'}, exclude_none=True)))
+    await db.commit()
     return response_ok(data=obj.to_dict())
 
 
@@ -150,8 +145,7 @@ async def create_upload_file(file: UploadFile = File(),
     save_file = os.path.join(settings.UPLOAD_MEDIA_FOLDER, filename + ext)
     with open(save_file, 'wb+') as buffer:
         buffer.write(await file.read())
-    async with db.begin():
-        obj = UploadModel(url='/upload/{}{}'.format(filename, ext))
-        db.add(obj)
-        await db.commit()
+    obj = UploadModel(url='/upload/{}{}'.format(filename, ext))
+    db.add(obj)
+    await db.commit()
     return response_ok(data=jsonable_encoder(obj))

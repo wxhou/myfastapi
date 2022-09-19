@@ -20,3 +20,5 @@ async_session_factory = sessionmaker(
 
 
 async_session = async_scoped_session(async_session_factory, scopefunc=current_task)
+
+# sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.

@@ -27,7 +27,7 @@ class UserModify(BaseModel):
     """
     id: conint(ge=1)
     username: Optional[str] = None
-    nick_name: Optional[str] = None
+    nickname: Optional[str] = None
     email: Optional[EmailStr] = None
     avatar_id: Optional[int] = None
 
