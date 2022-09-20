@@ -1,6 +1,6 @@
 import os
 import sys
-BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 sys.path.append(BASEDIR)
 import logging
 from logging.handlers import RotatingFileHandler
@@ -21,6 +21,15 @@ file_handler.setFormatter(logging.Formatter(settings.LOGGER_FORMATTER))
 logger.addHandler(file_handler)
 # logger.addHandler(stream_handler)
 
+
+websocket_logger = logging.getLogger('websocket')
+websocket_logger.setLevel(settings.LOGGER_LEVEL)
+wf_handler = RotatingFileHandler(filename=settings.WEBSOCKET_LOGGER_FILE,
+                                   maxBytes=10 * 1024 * 1024,
+                                   backupCount=10,
+                                   encoding="utf-8")
+wf_handler.setFormatter(logging.Formatter(settings.LOGGER_FORMATTER))
+websocket_logger.addHandler(wf_handler)
 
 if __name__ == '__main__':
     logger.debug("测试日志")

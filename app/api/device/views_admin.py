@@ -1,12 +1,12 @@
 from math import ceil
 from sqlalchemy import func, or_, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Security, Request, Query
-from app.api.deps import get_db, get_redis
-from app.core.redis import MyRedis
+from fastapi import APIRouter, Depends, Security, Request, Query, Header, WebSocket, WebSocketDisconnect
+from app.api.deps import get_db, get_redis, MyRedis
+from app.core.db import AsyncSession, engine
 from app.core.settings import settings
 from app.common.encoder import jsonable_encoder
 from app.common.response import ErrCode, response_ok, response_err
+from app.common.sockets import manager
 from app.utils.logger import logger
 from app.api.base.auth import get_current_active_user
 from app.api.base.model import BaseUser
@@ -28,18 +28,10 @@ async def device_insert(request: Request,
                             DeviceInfo.device_mac_addr==args.device_mac_addr))
     if obj is not None:
         return response_err(ErrCode.QUERY_HAS_EXISTS)
-    obj = DeviceInfo(
-        device_name=args.device_name,
-        device_type=args.device_type,
-        device_position=args.device_position,
-        device_number=args.device_number,
-        device_screen_number=args.device_screen_number,
-        device_mac_addr=args.device_mac_addr,
-        device_ip_addr=args.device_ip_addr,
-        annotation=args.annotation
-    )
+    obj = DeviceInfo(**args.dict(exclude_none=True))
     db.add(obj)
-    obj.generate_register_code()
+    await db.flush()
+    obj.generate_register_code(obj.device_type, obj.id)
     await db.commit()
     return response_ok(data={"id": obj.id})
 

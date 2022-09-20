@@ -18,11 +18,13 @@ async def startup():
     from app.core.redis import init_redis_pool
     from app.core.exceptions import register_exceptions
     from app.core.middleware import register_middleware
+    from app.api.socketio import register_socketio
     from app.api.router import register_router
     scheduler.start()
     register_router(app)
     register_exceptions(app)
     register_middleware(app)
+    register_socketio(app)
     app.state.redis = await init_redis_pool()  # redis
 
 

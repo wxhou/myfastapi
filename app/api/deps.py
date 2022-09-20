@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import async_session
-from app.core.redis import Redis
+from app.core.redis import MyRedis
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -12,7 +12,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_redis(request: Request) -> Redis:
+async def get_redis(request: Request) -> MyRedis:
     """获取redis连接"""
     return await request.app.state.redis
 

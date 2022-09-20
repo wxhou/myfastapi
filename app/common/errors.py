@@ -22,3 +22,11 @@ class AccessTokenFail(Exception):
 
     def __init__(self, msg: str = "访问令牌失败"):
         self.msg = msg
+
+
+
+class DeviceNotFound(Exception):
+    """ 设备不存在 """
+
+    def __init__(self, msg: str = "设备不存在"):
+        self.msg = msg

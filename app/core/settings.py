@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Optional, Dict, Set
+from typing import List, Optional, Dict, Set, Sequence
 from functools import lru_cache
 from pydantic import BaseSettings, AnyHttpUrl
 
@@ -14,11 +14,11 @@ class DevelopmentSettings(BaseSettings):
     RELOAD: bool = True
     SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
     GLOBAL_ENCODING: str = 'utf-8'
-    CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost']
+    CORS_ORIGINS: Sequence[str] = ['*']
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+asyncmy://root:root1234@localhost:3306/db_weblog?charset=utf8"
     # MySQL(同步)
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
@@ -40,6 +40,7 @@ class DevelopmentSettings(BaseSettings):
 
     LOGGER_LEVEL: int = logging.DEBUG
     LOGGER_FILE: str = './logs/server.log'
+    WEBSOCKET_LOGGER_FILE: str = './logs/websocket.log'
     LOGGER_FORMATTER: str = '[%(asctime)s] %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
 
     # upload
@@ -72,7 +73,7 @@ class TestingSettings(BaseSettings):
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+asyncmy://root:root1234@localhost:3306/db_weblog?charset=utf8"
     # MySQL(同步)
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
@@ -128,7 +129,7 @@ class ProductionSettings(BaseSettings):
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+aiomysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+asyncmy://root:root1234@localhost:3306/db_weblog?charset=utf8"
     # MySQL(同步)
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
