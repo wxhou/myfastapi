@@ -7,13 +7,12 @@ from app.core.settings import settings
 websocket_logger = logging.getLogger('websocket')
 
 def register_socketio(app: FastAPI):
-    # https://github.com/miguelgrinberg/python-socketio/issues/205
     sio = socketio.AsyncServer(async_mode='asgi',
-                               cors_allowed_origins=[],
-                               logger=True,
-                               engineio_logger=True)
+                               cors_allowed_origins=[] # https://github.com/miguelgrinberg/python-socketio/issues/205
+                               )
     asgi = socketio.ASGIApp(sio)
     app.mount('/ws', asgi, name='socket')
+    app.state.sio = sio
 
     @sio.on("connect")
     async def test_connect(sid: str, *args, **kwargs):

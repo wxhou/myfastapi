@@ -1,10 +1,11 @@
 import traceback
+from jose import JWTError
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError
 from aioredis.exceptions import ConnectionError
 from app.common.response import ErrCode, response_err
-from app.common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail
+from app.common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail, DeviceNotFound, NotAuthenticated
 from app.utils.logger import logger
 
 
@@ -16,13 +17,22 @@ def register_exceptions(app: FastAPI):
         return response_err(ErrCode.USER_NOT_EXISTS)
 
     @app.exception_handler(UserNotActive)
-    async def user_not_exists(request: Request, exc: UserNotActive):
+    async def user_not_active(request: Request, exc: UserNotActive):
         return response_err(ErrCode.USER_NOT_ACTIVE)
 
     @app.exception_handler(AccessTokenFail)
+    @app.exception_handler(JWTError)
     async def access_token_error(request: Request, exc: AccessTokenFail):
         logger.critical(traceback.format_exc())
         return response_err(ErrCode.TOKEN_INVALID_ERROR)
+
+    @app.exception_handler(DeviceNotFound)
+    async def device_not_found(request: Request, exc: DeviceNotFound):
+        return response_err(ErrCode.DEVICE_NOT_FOUND)
+
+    @app.exception_handler(NotAuthenticated)
+    async def not_authenticated(request: Request, exc: NotAuthenticated):
+        return response_err(ErrCode.NOT_AUTHENTICATED)
 
     @app.exception_handler(RequestValidationError)
     async def validation_request_handler(request: Request, exc: RequestValidationError):
@@ -46,7 +56,7 @@ def register_exceptions(app: FastAPI):
     @app.exception_handler(PermissionError)
     async def permission_error_handler(request: Request, exc: PermissionError):
         """无访问权限"""
-        return response_err(ErrCode.COMMON_PERMISSION_ERR, detail=exc.detail)
+        return response_err(ErrCode.COMMON_PERMISSION_ERR)
 
 
     @app.exception_handler(ConnectionError)

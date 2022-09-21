@@ -1,6 +1,5 @@
 from typing import Optional, Union, Any
 from datetime import datetime, timedelta
-from fastapi import Header
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from app.core.settings import settings
@@ -25,23 +24,32 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 # https://www.cnblogs.com/CharmCode/p/14191112.html?ivk_sa=1024320u
+def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_REFRESH_SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
 
 
-async def check_jwt_token(token: Optional[str] = Header(...)) -> Union[str, Any]:
+
+async def decrypt_refresh_token(token: str)-> Union[str, Any]:
     """ 解密token """
-    try:
-        payload = jwt.decode(
-            token=token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        return payload
-    except Exception as e:  # jwt.JWTError, jwt.ExpiredSignatureError, AttributeError
-        raise JWTError(f'token已过期! -- {e}')
+    payload = jwt.decode(token=token, key=settings.JWT_REFRESH_SECRET_KEY, algorithms=[settings.ALGORITHM])
+    username = payload.get("sub")
+    if username is None:
+        raise JWTError
+    return username
 
 
 if __name__ == '__main__':

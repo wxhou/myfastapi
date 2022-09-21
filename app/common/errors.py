@@ -23,6 +23,9 @@ class AccessTokenFail(Exception):
     def __init__(self, msg: str = "访问令牌失败"):
         self.msg = msg
 
+class NotAuthenticated(Exception):
+    def __init__(self, msg: str = "JWT验证失败"):
+        self.msg = msg
 
 
 class DeviceNotFound(Exception):

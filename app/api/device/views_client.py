@@ -1,7 +1,4 @@
-from typing import Optional
-from math import ceil
-from datetime import timedelta
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import select, update
 from fastapi import APIRouter, Depends, Security, Request, Query, Header
 from fastapi.encoders import jsonable_encoder
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
@@ -25,7 +22,7 @@ async def device_register(request: Request,
     obj = await db.scalar(select(DeviceInfo.id).filter(DeviceInfo.device_register_code==args.device_register_code,
                             DeviceInfo.is_registered==0, DeviceInfo.status==0))
     if obj is not None:
-        return response_err(ErrCode.QUERY_HAS_EXISTS)
+        return response_err(ErrCode.DEVICE_IS_EXISTS)
     await db.execute(update(DeviceInfo).where(DeviceInfo.device_register_code==args.device_register_code,
                             DeviceInfo.is_registered==0, DeviceInfo.status==0).values(is_registered=1))
     await db.commit()
@@ -41,6 +38,6 @@ async def device_info(
     obj = await db.scalar(select(DeviceInfo).filter(DeviceInfo.id==id,
                             DeviceInfo.status==0))
     if obj is None:
-        return response_err(ErrCode.QUERY_NOT_EXISTS)
+        return response_err(ErrCode.DEVICE_NOT_FOUND)
     return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
 

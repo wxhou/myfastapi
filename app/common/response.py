@@ -15,6 +15,9 @@ class ErrCode(object):
     QUERY_NOT_EXISTS = (1007, "数据不存在")
     QUERY_HAS_EXISTS = (1008, "数据已存在")
     TOO_MANY_REQUEST = (1009, "太多的请求")
+    DEVICE_NOT_FOUND = (1010, "设备不存在")
+    DEVICE_IS_EXISTS = (1011, "设备已存在")
+    NOT_AUTHENTICATED = (1012, "JWT验证失败")
     # params
     REQUEST_PARAMS_ERROR = (2000, "请求参数错误")
     COMMON_INTERNAL_ERR = (2001, '内部错误')

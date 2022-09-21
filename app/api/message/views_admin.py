@@ -1,13 +1,13 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from common.sockets import manager
+from app.common.sockets import manager
 
 
 router_message_admin = APIRouter()
 
 
 
-@router_message_admin.get('/index/')
+@router_message_admin.get('/index/', deprecated=True)
 async def index():
     """首页"""
 
