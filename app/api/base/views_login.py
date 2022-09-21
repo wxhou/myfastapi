@@ -1,7 +1,7 @@
 from datetime import timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Header, Request, Security
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from app.api.deps import get_db, get_redis
@@ -31,9 +31,9 @@ async def login_access_token(
         return response_err(ErrCode.UNAME_OR_PWD_ERROR)
     access_token = create_access_token(data={"sub": user.username})
     refresh_token = create_refresh_token(data={"sub": user.username})
-    await redis.set("weblog_access_token_{}".format(access_token), access_token,
+    await redis.set("weblog_access_token_{}".format(access_token), refresh_token,
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    await redis.set("weblog_refresh_token_{}".format(refresh_token), refresh_token,
+    await redis.set("weblog_refresh_token_{}".format(refresh_token), access_token,
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     # 'access_token'和'token_type'一定要写,否则get_current_user依赖拿不到token
     # 可添加字段(先修改schemas/token里面的Token返回模型)
@@ -53,8 +53,7 @@ async def login_refresh_token(
 ):
     """登录接口"""
 
-    token = data.refresh_token.split(' ', 1)[1]  # 去除token前面的 JWT
-    username = await decrypt_refresh_token(token)
+    username = await decrypt_refresh_token(data.refresh_token)
     _key_name = 'weblog_login_temporary'
     res = await redis.get_pickle(_key_name)
     if res:
@@ -62,10 +61,10 @@ async def login_refresh_token(
     user_obj = await db.scalar(select(BaseUser).where(BaseUser.username==username, BaseUser.status==0))
     if user_obj is None:
         return response_err(ErrCode.TOKEN_INVALID_ERROR)
-    if not (await redis.exists(f"weblog_refresh_token_{token}")):
+    if not (await redis.exists(f"weblog_refresh_token_{data.refresh_token}")):
         return response_err(ErrCode.TOKEN_INVALID_ERROR)
     access_token = create_access_token(data={"sub": username})
-    await redis.set("weblog_access_token_{}".format(access_token), access_token,
+    await redis.set("weblog_access_token_{}".format(access_token), data.refresh_token,
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     result = {"access_token": access_token, "token_type": "JWT"}
     await redis.set_pickle(_key_name, result, timeout=10)
@@ -75,12 +74,12 @@ async def login_refresh_token(
 @router_login.api_route('/logout/', methods=['GET', 'POST'], summary='退出登录')
 async def logout(request: Request,
                  redis: MyRedis = Depends(get_redis),
-                 current_user: BaseUser = Depends(get_current_active_user)):
+                 token: str = Depends(oauth2_scheme)):
     """退出登录"""
-    if token := request.headers.get('authorization'):
-        token = token.split(' ', 1)[1]  # 去除token前面的 JWT
-        await redis.delete("weblog_access_token_{}".format(token))
-        await redis.delete("weblog_refresh_token_{}".format(token))
+    refresh_token = await redis.get("weblog_access_token_{}".format(token))
+    await redis.delete("weblog_access_token_{}".format(token))
+    if refresh_token:
+        await redis.delete("weblog_refresh_token_{}".format(refresh_token))
     return response_ok()
 
 

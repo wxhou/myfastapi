@@ -132,9 +132,9 @@ class ProductionSettings(BaseSettings):
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+asyncmy://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+asyncmy://root:root1234@127.0.0.1:3306/db_weblog?charset=utf8"
     # MySQL(同步)
-    SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@127.0.0.1:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = False
     REDIS_URL: str = "redis://localhost:6379/2"

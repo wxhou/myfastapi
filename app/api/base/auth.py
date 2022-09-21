@@ -1,50 +1,17 @@
 from typing import Optional, Dict
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi.security.utils import get_authorization_scheme_param
-from fastapi.security import OAuth2, SecurityScopes
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from jose import jwt, JWTError
-from fastapi import Request, Depends, Security
+from fastapi import Request, Depends
 from app.api.deps import get_db, get_redis
 from app.core.redis import MyRedis
 from app.core.settings import settings
-from app.common.security import verify_password
+from app.common.security import verify_password, OAuth2PasswordJWT
 from app.common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail, NotAuthenticated
 from app.utils.logger import logger
-from .model import BaseUser, BaseRole, BasePermission, RolePermission
+from .model import BaseUser, BasePermission, RolePermission
 from .schemas import TokenData
 
-
-class OAuth2PasswordJWT(OAuth2):
-    def __init__(
-        self,
-        tokenUrl: str,
-        scheme_name: Optional[str] = None,
-        scopes: Optional[Dict[str, str]] = None,
-        description: Optional[str] = None,
-        auto_error: bool = True,
-    ):
-        if not scopes:
-            scopes = {}
-        flows = OAuthFlowsModel(
-            password={"tokenUrl": tokenUrl, "scopes": scopes})
-        super().__init__(
-            flows=flows,
-            scheme_name=scheme_name,
-            description=description,
-            auto_error=auto_error,
-        )
-
-    async def __call__(self, request: Request) -> Optional[str]:
-        authorization: str = request.headers.get("Authorization")
-        scheme, param = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "jwt":
-            if self.auto_error:
-                raise NotAuthenticated
-            else:
-                return None
-        return param
 
 
 oauth2_scheme = OAuth2PasswordJWT(tokenUrl="/login/",
