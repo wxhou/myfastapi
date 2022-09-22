@@ -10,7 +10,7 @@ from app.api.base.model import BaseUser
 from app.api.base.auth import get_current_active_user, check_user_permission
 from .model import Category, Post, Comment
 from .schemas import PostInsert, PostUpdate, PostDelete, CommentInsert
-from .tasks import helloworld
+
 
 router_blog_admin = APIRouter()
 
@@ -138,7 +138,6 @@ async def post_top(request: Request,
     objs = await db.scalars(select(Post).filter(*query_filter).order_by(_order_by))
     _count = await db.scalar(select(func.count()).filter(*query_filter))
     _pages = int(ceil(_count / float(page_size)))
-    # helloworld.apply_async((2, 3), queue='transient', ignore_result=True)
     return response_ok(data=[obj.to_dict() for obj in objs],
                        total=_count, pages=_pages)
 

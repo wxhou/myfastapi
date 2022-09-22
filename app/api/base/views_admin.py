@@ -3,7 +3,7 @@ from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Request, Query, Path, BackgroundTasks, File, UploadFile
+from fastapi import APIRouter, Depends, Request, Query, Path, File, UploadFile
 from app.api.deps import get_db, get_redis
 from app.core.redis import MyRedis
 from app.core.settings import settings
@@ -24,7 +24,6 @@ router_base_admin = APIRouter()
 @router_base_admin.post('/user/register/', summary='用户注册,并发送邮件')
 async def user_register(request: Request,
                         user: UserRegister,
-                        background_tasks: BackgroundTasks,
                         db: AsyncSession = Depends(get_db),
                         redis: MyRedis = Depends(get_redis)):
     """用户注册"""
@@ -42,7 +41,7 @@ async def user_register(request: Request,
         data={"sub": obj.username}, expires_delta=timedelta(seconds=expires_delta)
     )
     await redis.set(f"user_register_{access_token}", value=obj.id, ex=expires_delta)
-    background_tasks.add_task(send_register_email, request.url_for("user_active", token=access_token), obj.email)
+    send_register_email.delay(send_register_email, request.url_for("user_active", token=access_token), obj.email)
     return response_ok(data=obj.to_dict())
 
 

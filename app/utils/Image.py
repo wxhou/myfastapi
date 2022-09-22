@@ -1,9 +1,10 @@
 import random
+import base64
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
 
 
-def gen_picture(code):
+def gen_picture(code) -> str:
     """生成验证码图片
     """
     # 新建一个图层

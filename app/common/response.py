@@ -25,6 +25,8 @@ class ErrCode(object):
     REDIS_CONNECTION_ERROR = (2003, 'redis连接失败')
     DB_CONNECTION_ERROR = (2004, 'DB连接失败')
     COMMON_PERMISSION_ERR = (2005, '无访问权限')
+    # goods
+    GOODS_NOT_FOUND = (3000, '商品走丢了')
 
 
 def response_ok(data: Union[List, Dict, None] = None, msg='success', **kwargs) -> Dict:
