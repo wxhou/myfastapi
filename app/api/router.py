@@ -5,6 +5,7 @@ from app.api.blog.router import blog_router
 from app.api.message.router import message_router
 from app.api.device.router import device_router
 from app.api.goods.router import goods_router
+from app.api.trade.router import trade_router
 
 
 def register_router(app: FastAPI):
@@ -15,3 +16,4 @@ def register_router(app: FastAPI):
     app.include_router(message_router, prefix='/message')
     app.include_router(device_router, prefix='/device')
     app.include_router(goods_router, prefix='/goods')
+    app.include_router(trade_router, prefix='/trade')

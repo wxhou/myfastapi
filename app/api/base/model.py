@@ -64,7 +64,8 @@ class UploadModel(Base):
     """文件上传"""
     __tablename__ = 't_base_upload'
     id = Column(Integer, primary_key=True)
-    url = Column(String(256))
+    uid = Column(Integer) # 用户ID
+    url = Column(String(256)) # 图片地址
 
 
 class UserCollect(Base):
@@ -78,10 +79,11 @@ class UserCollect(Base):
 class UserAddress(Base):
     __tablename__ = 't_base_user_address'
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, index=True) # 用户ID
     province = Column(String(64)) # 省份
     city = Column(String(64)) # 城市
     district = Column(String(128)) # 区域
-    address = Column(Integer, index=True) # 用户ID
+    address = Column(String(128)) # 详细地址
     signer_name = Column(String(128)) # 签收人
     signer_mobile = Column(String(11)) # 签收电话
 

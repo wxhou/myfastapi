@@ -20,7 +20,7 @@ def register_middleware(app: FastAPI):
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST"],
         allow_headers=["*"],
     )
     # 500字节以上才开启gzip

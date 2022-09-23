@@ -20,6 +20,7 @@ class GoodsUpdate(BaseModel):
     id: int = Field(ge=1, title='商品ID')
     category_id: int = Field(default=None, title='分类ID', ge=1)
     goods_name: str = Field(default=None, title='商品名称', min_length=1, max_length=64)
+    goods_num: int = Field(default=None, title='商品库存', ge=0)
     market_price: int = Field(default=None, title='市场价格')
     shop_price: int = Field(default=None, title='本店价格')
     goods_brief: Optional[str] = Field(default=None, title='商品描述', min_length=1, max_length=512)

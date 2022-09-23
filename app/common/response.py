@@ -27,6 +27,9 @@ class ErrCode(object):
     COMMON_PERMISSION_ERR = (2005, '无访问权限')
     # goods
     GOODS_NOT_FOUND = (3000, '商品走丢了')
+    GOODS_NUM_NOT_ENOUGH = (3001, '库存不够了')
+    GOODS_SELL_OUT = (3002, '商品售罄了')
+    ORDER_NOT_FOUND = (3003, '订单不存在')
 
 
 def response_ok(data: Union[List, Dict, None] = None, msg='success', **kwargs) -> Dict:

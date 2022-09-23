@@ -7,10 +7,18 @@ from alembic import context
 from app.core.settings import settings
 from app.api.model import Base
 
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URL)
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and reflected and compare_to is None:
+        return False
+    else:
+        return True
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -43,8 +51,10 @@ def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
+        include_object = include_object,
         target_metadata=target_metadata,
         literal_binds=True,
+        compare_type = True,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -67,6 +77,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
+            include_object = include_object, compare_type=True,
             connection=connection, target_metadata=target_metadata
         )
 

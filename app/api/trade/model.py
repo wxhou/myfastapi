@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, SmallInteger, Integer, DateTime, Boolean, Text
+from sqlalchemy import Column, String, SmallInteger, Integer, DateTime
 from app.api.model import Base
 
 
@@ -9,6 +9,7 @@ class ShoppingCart(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, index=True) # 用户ID
     goods_id = Column(Integer, index=True) # 商品
+    goods_num = Column(Integer, default=0) # 商品数量
 
 
 class ShoppingOrder(Base):
@@ -21,6 +22,7 @@ class ShoppingOrder(Base):
     order_mount = Column(Integer, default=0.0) # 订单金额
     order_post = Column(String(128)) # 订单留言
 
+    pay_type = Column(SmallInteger) # 1微信2支付宝
     pay_status = Column(SmallInteger, default=1) # 1待支付2成功3超时关闭4交易结束5交易成功
     pay_time = Column(DateTime)
 

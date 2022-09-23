@@ -1,7 +1,6 @@
 from typing import Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from jose import jwt, JWTError
 from fastapi import Request, Depends
 from app.api.deps import get_db, get_redis
 from app.core.redis import MyRedis

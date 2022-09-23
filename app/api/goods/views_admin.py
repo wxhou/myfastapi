@@ -1,4 +1,3 @@
-import os, uuid
 from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
@@ -8,7 +7,7 @@ from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.encoder import jsonable_encoder
 from app.utils.logger import logger
-from app.utils.encrypt import make_code_sn
+from app.utils.snowflake import snow_flake
 from app.api.base.model import BaseUser
 from app.api.base.auth import check_user_permission, get_current_active_user
 from .model import Goods, GoodsCategory
@@ -55,9 +54,7 @@ async def goods_info(request: Request,
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     result = jsonable_encoder(obj, exclude={'status'})
-    await db.execute(update(Goods).where(Goods.id==obj.id, Goods.status==0).values(click_num=obj.click_num+1))
-    await db.commit()
-    add_goods_click_num.delay("goods_{obj.id}", 1)
+    add_goods_click_num.delay(obj.id)
     return response_ok(data=result)
 
 
@@ -67,13 +64,16 @@ async def goods_insert(
         request: Request,
         goods: GoodsInsert,
         db: AsyncSession = Depends(get_db),
+        redis: MyRedis = Depends(get_redis),
         current_user: BaseUser = Depends(check_user_permission('goods_insert'))):
     """更新用户信息"""
-    obj = Goods(**goods.dict(exclude_none=True))
+    args = goods.dict(exclude_none=True)
+    args['goods_sn'] = snow_flake.get_id()
+    obj = Goods(**args)
     db.add(obj)
-    await db.flush()
-    obj.goods_sn = make_code_sn(obj.id)
     await db.commit()
+    if _num := args.get("goods_num"):
+        await redis.set(f"goods_num_{args['id']}", _num)
     return response_ok(data={"id": obj.id})
 
 
@@ -82,6 +82,7 @@ async def goods_update(
         request: Request,
         goods: GoodsUpdate,
         db: AsyncSession = Depends(get_db),
+        redis: MyRedis = Depends(get_redis),
         current_user: BaseUser = Depends(check_user_permission('goods_update'))):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
@@ -90,6 +91,8 @@ async def goods_update(
         return response_err(ErrCode.GOODS_NOT_FOUND)
     await db.execute(update(Goods).where(Goods.id==args.pop('id', None), Goods.status==0).values(**args))
     await db.commit()
+    if _num := args.get("goods_num"):
+        await redis.set(f"goods_num_{args['id']}", _num)
     return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
 
 

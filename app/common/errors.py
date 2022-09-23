@@ -31,5 +31,12 @@ class NotAuthenticated(Exception):
 class DeviceNotFound(Exception):
     """ 设备不存在 """
 
-    def __init__(self, msg: str = "设备不存在"):
+    def __init__(self, *args: object, msg: str = "设备不存在"):
         self.msg = msg
+        super().__init__(*args)
+
+class InvalidSystemClock(Exception):
+
+    def __init__(self, *args: object, msg='系统时钟异常') -> None:
+        self.msg = msg
+        super().__init__(*args)

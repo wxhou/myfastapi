@@ -1,20 +1,24 @@
+import os
+from uuid import uuid4
 from datetime import timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from app.common.encoder import jsonable_encoder
 from app.api.deps import get_db, get_redis
 from app.core.redis import MyRedis
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token
 from app.utils.logger import logger
-from .model import BaseUser
+from .model import BaseUser, UploadModel
 from .auth import oauth2_scheme, authenticate, get_current_active_user
 from .schemas import Token, RefreshToken
 
-router_login = APIRouter(tags=['Login'])
+
+router_login = APIRouter(tags=['Auth'])
 
 
 
@@ -83,7 +87,27 @@ async def logout(request: Request,
     return response_ok()
 
 
-@router_login.get("/api/routes", summary="all route")
+
+@router_login.post("/upload/", summary='上传文件')
+async def create_upload_file(file: UploadFile = File(),
+                             db:AsyncSession = Depends(get_db),
+                             current_user: BaseUser = Depends(get_current_active_user)):
+    """上传文件"""
+    ext = os.path.splitext(file.filename)[1]
+    if ext not in settings.ALLOWED_IMAGE_EXTENSIONS:
+        return response_err(ErrCode.FILE_TYPE_ERROR)
+    filename = uuid4().hex
+    save_file = os.path.join(settings.UPLOAD_MEDIA_FOLDER, filename + ext)
+    with open(save_file, 'wb+') as buffer:
+        buffer.write(await file.read())
+    obj = UploadModel(url='/upload/{}{}'.format(filename, ext),
+                      uid=current_user.id)
+    db.add(obj)
+    await db.commit()
+    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+
+
+@router_login.get("/api/routes", summary="所有路由", deprecated=True)
 async def api_routes(request: Request):
     result = []
     for route in request.app.routes:

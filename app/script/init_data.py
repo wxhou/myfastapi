@@ -8,6 +8,7 @@ import asyncio
 from sqlalchemy import select, values, delete
 from app.core.db import async_session
 from app.utils.logger import logger
+from app.utils.snowflake import snow_flake
 from app.api.goods.model import Goods, GoodsCategory
 
 
@@ -1489,7 +1490,7 @@ async def init_goods():
             obj = Goods(goods_name=row['name'],
                   market_price=int(row['market_price'][1:-1]),
                   goods_brief=row['desc'],
-                  goods_sn=uuid.uuid4(),
+                  goods_sn=snow_flake.get_id(),
                   shop_price=int(row['sale_price'][1:-1]),
                   category_id=cate_id)
             db.add(obj)

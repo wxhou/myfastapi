@@ -28,7 +28,7 @@ class Goods(Base):
     id = Column(BigInteger, primary_key=True)
     category_id = Column(Integer, index=True, nullable=False) # 分类ID
     goods_name = Column(String(64)) # 商品名称
-    goods_sn = Column(String(64), unique=True) # 商品唯一货号
+    goods_sn = Column(String(64), nullable=False, unique=True) # 商品唯一货号
     click_num = Column(Integer, default=0) # 商品点击数
     sold_num = Column(Integer, default=0) # 销售量
     comment_num = Column(Integer, default=0) # 评论数

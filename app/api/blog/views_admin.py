@@ -85,11 +85,11 @@ async def post_list(request: Request,
                        total=_count, pages=_pages)
 
 
-@router_blog_admin.get('/post/info/{post_id}/')
+@router_blog_admin.get('/post/info/', summary='文章详情')
 async def post_info(request: Request,
-                       post_id: int = Path(title="文章ID"),
-                       db: AsyncSession = Depends(get_db),
-                       redis: MyRedis = Depends(get_redis)):
+                    post_id: int = Query(title="文章ID", ge=1),
+                    db: AsyncSession = Depends(get_db),
+                    redis: MyRedis = Depends(get_redis)):
     """文章详情"""
     query_filter = [Post.id==post_id, Post.status==0]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
