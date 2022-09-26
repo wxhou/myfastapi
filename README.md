@@ -58,8 +58,23 @@
 
 ## 项目启动
 
+
+uvicorn
+```shell
+uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload
+```
+
+gunicorn
 ```shell
 gunicorn weblog:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
+```
+
+celery
+
+- 不能使用-P gevent/eventlet ，并发请求下会报错，perfork测试正常
+
+```shell
+celery -A app.core.celery_app.celery worker -l info
 ```
 
 
@@ -69,3 +84,36 @@ https://hellowac.github.io/alembic_doc/zh/_front_matter.html
 
 ### 简单示例
 https://www.jianshu.com/p/942e270baf65
+
+
+## Question
+
+
+No.1 sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+```python
+async def async_main():
+    engine = create_async_engine(
+        "postgresql+asyncpg://scott:tiger@localhost/test", echo=True,
+    )
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+    async with AsyncSession(engine) as session:
+        async with session.begin():
+            session.add_all(
+                [
+                    A(bs=[B(), B()], data="a1"),
+                    A(bs=[B()], data="a2"),
+                    A(bs=[B(), B()], data="a3"),
+                ]
+            )
+
+        await session.run_sync(fetch_and_update_objects)
+
+        await session.commit()
+
+    # for AsyncEngine created in function scope, close and
+    # clean-up pooled connections
+    await engine.dispose()
+```

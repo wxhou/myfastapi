@@ -1,0 +1,7 @@
+*.md
+logs
+upload
+env
+venv
+**/versions
+.history

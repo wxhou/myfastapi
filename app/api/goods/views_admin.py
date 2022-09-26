@@ -47,15 +47,14 @@ async def goods_list(request: Request,
 
 @router_goods_admin.get('/info/', summary='商品详情')
 async def goods_info(request: Request,
-                    id: int = Query(..., description='商品ID'),
+                    goods_id: int = Query(..., description='商品ID'),
                     db: AsyncSession = Depends(get_db),
                     redis: MyRedis = Depends(get_redis)):
-    obj = await db.scalar(select(Goods).where(Goods.id==id, Goods.status==0))
+    obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
-    result = jsonable_encoder(obj, exclude={'status'})
-    add_goods_click_num.delay(obj.id)
-    return response_ok(data=result)
+    add_goods_click_num.delay(goods_id)
+    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
 
 
 

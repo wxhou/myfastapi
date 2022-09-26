@@ -42,7 +42,8 @@ class DevelopmentSettings(BaseSettings):
     MAIL_PASSWORD: str = 'GQWJDUKVWNOJLPOH'
 
     LOGGER_LEVEL: int = logging.DEBUG
-    LOGGER_FILE: str = './logs/server.log'
+    LOGGER_ALL_FILE: str = './logs/server.log'
+    LOGGER_ERROR_FILE : str = './logs/error.log'
     WEBSOCKET_LOGGER_FILE: str = './logs/websocket.log'
     LOGGER_FORMATTER: str = '[%(asctime)s] %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
 
