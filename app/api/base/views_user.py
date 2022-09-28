@@ -1,9 +1,8 @@
-import os, uuid
 from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Request, Query, Path
+from fastapi import APIRouter, Depends, Request, Query, Path, Security
 from app.api.deps import get_db, get_redis
 from app.core.redis import MyRedis
 from app.core.settings import settings
@@ -12,7 +11,7 @@ from app.common.security import set_password, create_access_token
 from app.common.encoder import jsonable_encoder
 from app.utils.logger import logger
 from .model import BaseUser, UserCollect, UserAddress, UserComment
-from .auth import check_user_permission
+from .auth import get_current_active_user
 from .tasks import send_register_email
 from .schemas import UserRegister, UserModify, UserAddressUpdate
 
@@ -65,7 +64,7 @@ async def user_update(
         request: Request,
         user: UserModify,
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('user_update'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['user_update'])):
     """更新用户信息"""
     sql = select(BaseUser).where(BaseUser.id == user.id, BaseUser.status == 0)
     obj = await db.scalar(sql)
@@ -85,7 +84,7 @@ async def user_list(
         username: str = Query(default=None),
         email: str = Query(default=None),
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('user_list'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['user_list'])):
     """更新用户信息"""
     query_filter = [BaseUser.status == 0]
     if username:
@@ -100,11 +99,11 @@ async def user_list(
 
 
 @router_base_admin.post('/address/update/', summary='更新用户地址')
-async def user_update(
+async def user_address_update(
         request: Request,
         addr: UserAddressUpdate,
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('user_update'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['user_address_update'])):
     """更新用户信息"""
     args = addr.dict(exclude_none=True)
     args['user_id'] = current_user.id
@@ -120,10 +119,10 @@ async def user_update(
 
 
 @router_base_admin.get('/address/list/', summary='用户地址列表')
-async def user_update(
+async def user_address_list(
         request: Request,
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('user_update'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['user_address_list'])):
     """用户地址列表"""
     objs = await db.scalars(select(UserAddress).where(UserAddress.user_id==current_user.id,
                                                UserAddress.status==0))

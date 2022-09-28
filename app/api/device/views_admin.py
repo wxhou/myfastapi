@@ -1,12 +1,12 @@
 from math import ceil
 from sqlalchemy import func, select, update
-from fastapi import APIRouter, Depends, Request, Query
+from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db
 from app.core.db import AsyncSession
 from app.common.encoder import jsonable_encoder
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
-from app.api.base.auth import check_user_permission
+from app.api.base.auth import get_current_active_user
 from app.api.base.model import BaseUser
 from .model import DeviceInfo
 from .schemas import DeviceInsert, DeviceModify, DeviceDelete
@@ -20,7 +20,7 @@ router_device_admin = APIRouter()
 async def device_insert(request: Request,
         args: DeviceInsert,
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('device_insert'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['device_insert'])):
     """新建设备"""
     obj = await db.scalar(select(DeviceInfo.id).filter(DeviceInfo.device_ip_addr==args.device_ip_addr,
                             DeviceInfo.device_mac_addr==args.device_mac_addr))
@@ -39,7 +39,7 @@ async def device_insert(request: Request,
 async def device_modify(request: Request,
         args: DeviceModify,
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('device_modify'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['device_modify'])):
     """修改设备"""
     obj = await db.scalar(select(DeviceInfo).filter(DeviceInfo.id==args.id,
                             DeviceInfo.status==0,
@@ -60,7 +60,7 @@ async def device_list(
         page_size: int = Query(default=15, ge=1, title='每页数量'),
         device_name: str = Query(default=None, title='设备名称'),
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('device_list'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['device_list'])):
     """设备列表信息"""
     query_filter = [DeviceInfo.status == 0]
     if device_name:
@@ -78,7 +78,7 @@ async def device_info(
         request: Request,
         id : int = Query(description='设备ID'),
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('device_info'))):
+        current_user: BaseUser = Security(get_current_active_user,scopes=['device_info'])):
     """设备详情信息"""
     obj = await db.scalar(select(DeviceInfo).filter(DeviceInfo.id==id,
                             DeviceInfo.status==0))
@@ -92,7 +92,7 @@ async def device_delete(
         request: Request,
         args : DeviceDelete,
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('device_delete'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['device_delete'])):
     """删除设备"""
     obj = await db.scalar(select(DeviceInfo.id).filter(DeviceInfo.id==args.id,
                             DeviceInfo.status==0))

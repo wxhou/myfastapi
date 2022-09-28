@@ -13,7 +13,7 @@ from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token
 from app.utils.logger import logger
-from .model import BaseUser, UploadModel
+from .model import BaseUser, UploadModel, BasePermission
 from .auth import oauth2_scheme, authenticate, get_current_active_user
 from .schemas import Token, RefreshToken
 
@@ -108,12 +108,18 @@ async def create_upload_file(file: UploadFile = File(),
 
 
 @router_login.get("/api/routes", summary="所有路由", deprecated=True)
-async def api_routes(request: Request):
+async def api_routes(request: Request,
+                     db:AsyncSession = Depends(get_db)):
     result = []
+    number = 1
     for route in request.app.routes:
         items = {
             "name": route.name,
             "path": route.path
         }
         result.append(items)
+        obj = BasePermission(name=route.path, function_name=route.name, order_num=number)
+        number += 1
+        db.add(obj)
+    await db.commit()
     return response_ok(data=result)

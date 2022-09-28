@@ -30,7 +30,7 @@ async def device_register(request: Request,
 
 
 @router_device_client.get('/info/', summary='设备详情')
-async def device_info(
+async def device_detail(
         request: Request,
         id : int = Query(description='设备ID'),
         db: AsyncSession = Depends(get_db)):

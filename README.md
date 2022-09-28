@@ -85,6 +85,23 @@ https://hellowac.github.io/alembic_doc/zh/_front_matter.html
 ### 简单示例
 https://www.jianshu.com/p/942e270baf65
 
+将当前的模型生成迁移文件
+```shell
+alembic revision --autogenerate -m "first" 将当前模型中的状态生成迁移文件
+```
+
+
+更新版本
+```shell
+alembic upgrade head
+```
+
+回滚版本
+```shell
+alembic downgrade head
+```
+
+
 
 ## Question
 

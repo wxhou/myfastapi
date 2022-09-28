@@ -1,13 +1,13 @@
 from math import ceil
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Request, Query, Path
+from fastapi import APIRouter, Depends, Request, Query, Security
 from app.core.redis import MyRedis
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.deps import get_db, get_redis
 from app.api.base.model import BaseUser
-from app.api.base.auth import get_current_active_user, check_user_permission
+from app.api.base.auth import get_current_active_user
 from .model import Category, Post, Comment
 from .schemas import PostInsert, PostUpdate, PostDelete, CommentInsert
 
@@ -19,7 +19,7 @@ router_blog_admin = APIRouter()
 async def category_list(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user: BaseUser = Depends(check_user_permission('category_list'))
+    current_user: BaseUser = Security(get_current_active_user, scopes=['category_list'])
 ):
     """文章分类列表"""
     objs = await db.scalars(select(Category).filter(Category.status==0))
@@ -30,7 +30,7 @@ async def category_list(
 async def post_insert(request: Request,
                       args: PostInsert,
                       db: AsyncSession = Depends(get_db),
-                      current_user=Depends(check_user_permission('post_insert'))):
+                      current_user: BaseUser = Security(get_current_active_user, scopes=['post_insert'])):
     """新建文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==args.category_id))
     if cate_obj is None:
@@ -48,7 +48,7 @@ async def post_insert(request: Request,
 async def post_update(request: Request,
                       post: PostUpdate,
                       db: AsyncSession = Depends(get_db),
-                      current_user=Depends(check_user_permission('post_update'))):
+                      current_user: BaseUser = Security(get_current_active_user, scopes=['post_update'])):
     """更新文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==post.category_id, Category.status==0))
     if cate_obj is None:
@@ -69,7 +69,7 @@ async def post_list(request: Request,
                     is_publish: bool = Query(default=None),
                     is_comment: bool = Query(default=None),
                     db: AsyncSession = Depends(get_db),
-                    current_user=Depends(check_user_permission('post_list'))):
+                    current_user: BaseUser = Security(get_current_active_user, scopes=['post_list'])):
     """文章列表"""
     query_filter = [Post.status==0, Post.user_id==current_user.id]
     if title:
@@ -103,7 +103,7 @@ async def post_info(request: Request,
 async def post_publish(request: Request,
                        post_id: int = Query(title="文章ID"),
                        db: AsyncSession = Depends(get_db),
-                       current_user=Depends(check_user_permission('post_publish'))):
+                       current_user=Security(get_current_active_user, scopes=['post_publish'])):
     """文章发布"""
     query_filter = [Post.id==post_id, Post.status==0, Post.user_id==current_user.id]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
@@ -146,7 +146,7 @@ async def post_top(request: Request,
 async def post_delete(request: Request,
                        args: PostDelete,
                        db: AsyncSession = Depends(get_db),
-                       current_user=Depends(check_user_permission('post_publish'))):
+                       current_user: BaseUser = Security(get_current_active_user, scopes=['post_publish'])):
     """文章删除"""
     query_filter = [Post.id==args.id, Post.status==0, Post.user_id==current_user.id]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
@@ -163,7 +163,7 @@ async def post_comment_insert(
                 comment:CommentInsert,
                 db: AsyncSession = Depends(get_db),
                 redis: MyRedis = Depends(get_redis),
-                current_user=Depends(get_current_active_user)):
+                current_user = Security(get_current_active_user)):
     """文章评论"""
     post_obj = await db.scalar(select(Post).filter(Post.status==0, Post.id==comment.post_id,
                                         Post.is_comment.is_(True), Post.is_publish.is_(True)))
@@ -185,7 +185,7 @@ async def post_comment_list(
                 post_id: int = Query(ge=1, title='文章ID'),
                 comment_id: int = Query(ge=1, title='评论ID'),
                 db: AsyncSession = Depends(get_db),
-                current_user=Depends(get_current_active_user)):
+                current_user: BaseUser = Security(get_current_active_user)):
     """文章评论列表"""
     post_obj = await db.scalar(select(Post).filter(Post.status==0, Post.id==post_id,
                                         Post.is_comment.is_(True), Post.is_publish.is_(True)))

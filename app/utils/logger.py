@@ -1,3 +1,6 @@
+import os, sys
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+sys.path.append(basedir)
 import logging
 from logging.handlers import RotatingFileHandler
 from app.core.settings import settings

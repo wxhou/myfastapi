@@ -1,7 +1,7 @@
 from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
-from fastapi import APIRouter, Depends, Request, Query
+from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
@@ -9,7 +9,7 @@ from app.common.encoder import jsonable_encoder
 from app.utils.logger import logger
 from app.utils.snowflake import snow_flake
 from app.api.base.model import BaseUser
-from app.api.base.auth import check_user_permission, get_current_active_user
+from app.api.base.auth import get_current_active_user
 from .model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
 from .schemas import ShoppingChartInsert, ShoppingChartDelete, ShoppingOrderInsert, ShoppingOrderDelete
 from .tasks import update_inventory, update_cart
@@ -25,7 +25,7 @@ async def trade_shopping_list(request: Request,
         page: int = Query(default=1, ge=1),
         page_size: int = Query(default=20, ge=1),
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('trade_shopping_list'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_list'])):
     """购物车列表"""
     query_filter = [ShoppingCart.status == 0, ShoppingCart.user_id==current_user.id]
     objs = await db.scalars(select(ShoppingCart).where(*query_filter).limit(page_size).offset((page - 1) * page))
@@ -47,7 +47,7 @@ async def trade_shopping_insert(request: Request,
         args: ShoppingChartInsert,
         db: AsyncSession = Depends(get_db),
         redis: MyRedis = Depends(get_redis),
-        current_user: BaseUser = Depends(check_user_permission('trade_shopping_insert'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_insert'])):
     """购物车新增"""
     _key_name = f"goods_num_{args.goods_id}"
     rs1_num = await redis.get(_key_name)
@@ -77,7 +77,7 @@ async def trade_shopping_delete(request: Request,
         args: ShoppingChartDelete,
         db: AsyncSession = Depends(get_db),
         redis: MyRedis = Depends(get_redis),
-        current_user: BaseUser = Depends(check_user_permission('trade_shopping_delete'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_delete'])):
     """购物车删除"""
     good_num = await db.scalar(select(ShoppingCart.goods_num).where(ShoppingCart.user_id==current_user.id,
                                                                     ShoppingCart.goods_id==args.goods_id))
@@ -98,7 +98,7 @@ async def trade_order_insert(request: Request,
         args: ShoppingOrderInsert,
         db: AsyncSession = Depends(get_db),
         redis: MyRedis = Depends(get_redis),
-        current_user: BaseUser = Depends(check_user_permission('trade_order_insert'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_insert'])):
     """新增订单"""
     obj = ShoppingOrder(user_id=current_user.id,
                 order_sn=snow_flake.get_id(),
@@ -123,7 +123,7 @@ async def trade_order_info(request: Request,
         order_id : int = Query(description='订单ID'),
         db: AsyncSession = Depends(get_db),
         redis: MyRedis = Depends(get_redis),
-        current_user: BaseUser = Depends(check_user_permission('trade_order_info'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])):
     """详情订单"""
     obj = await db.scalar(select(ShoppingOrder).where(ShoppingOrder.id==order_id,
                                                       ShoppingOrder.user_id==current_user.id,
@@ -151,7 +151,7 @@ async def trade_order_delete(request: Request,
         args: ShoppingOrderDelete,
         db: AsyncSession = Depends(get_db),
         redis: MyRedis = Depends(get_redis),
-        current_user: BaseUser = Depends(check_user_permission('trade_order_delete'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_delete'])):
     """删除订单"""
     obj = await db.scalar(select(ShoppingOrder).where(ShoppingOrder.id==args.order_id,
                                                       ShoppingOrder.user_id==current_user.id,

@@ -1,7 +1,8 @@
 from typing import Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from fastapi import Request, Depends
+from fastapi import Request, Depends, Security
+from fastapi.security import SecurityScopes
 from app.api.deps import get_db, get_redis
 from app.core.redis import MyRedis
 from app.core.settings import settings
@@ -32,12 +33,30 @@ async def get_current_user(db: AsyncSession = Depends(get_db),
     return obj
 
 
-async def get_current_active_user(current_user: BaseUser = Depends(get_current_user)):
+async def get_current_active_user(
+    security_scopes: SecurityScopes,
+    db: AsyncSession = Depends(get_db),
+    current_user: BaseUser = Depends(get_current_user)):
     """
     获取激活用户
     """
     if not current_user.is_active:
         raise UserNotActive
+    scopes = security_scopes.scopes
+    logger.info(scopes)
+    if not scopes:
+        return current_user
+    if current_user.role_id is None:
+        raise PermissionError
+    perm_ids = await db.scalars(select(BasePermission.id).filter(
+        BasePermission.function_name.in_(scopes), BasePermission.status==0))
+    if perm_ids is None:
+        raise PermissionError
+    sql = select(RolePermission.id).filter(RolePermission.role_id==current_user.role_id,
+                                    RolePermission.permission_id.in_(perm_ids))
+    res = await db.scalar(sql)
+    if res is None:
+        raise PermissionError
     return current_user
 
 
@@ -49,25 +68,3 @@ async def authenticate(db: AsyncSession, username: str, password: str):
     if user and verify_password(password, user.password_hash):
         return user
     return False
-
-
-def check_user_permission(permission_name: str):
-    """权限检查依赖"""
-    async def has_permission(request: Request,
-                             db: AsyncSession = Depends(get_db),
-                             current_user: BaseUser = Depends(get_current_active_user)):
-        if settings.DEBUG:
-            return current_user
-        if current_user.role_id is None:
-            raise PermissionError
-        perm_id = await db.scalar(select(BasePermission.id).filter(BasePermission.function_name==permission_name,
-                                                            BasePermission.status==0))
-        if perm_id is None:
-            raise PermissionError
-        sql = select(RolePermission.id).filter(RolePermission.role_id==current_user.role_id,
-                                      RolePermission.permission_id==perm_id)
-        res = await db.scalar(sql)
-        if res is None:
-            raise PermissionError
-        return current_user
-    return has_permission

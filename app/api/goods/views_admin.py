@@ -1,7 +1,7 @@
 from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
-from fastapi import APIRouter, Depends, Request, Query
+from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
@@ -9,7 +9,7 @@ from app.common.encoder import jsonable_encoder
 from app.utils.logger import logger
 from app.utils.snowflake import snow_flake
 from app.api.base.model import BaseUser
-from app.api.base.auth import check_user_permission, get_current_active_user
+from app.api.base.auth import get_current_active_user
 from .model import Goods, GoodsCategory
 from .schemas import GoodsInsert, GoodsUpdate, GoodsDelete
 from .tasks import add_goods_click_num
@@ -21,7 +21,7 @@ router_goods_admin = APIRouter()
 @router_goods_admin.get('/category/', summary='商品分类列表')
 async def goods_category_list(request: Request,
                         db: AsyncSession = Depends(get_db),
-                        current_user: BaseUser = Depends(get_current_active_user)):
+                        current_user: BaseUser = Security(get_current_active_user)):
     """商品分类列表"""
     query_filter = [GoodsCategory.status == 0]
     objs = await db.scalars(select(GoodsCategory).filter(*query_filter))
@@ -64,7 +64,7 @@ async def goods_insert(
         goods: GoodsInsert,
         db: AsyncSession = Depends(get_db),
         redis: MyRedis = Depends(get_redis),
-        current_user: BaseUser = Depends(check_user_permission('goods_insert'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['goods_insert'])):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
     args['goods_sn'] = snow_flake.get_id()
@@ -82,7 +82,7 @@ async def goods_update(
         goods: GoodsUpdate,
         db: AsyncSession = Depends(get_db),
         redis: MyRedis = Depends(get_redis),
-        current_user: BaseUser = Depends(check_user_permission('goods_update'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['goods_update'])):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
     obj = await db.scalar(select(Goods).where(Goods.id==args.get('id', None), Goods.status==0))
@@ -100,7 +100,7 @@ async def goods_delete(
         request: Request,
         goods: GoodsDelete,
         db: AsyncSession = Depends(get_db),
-        current_user: BaseUser = Depends(check_user_permission('goods_delete'))):
+        current_user: BaseUser = Security(get_current_active_user, scopes=['goods_delete'])):
     """更新用户信息"""
     await db.execute(update(Goods).where(Goods.id==goods.id, Goods.status==0).values(status=-1))
     await db.commit()
