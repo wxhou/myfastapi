@@ -1,6 +1,7 @@
-import os
+import os, shutil
 from uuid import uuid4
 from datetime import timedelta
+from tempfile import NamedTemporaryFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, File, UploadFile
@@ -13,6 +14,7 @@ from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token
 from app.utils.logger import logger
+from app.utils.minios import minio_server
 from .model import BaseUser, UploadModel, BasePermission
 from .auth import oauth2_scheme, authenticate, get_current_active_user
 from .schemas import Token, RefreshToken
@@ -90,21 +92,26 @@ async def logout(request: Request,
 
 @router_login.post("/upload/", summary='上传文件')
 async def create_upload_file(file: UploadFile = File(),
-                             db:AsyncSession = Depends(get_db),
-                             current_user: BaseUser = Depends(get_current_active_user)):
+                             db:AsyncSession = Depends(get_db)
+                             ):
     """上传文件"""
     ext = os.path.splitext(file.filename)[1]
     if ext not in settings.ALLOWED_IMAGE_EXTENSIONS:
         return response_err(ErrCode.FILE_TYPE_ERROR)
-    filename = uuid4().hex
-    save_file = os.path.join(settings.UPLOAD_MEDIA_FOLDER, filename + ext)
-    with open(save_file, 'wb+') as buffer:
-        buffer.write(await file.read())
-    obj = UploadModel(url='/upload/{}{}'.format(filename, ext),
-                      uid=current_user.id)
-    db.add(obj)
-    await db.commit()
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+
+    with NamedTemporaryFile(suffix=ext, dir=settings.UPLOAD_MEDIA_FOLDER) as tmp:
+        shutil.copyfileobj(file.file, tmp)
+        minio_server.fput_object(tmp.name, tmp.name)
+    # with open(save_file, 'wb+') as buffer:
+        # buffer.write(await file.read())
+    # obj = UploadModel(url='/upload/{}{}'.format(filename, ext),
+    #                   uid=current_user.id)
+    # db.add(obj)
+    # NamedTemporaryFile()
+    # await db.commit()
+    a = minio_server.stat_object(tmp.name)
+    print(a.object_name)
+    return response_ok()
 
 
 @router_login.get("/api/routes", summary="所有路由", deprecated=True)

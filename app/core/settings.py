@@ -35,6 +35,11 @@ class DevelopmentSettings(BaseSettings):
     JWT_SECRET_KEY: str = "DXaPkfReer04uwIQU06Enl"
     JWT_REFRESH_SECRET_KEY: str = "o7Ooj6lswdtXUtfuSnjvQS"
 
+    # MINIO
+    MINIO_HOST = "192.168.0.174:9000"
+    MINIO_ACCESS_KEY = "admin"
+    MINIO_SECRET_KEY = "admin123"
+
     # email
     MAIL_SERVER: str = 'smtp.126.com'
     MAIL_PORT: int = 25
