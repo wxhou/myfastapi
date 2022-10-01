@@ -64,10 +64,3 @@ def register_exceptions(app: FastAPI):
         """Redis链接失败"""
         logger.critical(traceback.format_exc())
         return response_err(ErrCode.REDIS_CONNECTION_ERROR)
-
-
-    @app.exception_handler(OperationalError)
-    async def db_connect_error(request: Request, exc: OperationalError):
-        """数据库链接失败"""
-        logger.critical(traceback.format_exc())
-        return response_err(ErrCode.DB_CONNECTION_ERROR)
