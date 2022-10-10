@@ -47,10 +47,9 @@ class DevelopmentSettings(BaseSettings):
     MAIL_PASSWORD: str = 'GQWJDUKVWNOJLPOH'
 
     LOGGER_LEVEL: int = logging.DEBUG
-    LOGGER_ALL_FILE: str = './logs/server.log'
+    LOGGER_SERVER_FILE: str = './logs/server.log'
     LOGGER_ERROR_FILE : str = './logs/error.log'
     WEBSOCKET_LOGGER_FILE: str = './logs/websocket.log'
-    LOGGER_FORMATTER: str = '[%(asctime)s] %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
 
     # upload
     UPLOAD_MEDIA_FOLDER: str = os.path.join(BASEDIR, 'upload')
@@ -95,6 +94,11 @@ class TestingSettings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
+
+    # MINIO
+    MINIO_HOST = "10.12.52.212:9000"
+    MINIO_ACCESS_KEY = "admin"
+    MINIO_SECRET_KEY = "admin123"
 
     # email
     MAIL_SERVER: str = 'smtp.126.com'

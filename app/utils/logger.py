@@ -1,39 +1,17 @@
-import os, sys
-basedir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-sys.path.append(basedir)
-import logging
-from logging.handlers import RotatingFileHandler
+"""
+日志文件配置 参考链接
+https://github.com/Delgan/loguru
+# 本来是想 像flask那样把日志对象挂载到app对象上，作者建议直接使用全局对象
+https://github.com/tiangolo/fastapi/issues/81#issuecomment-473677039
+考虑是否应该把logger 改成单例
+"""
+import contextvars
+from logging import Filter
+from loguru import logger
+
 from app.core.settings import settings
 
 
-logger = logging.getLogger()
-
-# stream_handler = logging.StreamHandler(stream=None)
-file_handler = RotatingFileHandler(filename=settings.LOGGER_ALL_FILE,
-                                   maxBytes=10 * 1024 * 1024,
-                                   backupCount=10,
-                                   encoding="utf-8")
-file_handler.setLevel(settings.LOGGER_LEVEL)
-file_handler.setFormatter(logging.Formatter(settings.LOGGER_FORMATTER))
-
-err_handler = RotatingFileHandler(filename=settings.LOGGER_ERROR_FILE,
-                                   maxBytes=10 * 1024 * 1024,
-                                   backupCount=10,
-                                   encoding="utf-8")
-err_handler.setLevel(logging.ERROR)
-err_handler.setFormatter(logging.Formatter(settings.LOGGER_FORMATTER))
-logger.addHandler(file_handler)
-logger.addHandler(err_handler)
-
-# websocket
-websocket_logger = logging.getLogger('websocket')
-websocket_logger.setLevel(settings.LOGGER_LEVEL)
-wf_handler = RotatingFileHandler(filename=settings.WEBSOCKET_LOGGER_FILE,
-                                   maxBytes=10 * 1024 * 1024,
-                                   backupCount=10,
-                                   encoding="utf-8")
-wf_handler.setFormatter(logging.Formatter(settings.LOGGER_FORMATTER))
-websocket_logger.addHandler(wf_handler)
-
-if __name__ == '__main__':
-    logger.debug("测试日志")
+# 日志简单配置 文件区分不同级别的日志
+logger.add(settings.LOGGER_SERVER_FILE, rotation="500 MB", encoding='utf-8', enqueue=True, level='INFO')
+logger.add(settings.LOGGER_ERROR_FILE, rotation="500 MB", encoding='utf-8', enqueue=True, level='ERROR')
