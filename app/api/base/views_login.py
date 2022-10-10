@@ -34,8 +34,8 @@ async def login_access_token(
     user = await authenticate(db, username=form_data.username, password=form_data.password)
     if not user:
         return response_err(ErrCode.UNAME_OR_PWD_ERROR)
-    access_token = create_access_token(data={"sub": user.username})
-    refresh_token = create_refresh_token(data={"sub": user.username})
+    access_token = create_access_token(data={"sub": user.username, "id": user.id})
+    refresh_token = create_refresh_token(data={"sub": user.username, "id": user.id})
     await redis.set("weblog_access_token_{}".format(access_token), refresh_token,
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     await redis.set("weblog_refresh_token_{}".format(refresh_token), access_token,
@@ -58,7 +58,7 @@ async def login_refresh_token(
 ):
     """登录接口"""
 
-    username = await decrypt_refresh_token(data.refresh_token)
+    username, uid = await decrypt_refresh_token(data.refresh_token)
     _key_name = 'weblog_login_temporary'
     res = await redis.get_pickle(_key_name)
     if res:
@@ -68,7 +68,7 @@ async def login_refresh_token(
         return response_err(ErrCode.TOKEN_INVALID_ERROR)
     if not (await redis.exists(f"weblog_refresh_token_{data.refresh_token}")):
         return response_err(ErrCode.TOKEN_INVALID_ERROR)
-    access_token = create_access_token(data={"sub": username})
+    access_token = create_access_token(data={"sub": username, "id": uid})
     await redis.set("weblog_access_token_{}".format(access_token), data.refresh_token,
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     result = {"access_token": access_token, "token_type": "JWT"}
@@ -97,11 +97,11 @@ async def create_upload_file(file: UploadFile = File(),
     ext = os.path.splitext(file.filename)[1]
     if ext not in settings.ALLOWED_IMAGE_EXTENSIONS:
         return response_err(ErrCode.FILE_TYPE_ERROR)
-    filename = uuid4().hex
-    save_file = os.path.join(settings.UPLOAD_MEDIA_FOLDER, filename + ext)
+    new_fname = "{}/{}{}".format(file.content_type, uuid4(), ext).replace('/', '-')
+    save_file = os.path.join(settings.UPLOAD_MEDIA_FOLDER, new_fname)
     with open(save_file, 'wb+') as buffer:
         buffer.write(await file.read())
-    obj = UploadModel(fileUrl='/upload/{}{}'.format(filename, ext),
+    obj = UploadModel(fileUrl='/upload/' + new_fname,
                       filename=file.filename,
                       content_type=file.content_type,
                       uid=current_user.id)

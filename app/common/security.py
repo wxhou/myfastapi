@@ -51,18 +51,20 @@ async def decrypt_access_token(token: str)-> Union[str, Any]:
     """ 解密token """
     payload = jwt.decode(token=token, key=settings.JWT_SECRET_KEY, algorithms=settings.ALGORITHM)
     username = payload.get("sub")
-    if username is None:
+    uid = payload.get("id")
+    if username is None or uid is None:
         raise JWTError
-    return username
+    return username, uid
 
 
 async def decrypt_refresh_token(token: str)-> Union[str, Any]:
     """ 解密token """
     payload = jwt.decode(token=token, key=settings.JWT_REFRESH_SECRET_KEY, algorithms=settings.ALGORITHM)
     username = payload.get("sub")
-    if username is None:
+    uid = payload.get("id")
+    if username is None or uid is None:
         raise JWTError
-    return username
+    return username, uid
 
 
 class OAuth2PasswordJWT(OAuth2):

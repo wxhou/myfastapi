@@ -5,13 +5,13 @@ https://github.com/Delgan/loguru
 https://github.com/tiangolo/fastapi/issues/81#issuecomment-473677039
 考虑是否应该把logger 改成单例
 """
-import contextvars
-from logging import Filter
 from loguru import logger
 
 from app.core.settings import settings
 
 
 # 日志简单配置 文件区分不同级别的日志
-logger.add(settings.LOGGER_SERVER_FILE, rotation="500 MB", encoding='utf-8', enqueue=True, level='INFO')
-logger.add(settings.LOGGER_ERROR_FILE, rotation="500 MB", encoding='utf-8', enqueue=True, level='ERROR')
+logger.add(settings.LOGGER_SERVER_FILE, rotation="500 MB", compression='zip',
+           retention="14 days", encoding='utf-8', enqueue=True, level='INFO')
+logger.add(settings.LOGGER_ERROR_FILE, rotation="500 MB", compression='zip',
+           retention="14 days", encoding='utf-8', enqueue=True, level='ERROR')

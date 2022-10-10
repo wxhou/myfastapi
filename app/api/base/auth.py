@@ -24,9 +24,10 @@ async def get_current_user(db: AsyncSession = Depends(get_db),
     is_token_alive = await redis.exists("weblog_access_token_{}".format(token))
     if not is_token_alive:
         raise NotAuthenticated
-    username = await decrypt_access_token(token)
+    username, uid = await decrypt_access_token(token)
     token_data = TokenData(username=username)
-    obj = await db.scalar(select(BaseUser).where(BaseUser.username == token_data.username,
+    obj = await db.scalar(select(BaseUser).where(BaseUser.id==uid,
+                                                 BaseUser.username == token_data.username,
                                                  BaseUser.status == 0))
     if obj is None:
         raise UserNotExist
@@ -36,6 +37,7 @@ async def get_current_user(db: AsyncSession = Depends(get_db),
 async def get_current_active_user(
     security_scopes: SecurityScopes,
     db: AsyncSession = Depends(get_db),
+    redis: MyRedis = Depends(get_redis),
     current_user: BaseUser = Depends(get_current_user)):
     """
     获取激活用户
@@ -43,7 +45,6 @@ async def get_current_active_user(
     if not current_user.is_active:
         raise UserNotActive
     scopes = security_scopes.scopes
-    logger.info(scopes)
     if not scopes:
         return current_user
     if current_user.role_id is None:
