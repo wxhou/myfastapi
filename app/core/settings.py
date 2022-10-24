@@ -26,7 +26,7 @@ class DevelopmentSettings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/2"
 
     CELERY_SECURITY_KEY:str = "'R9NrIpN5zbMpbcuzNL75BU'"
-    CELERY_BROKER_URL: str = "redis://localhost:6379/6"
+    CELERY_BROKER_URL: str = "amqp://myuser:mypassword@localhost:5672/myvhost"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30

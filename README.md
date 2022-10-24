@@ -102,6 +102,19 @@ alembic downgrade head
 ```
 
 
+## RabbitMQ
+
+```shell
+# 添加用户跟密码
+$ rabbitmqctl add_user test test123
+# 添加虚拟主机
+$ rabbitmqctl add_vhost test_vhost
+# 为用户添加标签
+$ rabbitmqctl set_user_tags test test_tag
+# 设置用户权限
+$ rabbitmqctl set_permissions -p test_vhost test ".*" ".*" ".*"
+```
+
 
 ## Question
 
