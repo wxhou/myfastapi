@@ -15,3 +15,7 @@ logger.add(settings.LOGGER_SERVER_FILE, rotation="500 MB", compression='zip',
            retention="14 days", encoding='utf-8', enqueue=True, level='INFO')
 logger.add(settings.LOGGER_ERROR_FILE, rotation="500 MB", compression='zip',
            retention="14 days", encoding='utf-8', enqueue=True, level='ERROR')
+
+# websocket日志
+logger.add(settings.WEBSOCKET_LOGGER_FILE, filter=lambda record: record["extra"]["name"]=="websocket")
+websocket_logger = logger.bind(name='websocket')

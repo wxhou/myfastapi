@@ -1,4 +1,4 @@
-from typing import Union, List, Tuple, Dict, Any
+from typing import Union, List, Dict
 from starlette import status
 from fastapi.responses import JSONResponse
 
@@ -32,7 +32,7 @@ class ErrCode(object):
     ORDER_NOT_FOUND = (3003, '订单不存在')
 
 
-def response_ok(data: Union[List, Dict, None] = None, msg='success', **kwargs) -> Dict:
+def response_ok(data: Union[List, Dict, None] = None, msg='success', status_code=status.HTTP_200_OK,  **kwargs) -> JSONResponse:
     """正确返回"""
     ret = {'code': 0, 'errmsg': msg}
     if data is not None:
@@ -40,10 +40,10 @@ def response_ok(data: Union[List, Dict, None] = None, msg='success', **kwargs) -
     for k, v in kwargs.items():
         if k not in ret:
             ret[k] = v
-    return JSONResponse(ret, status_code=status.HTTP_200_OK)
+    return JSONResponse(ret, status_code=status_code)
 
 
-def response_err(errcode, detail=None, status_code=status.HTTP_200_OK):
+def response_err(errcode, detail=None, status_code=status.HTTP_200_OK) -> JSONResponse:
     """错误返回"""
     ret = {"code": errcode[0], "errmsg": errcode[1]}
     if detail is not None:

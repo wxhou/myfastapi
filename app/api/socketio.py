@@ -1,10 +1,8 @@
-import logging
 import socketio
 from fastapi import FastAPI, Depends
 from app.api.deps import get_db, get_redis, MyRedis
 from app.core.settings import settings
-
-websocket_logger = logging.getLogger('websocket')
+from app.utils.logger import websocket_logger
 
 def register_socketio(app: FastAPI):
     sio = socketio.AsyncServer(async_mode='asgi',
