@@ -4,3 +4,4 @@ from .blog.model import Category, Post, Comment
 from .device.model import DeviceInfo
 from .goods.model import Goods, GoodsCategory, GoodsCategoryBrand, HotSearchWord
 from .trade.model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
+from .form.model import FormTemplate, FormTemplateVersion, FormFillRecord

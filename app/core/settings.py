@@ -25,11 +25,13 @@ class DevelopmentSettings(BaseSettings):
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:6379/2"
 
-    CELERY_SECURITY_KEY:str = "'R9NrIpN5zbMpbcuzNL75BU'"
-    CELERY_BROKER_URL: str = "amqp://myuser:mypassword@localhost:5672/myvhost"
+    MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
+
+    CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"
+    CELERY_BROKER_URL: str = "redis://localhost:6379/6"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     ALGORITHM: str = "HS256"
     JWT_SECRET_KEY: str = "DXaPkfReer04uwIQU06Enl"
@@ -40,6 +42,12 @@ class DevelopmentSettings(BaseSettings):
     MINIO_ACCESS_KEY = "admin"
     MINIO_SECRET_KEY = "admin123"
 
+    # alipay
+    ALIPAY_SERVER_URL = "https://openapi.alipay.com/gateway.do"
+    ALIPAY_APP_ID = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_ID.txt')
+    ALIPAY_APP_PRIVATE_KEY = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_PRIVATE_KEY.txt')
+    ALIPAY_PUBLIC_KEY = os.path.join(BASEDIR, 'cert', 'ALIPAY_PUBLIC_KEY.txt')
+
     # email
     MAIL_SERVER: str = 'smtp.126.com'
     MAIL_PORT: int = 25
@@ -48,8 +56,9 @@ class DevelopmentSettings(BaseSettings):
 
     LOGGER_LEVEL: int = logging.DEBUG
     LOGGER_SERVER_FILE: str = './logs/server.log'
-    LOGGER_ERROR_FILE : str = './logs/error.log'
+    LOGGER_ERROR_FILE: str = './logs/error.log'
     WEBSOCKET_LOGGER_FILE: str = './logs/websocket.log'
+    PAY_LOGGER_FILE: str = './logs/weblog_pay.log'
 
     # upload
     UPLOAD_MEDIA_FOLDER: str = os.path.join(BASEDIR, 'upload')
@@ -65,13 +74,16 @@ class DevelopmentSettings(BaseSettings):
     }
 
     SWAGGER_DOCS_URL: str = '/docs'
-    SWAGGER_REDOC_URL: str ='/redocs'
-    SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1} # https://github.com/tiangolo/fastapi/issues/2633
+    SWAGGER_REDOC_URL: str = '/redocs'
+    # https://github.com/tiangolo/fastapi/issues/2633
+    SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
+
 
 class TestingSettings(BaseSettings):
     """测试配置"""
     PROJECT_NAME = 'weblog'
-    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    BASEDIR: str = os.path.abspath(os.path.dirname(
+        os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
     PORT: int = 8199
     RELOAD: bool = True
@@ -114,7 +126,7 @@ class TestingSettings(BaseSettings):
     UPLOAD_MEDIA_FOLDER: str = os.path.join(BASEDIR, 'upload')
     MAX_CONTENT_LENGTH: int = 50 * 1024 * 1024
     ALLOWED_IMAGE_EXTENSIONS: Set[str] = {'.png', '.jpg', '.jpeg'}
-    ALLOWED_AUDIO_EXTENSIONS: Set[str]  = {'.mp3'}
+    ALLOWED_AUDIO_EXTENSIONS: Set[str] = {'.mp3'}
     ALLOWED_VIDEO_EXTENSIONS: Set[str] = {'.mp4'}
 
     PERMISSION_DATA: Dict[str, str] = {
@@ -124,15 +136,16 @@ class TestingSettings(BaseSettings):
     }
 
     SWAGGER_DOCS_URL: str = '/docs'
-    SWAGGER_REDOC_URL: str ='/redocs'
-    SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1} # https://github.com/tiangolo/fastapi/issues/2633
-
+    SWAGGER_REDOC_URL: str = '/redocs'
+    # https://github.com/tiangolo/fastapi/issues/2633
+    SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
 
 class ProductionSettings(BaseSettings):
     """生产配置"""
     PROJECT_NAME = 'weblog'
-    BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    BASEDIR: str = os.path.abspath(os.path.dirname(
+        os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = False
     PORT: int = 8199
     RELOAD: bool = True
@@ -181,7 +194,8 @@ class ProductionSettings(BaseSettings):
 
     SWAGGER_DOCS_URL: Optional[str] = None
     SWAGGER_REDOC_URL: Optional[str] = None
-    SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1} # https://github.com/tiangolo/fastapi/issues/2633
+    # https://github.com/tiangolo/fastapi/issues/2633
+    SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
 
 @lru_cache()

@@ -8,7 +8,6 @@ from app.core.redis import MyRedis
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
-from app.common.encoder import jsonable_encoder
 from app.utils.logger import logger
 from .model import BaseUser, UserCollect, UserAddress, UserComment
 from .auth import get_current_active_user
@@ -115,7 +114,7 @@ async def user_address_update(
         sql = update(UserAddress).where(UserAddress.id==obj.id, UserAddress.status==0).values(**args)
         await db.execute(sql)
     await db.commit()
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
 
 @router_base_admin.get('/address/list/', summary='用户地址列表')
@@ -126,4 +125,4 @@ async def user_address_list(
     """用户地址列表"""
     objs = await db.scalars(select(UserAddress).where(UserAddress.user_id==current_user.id,
                                                UserAddress.status==0))
-    return response_ok(data=[jsonable_encoder(obj, exclude={'status'})  for obj in objs])
+    return response_ok(data=[obj.to_dict() for obj in objs])

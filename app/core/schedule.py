@@ -17,9 +17,9 @@ class Singleton(type):
 
 class MyScheduler(metaclass=Singleton):
     def __init__(self) -> None:
-        self._scheduler = AsyncIOScheduler(
-            jobstores={'default': SQLAlchemyJobStore(url=settings.SQLALCHEMY_DATABASE_URL)}
-        )
+        self.jobstores = {'default': SQLAlchemyJobStore(url=settings.SQLALCHEMY_DATABASE_URL)}
+        self._scheduler = AsyncIOScheduler()
+        self._scheduler.configure(jobstores=self.jobstores)
 
     def start(self):
         self._scheduler.start()
@@ -37,7 +37,7 @@ class MyScheduler(metaclass=Singleton):
 
     def get_job(self, job_id, jobstore=None):
         """获取任务"""
-        return self._scheduler.get_job(self, job_id, jobstore)
+        return self._scheduler.get_job(job_id, jobstore)
 
     def add_job(self, *args, **kwargs):
         """添加任务
@@ -46,7 +46,7 @@ class MyScheduler(metaclass=Singleton):
                 next_run_time=undefined, jobstore='default', executor='default',
                 replace_existing=False, **trigger_args
         """
-        self._scheduler.add_job(*args, **kwargs)
+        return self._scheduler.add_job(*args, **kwargs)
 
     def remove_job(self, job_id, jobstore=None):
         """移除任务"""

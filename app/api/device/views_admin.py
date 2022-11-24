@@ -3,7 +3,6 @@ from sqlalchemy import func, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db
 from app.core.db import AsyncSession
-from app.common.encoder import jsonable_encoder
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.base.auth import get_current_active_user
@@ -50,7 +49,7 @@ async def device_modify(request: Request,
                             DeviceInfo.status==0,
                             DeviceInfo.is_registered==False).values(args.dict(exclude={'id'}, exclude_none=True)))
     await db.commit()
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
 
 @router_device_admin.get('/list/', summary='设备列表')
@@ -68,7 +67,7 @@ async def device_list(
     objs = (await db.scalars(select(DeviceInfo).filter(
         *query_filter).limit(page_size).offset((page - 1) * page)))
     _count = await db.scalar(select(func.count()).filter(*query_filter))
-    return response_ok(data=[jsonable_encoder(obj, exclude={'status'}) for obj in objs],
+    return response_ok(data=[obj.to_dict() for obj in objs],
                        total=_count,
                        pages=int(ceil(_count / float(page_size))))
 
@@ -84,7 +83,7 @@ async def device_info(
                             DeviceInfo.status==0))
     if obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
 
 @router_device_admin.post('/delete/', summary='删除设备')

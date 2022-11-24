@@ -65,13 +65,17 @@ uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload
 ```
 
 gunicorn
+
+# 只用单worker
+# 讨论链接: https://www.v2ex.com/t/294165
+
 ```shell
-gunicorn weblog:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
+gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
 ```
 
 celery
 
-- 不能使用-P gevent/eventlet ，并发请求下会报错，perfork测试正常
+> 不能使用-P gevent/eventlet ，并发请求下会报错，perfork测试正常
 
 ```shell
 celery -A app.core.celery_app.celery worker -l info

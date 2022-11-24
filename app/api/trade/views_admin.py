@@ -1,11 +1,12 @@
 from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
-from fastapi import APIRouter, Depends, Request, Query, Security
+from fastapi import APIRouter, Depends, Request, Query, Security, Form
+from fastapi.responses import Response
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
-from app.common.encoder import jsonable_encoder
+from app.common.myalipay import MYALIPAY, verify_with_rsa, AlipayTradePagePayModel, AlipayTradePagePayRequest
 from app.utils.logger import logger
 from app.utils.snowflake import snow_flake
 from app.api.base.model import BaseUser
@@ -33,7 +34,7 @@ async def trade_shopping_list(request: Request,
     for obj in objs:
         goods_obj = await db.scalar(select(Goods).where(Goods.id==obj.goods_id, Goods.status==0))
         items = {
-            "goods": jsonable_encoder(goods_obj, exclude={'status'}),
+            "goods": goods_obj.to_dict(),
             "goods_num": obj.goods_num
         }
         result_data.append(items)
@@ -130,20 +131,60 @@ async def trade_order_info(request: Request,
                                                       ShoppingOrder.status==0))
     if obj is None:
         return response_err(ErrCode.ORDER_NOT_FOUND)
-    result = jsonable_encoder(obj, exclude={'status'})
+    result = obj.to_dict()
     addr_obj = await db.scalar(select(UserAddress).where(UserAddress.id==result['user_address_id'],
                                                          UserAddress.status==0))
-    result['address_info'] = jsonable_encoder(addr_obj, exclude={'status'})
+    result['address_info'] = addr_obj.to_dict()
     order_goods_objs = await db.scalars(select(ShoppingOrderGoods).where(ShoppingOrderGoods.order_id==result['id'],
                                                                    ShoppingOrderGoods.status==0))
     result['goods_info'] = []
     for order_good_obj in order_goods_objs:
         goods_obj = await db.scalar(select(Goods).where(Goods.id==order_good_obj.goods_id,
                                                         Goods.status==0))
-        items = jsonable_encoder(goods_obj, exclude={'goods_num', 'status'})
+        items = goods_obj.to_dict(exclude={'goods_num', 'status'})
         items['goods_num'] = order_good_obj.goods_num
         result['goods_info'].append(items)
     return response_ok(data=result)
+
+
+@router_trade_admin.get('/order/pay/', summary='订单支付')
+async def trade_order_pay(request: Request,
+        order_id : int = Query(description='订单ID'),
+        db: AsyncSession = Depends(get_db),
+        redis: MyRedis = Depends(get_redis),
+        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])):
+    """详情订单"""
+    # https://blog.csdn.net/tonny7501/article/details/103029757
+    obj = await db.scalar(select(ShoppingOrder).where(ShoppingOrder.id==order_id,
+                                                      ShoppingOrder.user_id==current_user.id,
+                                                      ShoppingOrder.status==0))
+    if obj is None:
+        return response_err(ErrCode.ORDER_NOT_FOUND)
+    order_goods_objs = await db.scalars(select(ShoppingOrderGoods).where(ShoppingOrderGoods.order_id==order_id,
+                                                                   ShoppingOrderGoods.status==0))
+    goods_price = await db.execute(select(Goods.id, Goods.shop_price).where(
+        Goods.id.in_([x.goods_id for x in order_goods_objs]), Goods.status==0))
+    goods_price_dict = dict(goods_price.all())
+    model = AlipayTradePagePayModel()
+    model.out_trade_no = obj.order_sn
+    model.total_amount = sum(goods_price_dict.get(order_good_obj.goods_id) * order_good_obj.goods_num for order_good_obj in order_goods_objs)
+    model.subject = 'weblog支付'
+    model.time_expire = '10m'
+    pay_request = AlipayTradePagePayRequest(biz_model=model)
+    pay_request.notify_url = request.url_for("trade_order_notice")
+    pay_url = MYALIPAY.client().page_execute(pay_request, http_method='GET')
+    return response_ok(data={"url": pay_url, "order_id": order_id})
+
+
+@router_trade_admin.post('/order/pay/notice/', summary='订单支付通知')
+async def trade_order_notice(data: dict):
+    sign, sign_type = data.pop('sign', None), data.pop('sign_type', None)
+    params = sorted(data.items(), key=lambda e: e[0], reverse=False)
+    message = "&".join(u"{}={}".format(k, v) for k, v in params).encode()
+    if verify_with_rsa(settings.ALIPAY_PUBLIC_KEY, message, sign):
+        return Response('success')
+    else:
+        return Response('error')
 
 
 @router_trade_admin.post('/order/delete/', summary='删除订单')

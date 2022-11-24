@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from app.common.encoder import jsonable_encoder
 from app.api.deps import get_db, get_redis
 from app.core.redis import MyRedis
 from app.core.settings import settings
@@ -107,7 +106,7 @@ async def create_upload_file(file: UploadFile = File(),
                       uid=current_user.id)
     db.add(obj)
     await db.commit()
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
 
 @router_login.get("/api/routes", summary="所有路由", deprecated=True)

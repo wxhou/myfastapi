@@ -57,10 +57,3 @@ def register_exceptions(app: FastAPI):
     async def permission_error_handler(request: Request, exc: PermissionError):
         """无访问权限"""
         return response_err(ErrCode.COMMON_PERMISSION_ERR)
-
-
-    @app.exception_handler(ConnectionError)
-    async def redis_connect_error(request: Request, exc: ConnectionError):
-        """Redis链接失败"""
-        logger.critical(traceback.format_exc())
-        return response_err(ErrCode.REDIS_CONNECTION_ERROR)

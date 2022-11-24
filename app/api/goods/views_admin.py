@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
-from app.common.encoder import jsonable_encoder
 from app.utils.logger import logger
 from app.utils.snowflake import snow_flake
 from app.api.base.model import BaseUser
@@ -25,7 +24,7 @@ async def goods_category_list(request: Request,
     """商品分类列表"""
     query_filter = [GoodsCategory.status == 0]
     objs = await db.scalars(select(GoodsCategory).filter(*query_filter))
-    return response_ok(data=[jsonable_encoder(obj, exclude={'status'}) for obj in objs])
+    return response_ok(data=[obj.to_dict() for obj in objs])
 
 
 
@@ -42,7 +41,7 @@ async def goods_list(request: Request,
     objs = await db.scalars(select(Goods).filter(*query_filter).limit(page_size).offset((page - 1) * page))
     _count = await db.scalar(select(func.count()).filter(*query_filter))
     pages = int(ceil(_count / float(page_size)))
-    return response_ok(data=[jsonable_encoder(obj, exclude={'status'}) for obj in objs], total=_count, pages=pages)
+    return response_ok(data=[obj.to_dict() for obj in objs], total=_count, pages=pages)
 
 
 @router_goods_admin.get('/info/', summary='商品详情')
@@ -54,7 +53,7 @@ async def goods_info(request: Request,
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     add_goods_click_num.delay(goods_id)
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
 
 
@@ -92,7 +91,7 @@ async def goods_update(
     await db.commit()
     if _num := args.get("goods_num"):
         await redis.set(f"goods_num_{args['id']}", _num)
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
 
 @router_goods_admin.post('/delete/', summary='删除商品')

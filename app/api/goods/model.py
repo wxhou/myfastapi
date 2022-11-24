@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, String, SmallInteger, Integer, BigInteger, Boolean, Text, DATETIME
+from sqlalchemy import Column, String, SmallInteger, Integer, BigInteger, Boolean, Numeric, DATETIME
 from app.api.model import Base
 
 
@@ -33,7 +33,7 @@ class Goods(Base):
     sold_num = Column(Integer, default=0) # 销售量
     comment_num = Column(Integer, default=0) # 评论数
     goods_num = Column(Integer, default=0) # 库存数
-    market_price = Column(Integer, default=0) # 市场价格
+    market_price = Column(Numeric, default=0) # 市场价格
     shop_price = Column(Integer, default=0) # 本店价格
     goods_brief = Column(String(512)) # 商品描述
     goods_image = Column(Integer, index=True) # 商品图片

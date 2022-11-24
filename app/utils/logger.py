@@ -17,5 +17,7 @@ logger.add(settings.LOGGER_ERROR_FILE, rotation="500 MB", compression='zip',
            retention="14 days", encoding='utf-8', enqueue=True, level='ERROR')
 
 # websocket日志
-logger.add(settings.WEBSOCKET_LOGGER_FILE, filter=lambda record: record["extra"]["name"]=="websocket")
-websocket_logger = logger.bind(name='websocket')
+logger.add(settings.WEBSOCKET_LOGGER_FILE, filter=lambda record: "websocket" in record['extra'])
+
+# 支付日志
+logger.add(settings.PAY_LOGGER_FILE, filter=lambda record: "alipay" in record["extra"])

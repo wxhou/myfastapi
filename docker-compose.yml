@@ -1,0 +1,23 @@
+version: '3'
+services:
+    weblog:
+      build: .
+      container_name: weblog
+      ports:
+        - "8199:8199"
+      restart: always
+      environment:
+        - MY_WEBLOG_ENV=development
+    redis:
+        image: "redis:latest"
+        ports:
+            - "26379:6379"
+        restart: always
+    mysql:
+        image: "mysql:8.0.21"
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        ports:
+            - "23306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root1234

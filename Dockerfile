@@ -14,6 +14,10 @@ RUN chmod +x run.sh
 
 RUN mkdir logs && mkdir upload
 
+RUN alembic revision --autogenerate -m "update"
+
+RUN alembic upgrade head
+
 EXPOSE 8199
 
 CMD uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload

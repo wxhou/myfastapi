@@ -1,5 +1,6 @@
 from sqlalchemy import func, Column, DateTime, SmallInteger
 from sqlalchemy.orm import as_declarative, declared_attr
+from fastapi.encoders import jsonable_encoder
 
 
 @as_declarative()
@@ -9,7 +10,7 @@ class Base:
     # https://www.wenjiangs.com/doc/sqlalchemy-orm-mapping_api
 
     @declared_attr
-    def status(cls):  # 创建时间
+    def status(cls):  # 状态
         return Column(SmallInteger, server_default="0", comment='状态')
 
     @declared_attr
@@ -19,3 +20,6 @@ class Base:
     @declared_attr
     def update_time(cls):  # 更新时间
         return Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    def to_dict(self, exclude={'status'}):
+        return jsonable_encoder(self, exclude=exclude)

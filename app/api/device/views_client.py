@@ -1,6 +1,5 @@
 from sqlalchemy import select, update
 from fastapi import APIRouter, Depends, Security, Request, Query, Header
-from fastapi.encoders import jsonable_encoder
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err, JSONResponse
@@ -26,7 +25,7 @@ async def device_register(request: Request,
     await db.execute(update(DeviceInfo).where(DeviceInfo.device_register_code==args.device_register_code,
                             DeviceInfo.is_registered==0, DeviceInfo.status==0).values(is_registered=1))
     await db.commit()
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
 
 @router_device_client.get('/info/', summary='设备详情')
@@ -39,5 +38,5 @@ async def device_detail(
                             DeviceInfo.status==0))
     if obj is None:
         return response_err(ErrCode.DEVICE_NOT_FOUND)
-    return response_ok(data=jsonable_encoder(obj, exclude={'status'}))
+    return response_ok(data=obj.to_dict())
 
