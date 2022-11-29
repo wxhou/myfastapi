@@ -61,16 +61,7 @@
 
 uvicorn
 ```shell
-uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload
-```
-
-gunicorn
-
-# 只用单worker
-# 讨论链接: https://www.v2ex.com/t/294165
-
-```shell
-gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
+uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload --workers=4
 ```
 
 celery
@@ -150,4 +141,15 @@ async def async_main():
     # for AsyncEngine created in function scope, close and
     # clean-up pooled connections
     await engine.dispose()
+```
+
+No.2 使用gunicorn的多worker会使任务重复生成, uvicorn测试多workers不会重复生成
+
+gunicorn
+
+# 只用单worker
+# 讨论链接: https://www.v2ex.com/t/294165
+
+```shell
+gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
 ```

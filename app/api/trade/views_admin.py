@@ -6,7 +6,7 @@ from fastapi.responses import Response
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
-from app.common.myalipay import MYALIPAY, verify_with_rsa, AlipayTradePagePayModel, AlipayTradePagePayRequest
+from app.extensions.myalipay import MYALIPAY, verify_with_rsa, AlipayTradePagePayModel, AlipayTradePagePayRequest
 from app.utils.logger import logger
 from app.utils.snowflake import snow_flake
 from app.api.base.model import BaseUser

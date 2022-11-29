@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError
 from aioredis.exceptions import ConnectionError
 from app.common.response import ErrCode, response_err
-from app.common.errors import UserNotExist, UserNotActive, PermissionError, AccessTokenFail, DeviceNotFound, NotAuthenticated
+from app.common.error import UserNotExist, UserNotActive, PermissionError, AccessTokenFail, DeviceNotFound, NotAuthenticated
 from app.utils.logger import logger
 
 

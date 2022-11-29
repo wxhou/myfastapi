@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.core.settings import settings
-from app.core.schedule import scheduler
+from app.extensions.schedule import scheduler
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -16,10 +16,10 @@ app = FastAPI(
 async def startup():
     """初始化"""
     import motor.motor_asyncio
-    from app.core.redis import init_redis_pool
     from app.core.exceptions import register_exceptions
     from app.core.middleware import register_middleware
-    from app.api.socketio import register_socketio
+    from app.extensions.redis import init_redis_pool
+    from app.extensions.socketio import register_socketio
     from app.api.router import register_router
     scheduler.start()
     register_router(app)
@@ -36,5 +36,5 @@ async def shutdown():
     await app.state.redis.close()  # 关闭 redis
 
 if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run("weblog:app", host="0.0.0.0", port=settings.PORT, reload=settings.RELOAD, workers=1)
+    import subprocess
+    subprocess.run("uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload --workers=4", shell=True)

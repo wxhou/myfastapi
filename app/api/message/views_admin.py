@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from app.common.sockets import manager
+from app.extensions.websockets import manager
 
 
 router_message_admin = APIRouter()

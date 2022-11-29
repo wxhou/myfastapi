@@ -1,11 +1,12 @@
 import pickle
 from typing import Any
-from aioredis import Redis
+from functools import lru_cache
+from aioredis import Redis as AsyncRedis
 from app.utils.logger import logger
-from .settings import settings
+from app.core.settings import settings
 
 
-class MyRedis(Redis):
+class MyRedis(AsyncRedis):
     """自定义Redis"""
 
     def dump_object(self, value):
@@ -44,7 +45,15 @@ class MyRedis(Redis):
         return result
 
 # 参考: https://github.com/grillazz/fastapi-redis/tree/main/app
+
+
 async def init_redis_pool() -> MyRedis:
     redis = await MyRedis.from_url(url=settings.REDIS_URL,
-                                 encoding=settings.GLOBAL_ENCODING)
+                                   encoding=settings.GLOBAL_ENCODING)
     return redis
+
+
+
+from redis import Redis as SYNC_REDIS
+from redis import ConnectionPool
+redis = SYNC_REDIS(connection_pool=ConnectionPool.from_url(settings.REDIS_URL), decode_responses=True)

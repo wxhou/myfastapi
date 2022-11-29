@@ -4,9 +4,9 @@ from datetime import timedelta
 from bson.objectid import ObjectId
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Body, Security
-from app.api.deps import get_db, get_redis, get_mongo, AsyncIOMotorClient, MyRedis, AsyncSession
+from app.api.deps import get_db, get_redis, get_mongo, MyRedis, AsyncSession
 from app.core.settings import settings
-from app.core.schedule import scheduler
+from app.extensions.schedule import scheduler
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.snowflake import snow_flake
@@ -46,7 +46,7 @@ async def template_design(
     template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),
     redis: MyRedis = Depends(get_redis),
-    mg_client: AsyncIOMotorClient = Depends(get_mongo),
+    mg_client = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_design'])
 ):
     """表单设计"""
@@ -146,12 +146,4 @@ async def template_publish(
         FormTemplateVersion.template_id==template_id,
         FormTemplateVersion.id==version_id).values(is_publish=True))
     await db.commit()
-    _job = scheduler.get_job("test_scheduler")
-    if _job is None:
-        _job = scheduler.add_job(hello_word, 'interval', seconds=5, id="test_scheduler")
-    return response_ok(data={"sid": _job.id})
-
-
-async def hello_word():
-    # TODO 测试scheduler
-    logger.info("hello scheduler : {}".format(int(time.time())))
+    return response_ok()

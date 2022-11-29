@@ -3,8 +3,8 @@ from sqlalchemy import update
 
 from celery.utils.log import get_task_logger
 from app.core.celery_app import celery
-from app.core.db import async_session
-from app.utils.asyfunc import sync_run_async
+from app.extensions.db import async_session
+from app.common.decorator import sync_run_async
 from ..goods.model import Goods
 from ..trade.model import ShoppingCart
 

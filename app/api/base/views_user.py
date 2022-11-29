@@ -4,7 +4,7 @@ from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, Path, Security
 from app.api.deps import get_db, get_redis
-from app.core.redis import MyRedis
+from app.extensions.redis import MyRedis
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token

@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from app.core.settings import settings
-from app.core.redis import MyRedis
+from app.extensions.redis import MyRedis
 from app.utils.logger import logger
 from app.common.response import ErrCode, response_err
 

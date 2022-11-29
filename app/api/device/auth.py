@@ -3,7 +3,7 @@ from sqlalchemy import select
 from fastapi import Depends, Header
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.api.device.model import DeviceInfo
-from app.common.errors import DeviceNotFound
+from app.common.error import DeviceNotFound
 
 
 

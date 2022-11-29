@@ -7,7 +7,7 @@ from fastapi.security import OAuth2
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from app.core.settings import settings
-from app.common.errors import NotAuthenticated
+from app.common.error import NotAuthenticated
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")  # 加密密码

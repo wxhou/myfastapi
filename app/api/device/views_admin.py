@@ -2,7 +2,7 @@ from math import ceil
 from sqlalchemy import func, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db
-from app.core.db import AsyncSession
+from app.extensions.db import AsyncSession
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.base.auth import get_current_active_user

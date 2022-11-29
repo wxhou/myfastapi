@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from app.api.deps import get_db, get_redis
-from app.core.redis import MyRedis
+from app.extensions.redis import MyRedis
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token

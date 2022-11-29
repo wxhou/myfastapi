@@ -1,5 +1,5 @@
 from time import time
-from app.common.errors import InvalidSystemClock
+from app.common.error import InvalidSystemClock
 from app.utils.logger import logger
 # https://www.cnblogs.com/oklizz/p/11865750.html
 

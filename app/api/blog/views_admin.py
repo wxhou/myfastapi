@@ -2,7 +2,7 @@ from math import ceil
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, Security
-from app.core.redis import MyRedis
+from app.extensions.redis import MyRedis
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.deps import get_db, get_redis
