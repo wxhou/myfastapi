@@ -3,6 +3,7 @@ from sqlalchemy import update
 from celery.utils.log import get_task_logger
 from app.core.celery_app import celery
 from app.extensions.db import async_session
+from app.extensions.redis import redis
 from app.common.decorator import sync_run_async
 from .model import Goods
 
@@ -17,4 +18,4 @@ async def add_goods_click_num(obj_id):
     async with async_session() as session:
         await session.execute(update(Goods).where(Goods.id==obj_id, Goods.status==0).values(click_num=Goods.click_num+1))
         await session.commit()
-    celery.redis.set("add_goods_click_num", 1)
+    redis.set("add_goods_click_num", 1)

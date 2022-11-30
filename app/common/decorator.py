@@ -19,7 +19,7 @@ def sync_run_async(func):
     return wrapper
 
 
-def singe_task(lock_name, connection_details=None):
+def singe_task(lock_name, connection_details=None, seconds=1):
     """只运行一次任务"""
     def rlock(func):
         if inspect.iscoroutine(func):
@@ -28,7 +28,7 @@ def singe_task(lock_name, connection_details=None):
                 try:
                     with RedLock(lock_name, connection_details=connection_details):
                         ret = await func(*args, **kwargs)
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(seconds)
                         return ret
                 except RedLockError:
                     pass
@@ -39,7 +39,7 @@ def singe_task(lock_name, connection_details=None):
                 try:
                     with RedLock(lock_name, connection_details=connection_details):
                         ret = func(*args, **kwargs)
-                        sleep()
+                        sleep(seconds)
                         return ret
                 except RedLockError:
                     pass

@@ -4,7 +4,7 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.asyncio import AsyncIOExecutor
 from app.core.settings import settings
 from app.utils.logger import logger
-from app.utils.times import timestamp, sleep
+from app.common.decorator import singe_task
 
 
 class Singleton(type):
@@ -68,12 +68,7 @@ scheduler = MyScheduler()
 
 
 @scheduler.task("interval", id='hello_scheduler', seconds=5)
+@singe_task("hello_scheduler")
 def hello_scheduler():
     # TODO 测试scheduler
-    logger.info("hello scheduler : {}".format(timestamp()))
-    try:
-        with RedLock('hello_scheduler'):
-            logger.info("hello scheduler : {}".format(timestamp()))
-            sleep()
-    except RedLockError:
-        pass
+    logger.info("hello scheduler!")

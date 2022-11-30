@@ -4,6 +4,7 @@ from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
+from app.extensions.websocket import manager
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.snowflake import snow_flake
@@ -53,6 +54,7 @@ async def goods_info(request: Request,
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     add_goods_click_num.delay(goods_id)
+    await manager.send_personal_message({'goods_id': obj.id}, 1)
     return response_ok(data=obj.to_dict())
 
 
