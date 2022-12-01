@@ -24,7 +24,23 @@ class DevelopmentSettings(BaseSettings):
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:6379/2"
-
+    REDIS_CONNECTIONS = [
+        {
+            'host': 'localhost',
+            'port': 6379,
+            'db': 2,
+        },
+        {
+            'host': 'localhost',
+            'port': 6379,
+            'db': 6,
+        },
+        {
+            'host': 'localhost',
+            'port': 6379,
+            'db': 7,
+        }
+    ]
     MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
 
     CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"
@@ -73,8 +89,6 @@ class DevelopmentSettings(BaseSettings):
         "user": "普通用户"
     }
 
-    SWAGGER_DOCS_URL: str = '/docs'
-    SWAGGER_REDOC_URL: str = '/redocs'
     # https://github.com/tiangolo/fastapi/issues/2633
     SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
@@ -99,6 +113,18 @@ class TestingSettings(BaseSettings):
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:26379/12"
+    REDIS_CONNECTIONS = [
+        {
+            'host': 'localhost',
+            'port': 26379,
+            'db': 11,
+        },
+        {
+            'host': 'localhost',
+            'port': 26379,
+            'db': 12,
+        }
+    ]
 
     MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
 
@@ -148,8 +174,6 @@ class TestingSettings(BaseSettings):
         "user": "普通用户"
     }
 
-    SWAGGER_DOCS_URL: str = '/docs'
-    SWAGGER_REDOC_URL: str = '/redocs'
     # https://github.com/tiangolo/fastapi/issues/2633
     SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
@@ -205,8 +229,6 @@ class ProductionSettings(BaseSettings):
         "user": "普通用户"
     }
 
-    SWAGGER_DOCS_URL: Optional[str] = None
-    SWAGGER_REDOC_URL: Optional[str] = None
     # https://github.com/tiangolo/fastapi/issues/2633
     SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
