@@ -7,8 +7,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     description='%s-API' % settings.PROJECT_NAME,
     version='1.0.0',
-    docs_url=settings.SWAGGER_DOCS_URL,
-    redoc_url=settings.SWAGGER_REDOC_URL,
+    docs_url=None, redoc_url=None,
     swagger_ui_parameters=settings.SWAGGER_SCHEMAS
 )
 
