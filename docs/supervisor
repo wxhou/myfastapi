@@ -1,7 +1,7 @@
 [program:weblog]
 directory=/root/weblog
-command=/root/weblog/env/bin/uvicorn weblog:app --host 0.0.0.0 --port 8199 --workers=4
-user=root
+command=/root/weblog/env/bin/gunicorn weblog:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
+user=root  ; 不同的服务器需要调整用户
 autostart=true     ; 在 supervisord 启动的时候也自动启动
 startsecs=5        ; 启动 5 秒后没有异常退出，就当作已经正常启动了
 autorestart=true   ; 程序异常退出后自动重启
@@ -9,8 +9,8 @@ stopasgroup=true
 killasgroup=true
 startretries=3     ; 启动失败自动重试次数，默认是 3
 log_stderr=true
-stderr_logfile_maxbytes=200MB  ; stdout 日志文件大小，默认50MB
-stderr_logfile_backups=10     ; stdout 日志文件备份数
+stderr_logfile_maxbytes=300MB  ; stdout 日志文件大小，默认50MB
+stderr_logfile_backups=10    ; stdout 日志文件备份数
 stderr_logfile=/root/weblog/logs/server_err.log
 environment=XMP_FLASK_ENV=production
 
@@ -29,4 +29,21 @@ log_stderr=true
 stderr_logfile_maxbytes=100MB  ; stdout 日志文件大小
 stderr_logfile_backups=10     ; stdout 日志文件备份数
 stderr_logfile=/root/weblog/logs/celery_app.log
+environment=XMP_FLASK_ENV=production
+
+
+[program:weblog_socketio]
+directory=/root/weblog
+command=/root/weblog/env/bin/gunicorn weblog:sio_app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8200
+user=root  ; 不同的服务器需要调整用户
+autostart=true     ; 在 supervisord 启动的时候也自动启动
+startsecs=5        ; 启动 5 秒后没有异常退出，就当作已经正常启动了
+autorestart=true   ; 程序异常退出后自动重启
+stopasgroup=true
+killasgroup=true
+startretries=3     ; 启动失败自动重试次数，默认是 3
+log_stderr=true
+stderr_logfile_maxbytes=100MB  ; stdout 日志文件大小，默认50MB
+stderr_logfile_backups=10     ; stdout 日志文件备份数
+stderr_logfile=/root/weblog/logs/sio_err.log
 environment=XMP_FLASK_ENV=production

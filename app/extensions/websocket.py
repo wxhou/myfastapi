@@ -1,6 +1,7 @@
 from typing import Set
 from collections import namedtuple
 from fastapi import WebSocket, WebSocketDisconnect
+from app.utils.logger import logger
 
 
 class ConnectionManager:
@@ -28,6 +29,7 @@ class ConnectionManager:
         """发送消息"""
         for connection in self.active_connections:
             if connection.client_id == client_id:
+                logger.bind(websocket=True).info("Send to {}: {}".format(client_id, message))
                 try:
                     await connection.websocket.send_json(message)
                 except WebSocketDisconnect:
@@ -37,6 +39,7 @@ class ConnectionManager:
         """广播"""
         for connection in self.active_connections:
             try:
+                logger.bind(websocket=True).info("Broadcast: {}-{}".format(connection.client_id, message))
                 await connection.websocket.send_json(message)
             except WebSocketDisconnect:
                 self.disconnect(connection.websocket, connection.client_id)

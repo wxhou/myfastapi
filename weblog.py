@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.core.settings import settings
+from app.core.sio import sio, sio_app
 from app.extensions.schedule import scheduler
 
 app = FastAPI(
@@ -19,22 +20,17 @@ async def startup():
     from app.core.exceptions import register_exceptions
     from app.core.middleware import register_middleware
     from app.extensions.redis import init_redis_pool
-    from app.extensions.socketio import register_socketio
     from app.api.router import register_router
-    scheduler.start()
     register_router(app)
     register_exceptions(app)
     register_middleware(app)
-    register_socketio(app)
     app.state.mongo = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGO_URL)
     app.state.redis = await init_redis_pool()  # redis
+    app.state.sio = sio
+    scheduler.start()
 
 
 @app.on_event("shutdown")
 async def shutdown():
     scheduler.shutdown()
     await app.state.redis.close()  # 关闭 redis
-
-if __name__ == '__main__':
-    import subprocess
-    subprocess.run("uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload --workers=4", shell=True)

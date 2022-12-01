@@ -10,11 +10,8 @@ def sync_run_async(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if inspect.iscoroutine(func):
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(func(*args, **kwargs))
-        else:
-            return func(*args, **kwargs)
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(func(*args, **kwargs))
 
     return wrapper
 

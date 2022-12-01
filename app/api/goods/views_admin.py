@@ -54,7 +54,8 @@ async def goods_info(request: Request,
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     add_goods_click_num.delay(goods_id)
-    await manager.send_personal_message({'goods_id': obj.id}, 1)
+    # await manager.send_personal_message({'goods_id': obj.id}, 1)
+    await request.app.state.sio.emit('my event', {'data': 'foobar'})
     return response_ok(data=obj.to_dict())
 
 
