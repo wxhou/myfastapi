@@ -36,21 +36,21 @@ def register_middleware(app: FastAPI):
     )
 
     # 注册swagger
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-    @app.get("/docs", include_in_schema=False)
-    async def custom_swagger_ui_html():
-        return get_swagger_ui_html(
-            openapi_url=f"/{app.title}/openapi.json",
-            title=app.title + " - Swagger UI",
-            oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-            swagger_js_url=f"/{app.title}/static/swagger-ui-bundle.js",
-            swagger_css_url=f"/{app.title}/static/swagger-ui.css",
-        )
+    # app.mount("/static", StaticFiles(directory="static"), name="static")
+    # @app.get("/docs", include_in_schema=False)
+    # async def custom_swagger_ui_html():
+    #     return get_swagger_ui_html(
+    #         openapi_url=f"/{app.title}/openapi.json",
+    #         title=app.title + " - Swagger UI",
+    #         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+    #         swagger_js_url=f"/{app.title}/static/swagger-ui-bundle.js",
+    #         swagger_css_url=f"/{app.title}/static/swagger-ui.css",
+    #     )
 
 
-    @app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
-    async def swagger_ui_redirect():
-        return get_swagger_ui_oauth2_redirect_html()
+    # @app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
+    # async def swagger_ui_redirect():
+    #     return get_swagger_ui_oauth2_redirect_html()
 
     # @app.middleware("http")
     # async def many_request(request: Request, call_next):

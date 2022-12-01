@@ -89,6 +89,8 @@ class DevelopmentSettings(BaseSettings):
         "user": "普通用户"
     }
 
+    SWAGGER_DOCS_URL: str = '/docs'
+    SWAGGER_REDOC_URL: str = '/redocs'
     # https://github.com/tiangolo/fastapi/issues/2633
     SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
@@ -174,6 +176,8 @@ class TestingSettings(BaseSettings):
         "user": "普通用户"
     }
 
+    SWAGGER_DOCS_URL: str = f'/{PROJECT_NAME}/docs'
+    SWAGGER_REDOC_URL: str = '/{PROJECT_NAME}/redocs'
     # https://github.com/tiangolo/fastapi/issues/2633
     SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
@@ -229,6 +233,8 @@ class ProductionSettings(BaseSettings):
         "user": "普通用户"
     }
 
+    SWAGGER_DOCS_URL = None
+    SWAGGER_REDOC_URL = None
     # https://github.com/tiangolo/fastapi/issues/2633
     SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
 
