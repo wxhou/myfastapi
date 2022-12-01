@@ -8,6 +8,7 @@ app = FastAPI(
     description='%s-API' % settings.PROJECT_NAME,
     version='1.0.0',
     docs_url=None, redoc_url=None,
+    swagger_ui_oauth2_redirect_url=f'{settings.PROJECT_NAME}/docs/oauth2-redirect'
     swagger_ui_parameters=settings.SWAGGER_SCHEMAS
 )
 
