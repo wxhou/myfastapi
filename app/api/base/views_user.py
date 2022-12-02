@@ -39,7 +39,7 @@ async def user_register(request: Request,
         data={"sub": obj.username}, expires_delta=timedelta(seconds=expires_delta)
     )
     await redis.set(f"user_register_{access_token}", value=obj.id, ex=expires_delta)
-    send_register_email.delay(send_register_email, request.url_for("user_active", token=access_token), obj.email)
+    send_register_email.delay(request.url_for("user_active", token=access_token), obj.email)
     return response_ok(data=obj.to_dict())
 
 
