@@ -5,13 +5,13 @@ from app.extensions.schedule import scheduler
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description='%s-API' % settings.PROJECT_NAME,
     version='1.0.0',
+    description=settings.SWAGGER_DESCRIPTION,
+    servers=settings.SERVERS,
     docs_url=settings.SWAGGER_DOCS_URL,
-    servers=[{"url":"https://tx.yunjinginc.com/weblog"}],
     redoc_url=settings.SWAGGER_REDOC_URL,
-    openapi_url=f"/{settings.PROJECT_NAME}/openapi.json",
-    swagger_ui_oauth2_redirect_url=f'/{settings.PROJECT_NAME}/docs/oauth2-redirect',
+    openapi_url=settings.OPENAPI_URL,
+    swagger_ui_oauth2_redirect_url=settings.SWAGGER_UI_PARAMETERS,
     swagger_ui_parameters=settings.SWAGGER_SCHEMAS
 )
 
