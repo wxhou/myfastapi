@@ -55,7 +55,7 @@ async def goods_info(request: Request,
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     add_goods_click_num.delay(goods_id)
-    await sio_line.emit('my event', {'data': 'foobar'}, to=[1])
+    await sio_line.emit_dispatch('my event', {'data': 'foobar'}, to=[1])
     return response_ok(data=obj.to_dict())
 
 
