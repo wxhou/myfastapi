@@ -86,6 +86,7 @@ class TestingSettings(BaseSettings):
     }
 
     SERVERS: List[Dict[str, str]] = [{"url":"https://tx.yunjinginc.com/weblog"}]
+    SWAGGER_LOGIN = f"/{PROJECT_NAME}/login/"
     SWAGGER_DOCS_URL: str = f'/{PROJECT_NAME}/docs'
     SWAGGER_REDOC_URL: str = f'/{PROJECT_NAME}/redocs'
     OPENAPI_URL: str = f'/{PROJECT_NAME}/openapi.json'

@@ -89,6 +89,7 @@ class DevelopmentSettings(BaseSettings):
     }
 
     SERVERS: Optional[List] = None
+    SWAGGER_LOGIN = "/login/"
     SWAGGER_DOCS_URL: str = '/docs'
     SWAGGER_REDOC_URL: str = '/redocs'
     OPENAPI_URL: str = "/openapi.json"

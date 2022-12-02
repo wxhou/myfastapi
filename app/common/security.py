@@ -1,13 +1,8 @@
-from typing import Optional, Union, Any, Dict
+from typing import Optional, Union, Any
 from datetime import datetime, timedelta
-from fastapi import Request
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi.security.utils import get_authorization_scheme_param
-from fastapi.security import OAuth2
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from app.core.settings import settings
-from app.common.error import NotAuthenticated
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")  # 加密密码
@@ -66,38 +61,5 @@ async def decrypt_refresh_token(token: str)-> Union[str, Any]:
         raise JWTError
     return username, uid
 
-
-class OAuth2PasswordJWT(OAuth2):
-    def __init__(
-        self,
-        tokenUrl: str,
-        scheme_name: Optional[str] = None,
-        scopes: Optional[Dict[str, str]] = None,
-        description: Optional[str] = None,
-        auto_error: bool = True,
-    ):
-        if not scopes:
-            scopes = {}
-        flows = OAuthFlowsModel(
-            password={"tokenUrl": tokenUrl, "scopes": scopes})
-        super().__init__(
-            flows=flows,
-            scheme_name=scheme_name,
-            description=description,
-            auto_error=auto_error,
-        )
-
-    async def __call__(self, request: Request) -> Optional[str]:
-        authorization: str = request.headers.get("Authorization")
-        scheme, param = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "jwt":
-            if self.auto_error:
-                raise NotAuthenticated
-            else:
-                return None
-        return param
-
-
 if __name__ == '__main__':
-    print(verify_password('hoou1993',
-          '$2b$12$tw/fMjiLHEVMROj2y9tjVOeDL3O6alHPznyX13sp79cfXDhWkKEaS'))
+    print(verify_password('hoou1993', '$2b$12$tw/fMjiLHEVMROj2y9tjVOeDL3O6alHPznyX13sp79cfXDhWkKEaS'))

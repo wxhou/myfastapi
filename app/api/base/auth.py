@@ -2,11 +2,11 @@ from typing import Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import Request, Depends, Security
-from fastapi.security import SecurityScopes
+from fastapi.security import SecurityScopes, OAuth2PasswordBearer
 from app.api.deps import get_db, get_redis
 from app.extensions.redis import MyRedis
 from app.core.settings import settings
-from app.common.security import verify_password, OAuth2PasswordJWT, decrypt_access_token
+from app.common.security import verify_password, decrypt_access_token
 from app.common.error import UserNotExist, UserNotActive, PermissionError, AccessTokenFail, NotAuthenticated
 from app.utils.logger import logger
 from .model import BaseUser, BasePermission, RolePermission
@@ -14,8 +14,7 @@ from .schemas import TokenData
 
 
 
-oauth2_scheme = OAuth2PasswordJWT(tokenUrl="/login/",
-                                  scheme_name='JWT')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.SWAGGER_LOGIN)
 
 async def get_current_user(db: AsyncSession = Depends(get_db),
                            redis: MyRedis = Depends(get_redis),

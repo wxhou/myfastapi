@@ -57,6 +57,7 @@ class ProductionSettings(BaseSettings):
     }
 
     SERVERS: Optional[str] = None
+    SWAGGER_LOGIN = "/login/"
     SWAGGER_DOCS_URL: Optional[str] = None
     SWAGGER_REDOC_URL: Optional[str] = None
     OPENAPI_URL: str = "/openapi.json"
