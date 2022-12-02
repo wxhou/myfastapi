@@ -44,7 +44,7 @@ async def login_access_token(
     return JSONResponse({
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "JWT"
+        "token_type": settings.JWT_TOKEN_TYPE
     })
 
 
@@ -70,7 +70,7 @@ async def login_refresh_token(
     access_token = create_access_token(data={"sub": username, "id": uid})
     await redis.set("weblog_access_token_{}".format(access_token), data.refresh_token,
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    result = {"access_token": access_token, "token_type": "JWT"}
+    result = {"access_token": access_token, "token_type": settings.JWT_TOKEN_TYPE}
     await redis.set_pickle(_key_name, result, timeout=10)
     return JSONResponse(result)
 

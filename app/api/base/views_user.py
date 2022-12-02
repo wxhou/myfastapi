@@ -40,7 +40,7 @@ async def user_register(request: Request,
     )
     await redis.set(f"user_register_{access_token}", value=obj.id, ex=expires_delta)
     send_register_email.delay(request.url_for("user_active", token=access_token), obj.email)
-    return response_ok(data=obj.to_dict())
+    return response_ok(data=obj.id)
 
 
 @router_base_admin.get('/active/{token}', summary='用户激活')
@@ -72,7 +72,7 @@ async def user_update(
     await db.execute(update(BaseUser).where(BaseUser.id == user.id,
                                             BaseUser.status == 0).values(user.dict(exclude={'id'}, exclude_none=True)))
     await db.commit()
-    return response_ok(data=obj.to_dict())
+    return response_ok(data=obj.id)
 
 
 @router_base_admin.get('/list/', summary='用户列表')
@@ -94,7 +94,7 @@ async def user_list(
         *query_filter).limit(page_size).offset((page - 1) * page))).all()
     _count = await db.scalar(select(func.count(BaseUser.id)).filter(*query_filter))
     pages = int(ceil(_count / float(page_size)))
-    return response_ok(data=[obj.to_dict() for obj in objs], total=_count, pages=pages)
+    return response_ok(data=[obj.to_dict(exclude={'status', 'password_hash'}) for obj in objs], total=_count, pages=pages)
 
 
 @router_base_admin.post('/address/update/', summary='更新用户地址')

@@ -51,6 +51,7 @@ class DevelopmentSettings(BaseSettings):
     ALGORITHM: str = "HS256"
     JWT_SECRET_KEY: str = "DXaPkfReer04uwIQU06Enl"
     JWT_REFRESH_SECRET_KEY: str = "o7Ooj6lswdtXUtfuSnjvQS"
+    JWT_TOKEN_TYPE: str = 'Bearer'
 
     # MINIO
     MINIO_HOST: str = "192.168.0.174:9000"

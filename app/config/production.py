@@ -32,6 +32,9 @@ class ProductionSettings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
+    JWT_SECRET_KEY: str = "TExvm2$vmC!RECAyO9DDst"
+    JWT_REFRESH_SECRET_KEY: str = "x&I^jl6n9D0aOgGn7USf7#"
+    JWT_TOKEN_TYPE: str = 'Bearer'
 
     # email
     MAIL_SERVER: str = 'smtp.126.com'
