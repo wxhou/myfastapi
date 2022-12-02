@@ -113,7 +113,7 @@ class SocketIOnline:
         """可以发送给多个客户端"""
         for d in self.socketio_online():
             if d.device_id in to:
-                await self.emit(event, data=data, to=d.sid, room=room, skip_sid=skip_sid,
+                await sio.emit(event, data=data, to=d.sid, room=room, skip_sid=skip_sid,
                                namespace=namespace, callback=callback, **kwargs)
 
 
