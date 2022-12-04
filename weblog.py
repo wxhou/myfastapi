@@ -37,3 +37,8 @@ async def startup():
 async def shutdown():
     scheduler.shutdown()
     await app.state.redis.close()  # 关闭 redis
+
+
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run(app, port=8199)

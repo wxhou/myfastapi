@@ -1,9 +1,9 @@
 import asyncio
 import inspect
 from functools import wraps
-from redlock import RedLock, RedLockError
 from app.utils.times import sleep
-from app.core.settings import settings
+from app.extensions.redis import redis_redlock, RedLockError
+
 
 def sync_run_async(func):
     """运行异步函数"""
@@ -16,14 +16,14 @@ def sync_run_async(func):
     return wrapper
 
 
-def singe_task(lock_name, seconds=1):
+def singe_task(lock_name, seconds=0.5):
     """只运行一次任务"""
     def rlock(func):
         if inspect.iscoroutine(func):
             @wraps(func)
             async def wrapper(*args, **kwargs):
                 try:
-                    with RedLock(lock_name, connection_details=settings.REDIS_CONNECTIONS):
+                    with redis_redlock.create_lock(lock_name):
                         ret = await func(*args, **kwargs)
                         await asyncio.sleep(seconds)
                         return ret
@@ -34,7 +34,7 @@ def singe_task(lock_name, seconds=1):
             @wraps(func)
             def wrapper(*args, **kwargs):
                 try:
-                    with RedLock(lock_name, connection_details=settings.REDIS_CONNECTIONS):
+                    with redis_redlock.create_lock(lock_name):
                         ret = func(*args, **kwargs)
                         sleep(seconds)
                         return ret

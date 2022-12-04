@@ -9,13 +9,13 @@ from app.config.production import ProductionSettings
 def get_settings():
     """获取配置信息"""
     env = os.environ.get('MY_WEBLOG_ENV', None)
-    if env is None:
-        raise EnvironmentError("MY_WEBLOG_ENV is Undefined!")
     env_config = {
         "development": DevelopmentSettings(),
         "testing": TestingSettings(),
         "production": ProductionSettings()
     }
+    if env is None or env not in env_config:
+        raise EnvironmentError("MY_WEBLOG_ENV is Undefined!")
     return env_config[env]
 
 

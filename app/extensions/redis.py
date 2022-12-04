@@ -1,7 +1,7 @@
-import pickle
 from typing import Any
-from functools import lru_cache
+from redlock import RedLockFactory, RedLockError
 from aioredis import Redis as AsyncRedis
+from app.common.resolve import load_object, dump_object
 from app.utils.logger import logger
 from app.core.settings import settings
 
@@ -9,38 +9,12 @@ from app.core.settings import settings
 class MyRedis(AsyncRedis):
     """自定义Redis"""
 
-    def dump_object(self, value):
-        """Dumps an object into a string for redis.  By default it serializes
-        integers as regular string and pickle dumps everything else.
-        """
-        t = type(value)
-        if t == int:
-            return str(value).encode("ascii")
-        return b"!" + pickle.dumps(value)
-
-    def load_object(self, value):
-        """The reversal of :meth:`dump_object`.  This might be called with
-        None.
-        """
-        if value is None:
-            return None
-        if value.startswith(b"!"):
-            try:
-                return pickle.loads(value[1:])
-            except pickle.PickleError:
-                return None
-        try:
-            return int(value)
-        except ValueError:
-            # before 0.8 we did not have serialization.  Still support that.
-            return value
-
     async def get_pickle(self, key) -> Any:
         res = await self.get(key)
-        return self.load_object(res)
+        return load_object(res)
 
     async def set_pickle(self, key, value, timeout=None, **kwargs):
-        dump = self.dump_object(value)
+        dump = dump_object(value)
         result = await self.set(key, value=dump, ex=timeout, **kwargs)
         return result
 
@@ -57,3 +31,4 @@ async def init_redis_pool() -> MyRedis:
 from redis import Redis as SYNC_REDIS
 from redis import ConnectionPool
 redis = SYNC_REDIS(connection_pool=ConnectionPool.from_url(settings.REDIS_URL), decode_responses=True)
+redis_redlock = RedLockFactory(connection_details=settings.REDIS_CONNECTIONS)

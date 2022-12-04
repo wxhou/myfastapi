@@ -1,8 +1,8 @@
 from typing import Optional
-import dill as pickle
 import socketio
 from ast import literal_eval
 from collections import namedtuple
+from app.common.resolve import load_object, dump_object
 from app.core.settings import settings
 from app.extensions.redis import redis
 from app.utils.logger import logger
@@ -46,53 +46,27 @@ class SocketIOnline:
         self.device = namedtuple('OnlineDevice', 'sid device_id timestamp')
         self.key_fix: str = "socketio_active_connection"
 
-    def dump_object(self, value):
-        """Dumps an object into a string for redis.  By default it serializes
-        integers as regular string and pickle dumps everything else.
-        """
-        t = type(value)
-        if t == int:
-            return str(value).encode("ascii")
-        return b"!" + pickle.dumps(value)
-
-    def load_object(self, value):
-        """The reversal of :meth:`dump_object`.  This might be called with
-        None.
-        """
-        if value is None:
-            return None
-        if value.startswith(b"!"):
-            try:
-                return pickle.loads(value[1:])
-            except pickle.PickleError:
-                return None
-        try:
-            return int(value)
-        except ValueError:
-            # before 0.8 we did not have serialization.  Still support that.
-            return value
-
     def socketio_online(self):
         """获取所有的对象"""
-        return (self.load_object(x) for x in redis.smembers(self.key_fix))
+        return (load_object(x) for x in redis.smembers(self.key_fix))
 
     def sadd(self, value):
         """添加对象"""
-        redis.sadd(self.key_fix, self.dump_object(value))
+        redis.sadd(self.key_fix, dump_object(value))
 
     def srem(self, value):
         """移除对象"""
-        redis.srem(self.key_fix, self.dump_object(value))
+        redis.srem(self.key_fix, dump_object(value))
 
     async def heartbeat(self, sid, client_id):
         """心跳检测"""
         _this = False
         for device in self.socketio_online():
-            if (timestamp() - device.timestamp) > 10:
-                self.srem(device)
             if device.device_id == client_id:
                 device._replace(sid=sid, timestamp=timestamp())
                 _this = True
+            if (timestamp() - device.timestamp) > 10:
+                self.srem(device)
         if not _this:
             self.sadd(self.device(sid=sid, device_id=client_id, timestamp=timestamp()))
 
