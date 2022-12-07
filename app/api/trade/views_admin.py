@@ -8,7 +8,7 @@ from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.extensions.myalipay import MYALIPAY, verify_with_rsa, AlipayTradePagePayModel, AlipayTradePagePayRequest
 from app.utils.logger import logger
-from app.utils.snowflake import snow_flake
+from app.utils.randomly import random_str
 from app.api.base.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
@@ -102,7 +102,7 @@ async def trade_order_insert(request: Request,
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_insert'])):
     """新增订单"""
     obj = ShoppingOrder(user_id=current_user.id,
-                order_sn=snow_flake.get_id(),
+                order_sn=random_str(),
                 user_address_id=args.address_id,
                 order_post=args.order_post)
     db.add(obj)

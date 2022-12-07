@@ -8,7 +8,7 @@ from app.core.settings import settings
 from app.extensions.websocket import manager
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
-from app.utils.snowflake import snow_flake
+from app.utils.randomly import random_str
 from app.api.base.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Goods, GoodsCategory
@@ -69,7 +69,7 @@ async def goods_insert(
         current_user: BaseUser = Security(get_current_active_user, scopes=['goods_insert'])):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
-    args['goods_sn'] = snow_flake.get_id()
+    args['goods_sn'] = random_str()
     obj = Goods(**args)
     db.add(obj)
     await db.commit()

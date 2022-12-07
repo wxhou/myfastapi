@@ -9,7 +9,6 @@ from app.core.settings import settings
 from app.extensions.schedule import scheduler
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
-from app.utils.snowflake import snow_flake
 from app.api.base.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import FormTemplate, FormTemplateVersion
