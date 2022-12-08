@@ -55,13 +55,11 @@
 ## 项目部署
 
 
-
-## 项目启动
-
+### 项目启动
 
 uvicorn
 ```shell
-uvicorn weblog:app --host 0.0.0.0 --port 8199 --reload --workers=4
+gunicorn weblog:app --workers 3 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199 --reload
 ```
 
 celery
@@ -73,12 +71,17 @@ celery -A app.core.celery_app.celery worker -l info
 ```
 
 
-## 数据库迁移
-### alembic中文文档
+### 数据库迁移
+#### alembic中文文档
 https://hellowac.github.io/alembic_doc/zh/_front_matter.html
 
-### 简单示例
+#### 简单示例
 https://www.jianshu.com/p/942e270baf65
+
+如果迁移文件夹不存在是，执行这个命令
+```shell
+alembic init alembic
+```
 
 将当前的模型生成迁移文件
 ```shell
@@ -97,7 +100,7 @@ alembic downgrade head
 ```
 
 
-## RabbitMQ
+### RabbitMQ
 
 ```shell
 # 添加用户跟密码
@@ -111,8 +114,7 @@ $ rabbitmqctl set_permissions -p test_vhost test ".*" ".*" ".*"
 ```
 
 
-## Question
-
+### Question
 
 No.1 sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
 ```python
@@ -143,13 +145,17 @@ async def async_main():
     await engine.dispose()
 ```
 
-No.2 使用gunicorn的多worker会使任务重复生成, uvicorn测试多workers不会重复生成
+No.2 使用gunicorn的多worker会导致apscheduler定时任务重复生成
 
-gunicorn
+> 讨论链接: https://www.v2ex.com/t/294165
+> uvicorn测试多workers不会重复生成。BUT查阅资料后说uvicorn是单进程
 
-# 只用单worker
-# 讨论链接: https://www.v2ex.com/t/294165
+解决方案:
+- gunicorn只用单worker
 
-```shell
-gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
-```
+    ```shell
+    gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
+    ```
+- 使用Redis锁限制定时任务执行
+
+    我选择的

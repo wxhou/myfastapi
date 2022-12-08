@@ -6,7 +6,6 @@ from fastapi.responses import Response
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
-from app.extensions.myalipay import MYALIPAY, verify_with_rsa, AlipayTradePagePayModel, AlipayTradePagePayRequest
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.api.base.model import BaseUser
@@ -165,15 +164,17 @@ async def trade_order_pay(request: Request,
     goods_price = await db.execute(select(Goods.id, Goods.shop_price).where(
         Goods.id.in_([x.goods_id for x in order_goods_objs]), Goods.status==0))
     goods_price_dict = dict(goods_price.all())
-    model = AlipayTradePagePayModel()
-    model.out_trade_no = obj.order_sn
-    model.total_amount = sum(goods_price_dict.get(order_good_obj.goods_id) * order_good_obj.goods_num for order_good_obj in order_goods_objs)
-    model.subject = 'weblog支付'
-    model.time_expire = '10m'
-    pay_request = AlipayTradePagePayRequest(biz_model=model)
-    pay_request.notify_url = request.url_for("trade_order_notice")
-    pay_url = MYALIPAY.client().page_execute(pay_request, http_method='GET')
-    return response_ok(data={"url": pay_url, "order_id": order_id})
+    # model = AlipayTradePagePayModel()
+    # model.out_trade_no = obj.order_sn
+    # model.total_amount = sum(goods_price_dict.get(order_good_obj.goods_id) * order_good_obj.goods_num for order_good_obj in order_goods_objs)
+    # model.subject = 'weblog支付'
+    # model.time_expire = '10m'
+    # pay_request = AlipayTradePagePayRequest(biz_model=model)
+    # pay_request.notify_url = request.url_for("trade_order_notice")
+    # pay_url = MYALIPAY.client().page_execute(pay_request, http_method='GET')
+    # return response_ok(data={"url": pay_url, "order_id": order_id})
+    # TODO WeChat支付
+    return response_ok()
 
 
 @router_trade_admin.post('/order/pay/notice/', summary='订单支付通知')
