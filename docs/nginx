@@ -18,10 +18,10 @@ server {
         index index.html;
         alias /home/ubuntu/Documents/myfastapi/app/template;
     }
-    location /weblog/docs/ {
-        proxy_pass http://127.0.0.1:8199/weblog/docs;
+    location ~* ^/weblog/(?<doc_name>(docs|redocs)) {
+        proxy_pass http://127.0.0.1:8199/weblog/$doc_name;
     }
-    location /weblog/openapi.json {
+    location = /weblog/openapi.json {
         proxy_pass http://127.0.0.1:8199/weblog/openapi.json;
     }
     location /weblog/socket.io {

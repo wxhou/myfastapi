@@ -8,12 +8,12 @@ from app.core.settings import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")  # 加密密码
 
 
-def set_password(password):
+def set_password(password: str):
     """加密明文密码"""
     return pwd_context.hash(password)
 
 
-def verify_password(password, password_hash):
+def verify_password(password: str, password_hash: str):
     """解密"""
     return pwd_context.verify(password, password_hash)
 

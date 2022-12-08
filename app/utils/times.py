@@ -1,8 +1,9 @@
+from typing import Optional
 import time
 from datetime import datetime, timedelta
 
 
-def timestamp(fmt=None):
+def timestamp(fmt: Optional[int]=None) -> int:
     """时间戳"""
     if fmt is None:
         return round(time.time())
@@ -12,7 +13,7 @@ def sleep(s=1):
     time.sleep(s)
 
 
-def dt_strftime(t=datetime.now(), fmt="%Y-%m-%d %H:%M:%S"):
+def dt_strftime(t=datetime.now(), fmt: str="%Y-%m-%d %H:%M:%S"):
     """格式化当前时间"""
     return t.strftime(fmt)
 

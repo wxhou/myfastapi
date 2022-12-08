@@ -16,7 +16,7 @@ def sync_run_async(func):
     return wrapper
 
 
-def singe_task(lock_name, seconds=0.5):
+def singe_task(lock_name: str, seconds: int=0.5):
     """只运行一次任务"""
     def rlock(func):
         if inspect.iscoroutine(func):

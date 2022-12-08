@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, NamedTuple, Generator
 import socketio
 from ast import literal_eval
 from collections import namedtuple
@@ -19,17 +19,17 @@ sio_app = socketio.ASGIApp(sio)
 
 
 @sio.on("connect")
-async def test_connect(sid: str, *args, **kwargs):
+async def test_connect(sid: str, *args, **kwargs) -> None:
     logger.bind(websocket=True).info(f"[Socket.IO] {sid} is connect")
 
 
 @sio.on("disconnect")
-async def test_discontect(sid: str):
+async def test_discontect(sid: str) -> None:
     logger.bind(websocket=True).info(f"[Socket.IO] {sid} close connect")
 
 
 @sio.on("heartbeat")
-async def test_heartbeat(sid: str, message):
+async def test_heartbeat(sid: str, message) -> None:
     """心跳 10S一次"""
     msg = literal_eval(message)
     logger.bind(websocket=True).info("[Socket.IO] OD({}) heartbeat {} to:{}".format(
@@ -43,22 +43,22 @@ class SocketIOnline:
     __slots__ = ('device', 'key_fix')
 
     def __init__(self):
-        self.device = namedtuple('OnlineDevice', 'sid device_id timestamp')
+        self.device: NamedTuple = namedtuple('OnlineDevice', 'sid device_id timestamp')
         self.key_fix: str = "socketio_active_connection"
 
-    def socketio_online(self):
+    def socketio_online(self) -> Generator:
         """获取所有的对象"""
         return (load_object(x) for x in redis.smembers(self.key_fix))
 
-    def sadd(self, value):
+    def sadd(self, value) -> None:
         """添加对象"""
         redis.sadd(self.key_fix, dump_object(value))
 
-    def srem(self, value):
+    def srem(self, value) -> None:
         """移除对象"""
         redis.srem(self.key_fix, dump_object(value))
 
-    async def heartbeat(self, sid, client_id):
+    async def heartbeat(self, sid, client_id) -> None:
         """心跳检测"""
         _this = False
         for device in self.socketio_online():
@@ -70,10 +70,10 @@ class SocketIOnline:
         if not _this:
             self.sadd(self.device(sid=sid, device_id=client_id, timestamp=timestamp()))
 
-    def __contains__(self, client_id):
+    def __contains__(self, client_id) -> bool:
         return any(ret.device_id == client_id for ret in self.socketio_online())
 
-    def __len__(self):
+    def __len__(self) -> int:
         return redis.scard(self.key_fix)
 
     async def emit(self, event, data=None, to=None, room=None, skip_sid=None,
