@@ -4,7 +4,7 @@ from datetime import timedelta
 from bson.objectid import ObjectId
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Body, Security
-from app.api.deps import get_db, get_redis, get_mongo, MyRedis, AsyncSession
+from app.api.deps import get_db, get_redis, get_mongo, MyRedis, AsyncSession, MongoClient
 from app.core.settings import settings
 from app.extensions.schedule import scheduler
 from app.common.response import ErrCode, response_ok, response_err
@@ -45,7 +45,7 @@ async def template_design(
     template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),
     redis: MyRedis = Depends(get_redis),
-    mg_client = Depends(get_mongo),
+    mg_client: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_design'])
 ):
     """表单设计"""
@@ -99,7 +99,7 @@ async def template_info(
     template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),
     redis: MyRedis = Depends(get_redis),
-    mg_client = Depends(get_mongo),
+    mg_client: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_info'])
 ):
     """表单设计"""

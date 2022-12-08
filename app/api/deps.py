@@ -1,6 +1,7 @@
 from typing import AsyncGenerator
 
 from fastapi import Request
+from pymongo import MongoClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.extensions.db import async_session
 from app.extensions.redis import MyRedis
@@ -16,6 +17,6 @@ async def get_redis(request: Request) -> MyRedis:
     """获取redis连接"""
     return await request.app.state.redis
 
-async def get_mongo(request: Request):
+async def get_mongo(request: Request) -> MongoClient:
     """获取MongoDB链接"""
     return request.app.state.mongo
