@@ -12,10 +12,10 @@ from app.api.form.router import form_router
 def register_router(app: FastAPI):
     """ 注册路由 """
     app.include_router(router_login)
-    app.include_router(base_router, prefix='/base', tags=['Base'])
-    app.include_router(blog_router, prefix='/blog', tags=['Blog'])
-    app.include_router(message_router, prefix='/message', tags=['Message'])
-    app.include_router(device_router, prefix='/device', tags=['Device'])
-    app.include_router(goods_router, prefix='/goods', tags=['Goods'])
-    app.include_router(trade_router, prefix='/trade', tags=['Trade'])
-    app.include_router(form_router, prefix='/form', tags=['Form'])
+    app.include_router(base_router, prefix='/base')
+    app.include_router(blog_router, prefix='/blog')
+    app.include_router(message_router, prefix='/message')
+    app.include_router(device_router, prefix='/device')
+    app.include_router(goods_router, prefix='/goods')
+    app.include_router(trade_router, prefix='/trade')
+    app.include_router(form_router, prefix='/form')

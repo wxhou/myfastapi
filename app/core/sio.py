@@ -85,10 +85,9 @@ class SocketIOnline:
     async def emit_dispatch(self, event, data=None, to: Optional[list]=None, room=None, skip_sid=None,
                    namespace=None, callback=None, **kwargs):
         """可以发送给多个客户端"""
-        for d in self.socketio_online():
-            if d.device_id in to:
-                await sio.emit(event, data=data, to=d.sid, room=room, skip_sid=skip_sid,
-                               namespace=namespace, callback=callback, **kwargs)
+        rest = [await sio.emit(event, data=data, to=d.sid, room=room, skip_sid=skip_sid,
+                namespace=namespace, callback=callback, **kwargs) for d in self.socketio_online()]
+        return rest
 
 
 sio_line = SocketIOnline()

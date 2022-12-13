@@ -1,6 +1,6 @@
 from typing import Union, List, Dict, Tuple
 from starlette import status
-from fastapi.responses import JSONResponse
+from fastapi.responses import ORJSONResponse
 
 
 class ErrCode(object):
@@ -32,20 +32,18 @@ class ErrCode(object):
     ORDER_NOT_FOUND = (3003, '订单不存在')
 
 
-def response_ok(data: Union[List, Dict, None] = None, msg: str = 'success', status_code=status.HTTP_200_OK,  **kwargs) -> JSONResponse:
+def response_ok(data: Union[List, Dict, None] = None, msg: str = 'success', status_code=status.HTTP_200_OK,  **kwargs) -> ORJSONResponse:
     """正确返回"""
     ret = {'code': 0, 'errmsg': msg}
     if data is not None:
         ret['data'] = data
-    for k, v in kwargs.items():
-        if k not in ret:
-            ret[k] = v
-    return JSONResponse(ret, status_code=status_code)
+    ret.update({k:v for k, v in kwargs.items() if k not in ret})
+    return ORJSONResponse(ret, status_code=status_code)
 
 
-def response_err(errcode: Tuple[int, str], detail: Union[List, Dict, None]=None, status_code=status.HTTP_200_OK) -> JSONResponse:
+def response_err(errcode: Tuple[int, str], detail: Union[List, Dict, None]=None, status_code=status.HTTP_200_OK) -> ORJSONResponse:
     """错误返回"""
     ret = {"code": errcode[0], "errmsg": errcode[1]}
     if detail is not None:
         ret['detail'] = detail
-    return JSONResponse(ret, status_code=status_code)
+    return ORJSONResponse(ret, status_code=status_code)

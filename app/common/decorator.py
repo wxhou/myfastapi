@@ -1,12 +1,25 @@
 import asyncio
 import inspect
-from functools import wraps
+from functools import wraps, partial
+from concurrent.futures import ThreadPoolExecutor
 from app.utils.times import sleep
 from app.extensions.redis import redis_redlock, RedLockError
 
 
+async def async_run_sync(func, *args, **kwargs):
+    """异步中运行同步函数
+    : FastAPI views
+    """
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as thread_pool:
+        result = await loop.run_in_executor(thread_pool, partial(func, *args, **kwargs))
+        return result
+
+
 def sync_run_async(func):
-    """运行异步函数"""
+    """同步中运行异步函数
+    : celery
+    """
 
     @wraps(func)
     def wrapper(*args, **kwargs):

@@ -2,7 +2,7 @@ from sqlalchemy import select, update
 from fastapi import APIRouter, Depends, Security, Request, Query, Header
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.settings import settings
-from app.common.response import ErrCode, response_ok, response_err, JSONResponse
+from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from .auth import check_device_exists
 from .model import DeviceInfo

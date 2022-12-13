@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import ORJSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from app.api.deps import get_db, get_redis
 from app.extensions.redis import MyRedis
@@ -18,7 +18,7 @@ from .auth import oauth2_scheme, authenticate, get_current_active_user
 from .schemas import Token, RefreshToken
 
 
-router_login = APIRouter(tags=['Auth'])
+router_login = APIRouter(tags=['Login'])
 
 
 
@@ -41,7 +41,7 @@ async def login_access_token(
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     # 'access_token'和'token_type'一定要写,否则get_current_user依赖拿不到token
     # 可添加字段(先修改schemas/token里面的Token返回模型)
-    return JSONResponse({
+    return ORJSONResponse({
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": settings.JWT_TOKEN_TYPE
@@ -61,7 +61,7 @@ async def login_refresh_token(
     _key_name = 'weblog_login_temporary'
     res = await redis.get_pickle(_key_name)
     if res:
-        return JSONResponse(res)
+        return ORJSONResponse(res)
     user_obj = await db.scalar(select(BaseUser).where(BaseUser.username==username, BaseUser.status==0))
     if user_obj is None:
         return response_err(ErrCode.TOKEN_INVALID_ERROR)
@@ -72,7 +72,7 @@ async def login_refresh_token(
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     result = {"access_token": access_token, "token_type": settings.JWT_TOKEN_TYPE}
     await redis.set_pickle(_key_name, result, timeout=10)
-    return JSONResponse(result)
+    return ORJSONResponse(result)
 
 
 @router_login.api_route('/logout/', methods=['GET', 'POST'], summary='退出登录')
@@ -85,43 +85,3 @@ async def logout(request: Request,
     if refresh_token:
         await redis.delete("weblog_refresh_token_{}".format(refresh_token))
     return response_ok()
-
-
-
-@router_login.post("/upload/", summary='上传文件')
-async def create_upload_file(file: UploadFile = File(),
-                             db:AsyncSession = Depends(get_db),
-                             current_user: BaseUser = Depends(get_current_active_user)):
-    """上传文件"""
-    ext = os.path.splitext(file.filename)[1]
-    if ext not in settings.ALLOWED_IMAGE_EXTENSIONS:
-        return response_err(ErrCode.FILE_TYPE_ERROR)
-    new_fname = "{}/{}{}".format(file.content_type, uuid4(), ext).replace('/', '-')
-    save_file = os.path.join(settings.UPLOAD_MEDIA_FOLDER, new_fname)
-    with open(save_file, 'wb+') as buffer:
-        buffer.write(await file.read())
-    obj = UploadModel(fileUrl='/upload/' + new_fname,
-                      filename=file.filename,
-                      content_type=file.content_type,
-                      uid=current_user.id)
-    db.add(obj)
-    await db.commit()
-    return response_ok(data=obj.to_dict())
-
-
-@router_login.get("/api/routes", summary="所有路由", deprecated=True)
-async def api_routes(request: Request,
-                     db:AsyncSession = Depends(get_db)):
-    result = []
-    number = 1
-    for route in request.app.routes:
-        items = {
-            "name": route.name,
-            "path": route.path
-        }
-        result.append(items)
-        obj = BasePermission(name=route.path, function_name=route.name, order_num=number)
-        number += 1
-        db.add(obj)
-    await db.commit()
-    return response_ok(data=result)
