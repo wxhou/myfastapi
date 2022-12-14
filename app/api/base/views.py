@@ -1,4 +1,5 @@
 import os
+import hashlib
 from uuid import uuid4
 from datetime import datetime
 from tempfile import NamedTemporaryFile
@@ -23,9 +24,9 @@ async def create_upload_file(file: UploadFile = File(),
                              db:AsyncSession = Depends(get_db),
                              current_user: BaseUser = Depends(get_current_active_user)):
     """上传文件"""
-    ret = await db.scalar(select(UploadModel.id).where(UploadModel.uniqueId==md5, UploadModel.status==0))
-    if ret is not None:
-        return response_err(ErrCode.QUERY_HAS_EXISTS)
+    obj = await db.scalar(select(UploadModel).where(UploadModel.uniqueId==md5, UploadModel.status==0))
+    if obj is not None:
+        return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId'}))
     ext = os.path.splitext(file.filename)[1]
     if ext not in settings.ALLOWED_IMAGE_EXTENSIONS:
         return response_err(ErrCode.FILE_TYPE_ERROR)
@@ -34,8 +35,15 @@ async def create_upload_file(file: UploadFile = File(),
     if not os.path.exists(root_path):
         os.makedirs(root_path)
     save_file = os.path.join(root_path, new_fname)
+    # 计算文件MD5
+    md5_obj = hashlib.md5()
     with open(save_file, 'wb+') as buffer:
-        buffer.write(await file.read())
+        FileStream = await file.read()
+        md5_obj.update(FileStream)
+        buffer.write(FileStream)
+    obj = await db.scalar(select(UploadModel).where(UploadModel.uniqueId==md5_obj.hexdigest(), UploadModel.status==0))
+    if obj is not None:
+        return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId'}))
     obj = UploadModel(fileUrl='/upload' + save_file.split(settings.UPLOAD_MEDIA_FOLDER)[1],
                       uniqueId=md5,
                       filename=file.filename,
@@ -43,7 +51,7 @@ async def create_upload_file(file: UploadFile = File(),
                       uid=current_user.id)
     db.add(obj)
     await db.commit()
-    return response_ok(data=obj.to_dict())
+    return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId'}))
 
 
 
