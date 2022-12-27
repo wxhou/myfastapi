@@ -1,19 +1,8 @@
 import asyncio
-import inspect
-from functools import wraps, partial
-from concurrent.futures import ThreadPoolExecutor
+from functools import wraps
+from asgiref.sync import sync_to_async, async_to_sync
 from app.utils.times import sleep
 from app.extensions.redis import redis_redlock, RedLockError
-
-
-async def async_run_sync(func, *args, **kwargs):
-    """异步中运行同步函数
-    : FastAPI views
-    """
-    loop = asyncio.get_event_loop()
-    with ThreadPoolExecutor() as thread_pool:
-        result = await loop.run_in_executor(thread_pool, partial(func, *args, **kwargs))
-        return result
 
 
 def sync_run_async(func):
@@ -23,8 +12,14 @@ def sync_run_async(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(func(*args, **kwargs))
+        if asyncio.iscoroutinefunction(func):
+            loop = asyncio.get_event_loop()
+            task = loop.create_task(func(*args, **kwargs))
+            loop.run_until_complete(task)
+            return task.result()
+            # return async_to_sync(func)(*args, **kwargs) # QA Fail
+        else:
+            return func(*args, **kwargs)
 
     return wrapper
 
@@ -32,7 +27,7 @@ def sync_run_async(func):
 def singe_task(lock_name: str, seconds: int=0.5):
     """只运行一次任务"""
     def rlock(func):
-        if inspect.iscoroutine(func):
+        if asyncio.iscoroutinefunction(func):
             @wraps(func)
             async def wrapper(*args, **kwargs):
                 try:

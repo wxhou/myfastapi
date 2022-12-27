@@ -34,7 +34,7 @@ class ErrCode(object):
 
 def response_ok(data: Union[List, Dict, None] = None, msg: str = 'success', status_code=status.HTTP_200_OK,  **kwargs) -> ORJSONResponse:
     """正确返回"""
-    ret = {'code': 0, 'errmsg': msg}
+    ret = {'errcode': 0, 'errmsg': msg}
     if data is not None:
         ret['data'] = data
     ret.update({k:v for k, v in kwargs.items() if k not in ret})
@@ -43,7 +43,7 @@ def response_ok(data: Union[List, Dict, None] = None, msg: str = 'success', stat
 
 def response_err(errcode: Tuple[int, str], detail: Union[List, Dict, None]=None, status_code=status.HTTP_200_OK) -> ORJSONResponse:
     """错误返回"""
-    ret = {"code": errcode[0], "errmsg": errcode[1]}
+    ret = {"errcode": errcode[0], "errmsg": errcode[1]}
     if detail is not None:
         ret['detail'] = detail
     return ORJSONResponse(ret, status_code=status_code)

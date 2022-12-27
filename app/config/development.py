@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Optional, Dict, Set, Sequence
+from typing import List, Optional, Dict, Set
 from pydantic import BaseSettings
 
 
@@ -13,7 +13,7 @@ class DevelopmentSettings(BaseSettings):
     RELOAD: bool = True
     SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
     GLOBAL_ENCODING: str = 'utf-8'
-    CORS_ORIGINS: Sequence[str] = ['*']
+    CORS_ORIGINS: List[str] = ['*']
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
@@ -22,30 +22,27 @@ class DevelopmentSettings(BaseSettings):
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
+
+    # Redis
     REDIS_URL: str = "redis://localhost:6379/2"
+    REDIS_SOCKETIO_URL: str = "redis://localhost:6379/3"
     REDIS_CONNECTIONS = [
         {
             'host': 'localhost',
             'port': 6379,
-            'db': 2,
-        },
-        {
-            'host': 'localhost',
-            'port': 6379,
-            'db': 6,
-        },
-        {
-            'host': 'localhost',
-            'port': 6379,
-            'db': 7,
-        }
+            'db': db_number,
+        } for db_number in (2, 3, 6, 7)
     ]
+
+    # MongoDB
     MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
 
+    # celery
     CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"
     CELERY_BROKER_URL: str = "redis://localhost:6379/6"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
 
+    # JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     ALGORITHM: str = "HS256"
@@ -59,7 +56,7 @@ class DevelopmentSettings(BaseSettings):
     MINIO_SECRET_KEY: str = "admin123"
 
     # alipay
-    ALIPAY_SERVER_URL: str = "https://openapi.alipay.com/gateway.do"
+    ALIPAY_SERVER_URL: str = "https://openapi.alipaydev.com/gateway.do"
     ALIPAY_APP_ID: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_ID.txt')
     ALIPAY_APP_PRIVATE_KEY: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_PRIVATE_KEY.txt')
     ALIPAY_PUBLIC_KEY: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_PUBLIC_KEY.txt')
@@ -89,6 +86,7 @@ class DevelopmentSettings(BaseSettings):
         "user": "普通用户"
     }
 
+    # swagger
     SERVERS: Optional[List] = None
     SWAGGER_LOGIN = "/login/"
     SWAGGER_DOCS_URL: str = '/docs'

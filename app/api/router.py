@@ -7,6 +7,7 @@ from app.api.device.router import device_router
 from app.api.goods.router import goods_router
 from app.api.trade.router import trade_router
 from app.api.form.router import form_router
+from app.api.user.router import router as user_router
 
 
 def register_router(app: FastAPI):
@@ -19,3 +20,4 @@ def register_router(app: FastAPI):
     app.include_router(goods_router, prefix='/goods')
     app.include_router(trade_router, prefix='/trade')
     app.include_router(form_router, prefix='/form')
+    app.include_router(user_router, prefix='/user')

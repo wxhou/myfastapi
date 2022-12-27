@@ -9,7 +9,7 @@ from app.core.settings import settings
 from app.extensions.schedule import scheduler
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
-from app.api.base.model import BaseUser
+from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import FormTemplate, FormTemplateVersion
 from .schemas import TemplateInsert
@@ -94,7 +94,7 @@ async def template_design(
     return response_ok(data={"_id": _id})
 
 
-@router_form_admin.post('/info/', summary='模板详情')
+@router_form_admin.get('/info/', summary='模板详情')
 async def template_info(
     template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),

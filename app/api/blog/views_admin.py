@@ -6,7 +6,7 @@ from app.extensions.redis import MyRedis
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.deps import get_db, get_redis
-from app.api.base.model import BaseUser
+from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Category, Post, Comment
 from .schemas import PostInsert, PostUpdate, PostDelete, CommentInsert

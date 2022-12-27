@@ -9,7 +9,7 @@ from app.utils.logger import logger
 from app.utils.times import timestamp
 
 
-mgr = socketio.AsyncRedisManager(settings.REDIS_URL)
+mgr = socketio.AsyncRedisManager(settings.REDIS_SOCKETIO_URL)
 sio = socketio.AsyncServer(
     client_manager=mgr,
     async_mode='asgi',
@@ -85,8 +85,10 @@ class SocketIOnline:
     async def emit_dispatch(self, event, data=None, to: Optional[list]=None, room=None, skip_sid=None,
                    namespace=None, callback=None, **kwargs):
         """可以发送给多个客户端"""
-        rest = [await sio.emit(event, data=data, to=d.sid, room=room, skip_sid=skip_sid,
-                namespace=namespace, callback=callback, **kwargs) for d in self.socketio_online()]
+        if not to:
+            return
+        rest = [await sio.emit(event, data=data, to=d.sid, room=room, skip_sid=skip_sid, namespace=namespace,
+                callback=callback, **kwargs) for d in self.socketio_online() if d.device_id in to]
         return rest
 
 

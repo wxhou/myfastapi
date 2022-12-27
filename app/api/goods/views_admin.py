@@ -9,7 +9,7 @@ from app.extensions.websocket import manager
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.randomly import random_str
-from app.api.base.model import BaseUser
+from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Goods, GoodsCategory
 from .schemas import GoodsInsert, GoodsUpdate, GoodsDelete

@@ -6,7 +6,7 @@ from app.extensions.db import AsyncSession
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.base.auth import get_current_active_user
-from app.api.base.model import BaseUser
+from app.api.user.model import BaseUser
 from .model import DeviceInfo
 from .schemas import DeviceInsert, DeviceModify, DeviceDelete
 

@@ -1,17 +1,18 @@
 import os
 import hashlib
 from uuid import uuid4
-from datetime import datetime
-from tempfile import NamedTemporaryFile
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, File, UploadFile, Form
 from app.api.deps import get_db
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
+from app.common.decorator import async_to_sync
 from app.utils.logger import logger
 from app.utils.times import dt_strftime
-from .model import BaseUser, UploadModel, BasePermission
+from app.api.user.model import BaseUser, BasePermission
+from .model import UploadModel
 from .auth import get_current_active_user
 
 
@@ -71,3 +72,11 @@ async def api_routes(request: Request,
         db.add(obj)
     await db.commit()
     return response_ok(data=result)
+
+
+@router.get("/sync", summary="同步路由", deprecated=True)
+def sync_routes(request: Request,
+                db:AsyncSession = Depends(get_db)):
+    ret = async_to_sync(request.body)()
+    logger.info(ret)
+    return response_ok()

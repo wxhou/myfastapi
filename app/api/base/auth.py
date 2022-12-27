@@ -9,7 +9,7 @@ from app.core.settings import settings
 from app.common.security import verify_password, decrypt_access_token
 from app.common.error import UserNotExist, UserNotActive, PermissionError, AccessTokenFail, NotAuthenticated
 from app.utils.logger import logger
-from .model import BaseUser, BasePermission, RolePermission
+from app.api.user.model import BaseUser, BasePermission, RolePermission
 from .schemas import TokenData
 
 

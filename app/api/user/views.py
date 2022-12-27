@@ -9,17 +9,16 @@ from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
 from app.utils.logger import logger
+from app.api.base.auth import get_current_active_user
 from .model import BaseUser, UserCollect, UserAddress, UserComment
-from .auth import get_current_active_user
 from .tasks import send_register_email
 from .schemas import UserRegister, UserModify, UserAddressUpdate
 
-router_base_admin = APIRouter()
+
+router_admin = APIRouter()
 
 
-
-
-@router_base_admin.post('/register/', summary='用户注册,并发送邮件')
+@router_admin.post('/register/', summary='用户注册,并发送邮件')
 async def user_register(request: Request,
                         user: UserRegister,
                         db: AsyncSession = Depends(get_db),
@@ -43,7 +42,7 @@ async def user_register(request: Request,
     return response_ok(data=obj.id)
 
 
-@router_base_admin.get('/active/{token}', summary='用户激活')
+@router_admin.get('/active/{token}', summary='用户激活')
 async def user_active(request: Request,
                     token :str = Path(title="激活用户token"),
                     db: AsyncSession = Depends(get_db),
@@ -58,7 +57,7 @@ async def user_active(request: Request,
     return response_ok()
 
 
-@router_base_admin.post('/update/', summary='更新用户信息')
+@router_admin.post('/update/', summary='更新用户信息')
 async def user_update(
         request: Request,
         user: UserModify,
@@ -75,7 +74,7 @@ async def user_update(
     return response_ok(data=obj.id)
 
 
-@router_base_admin.get('/list/', summary='用户列表')
+@router_admin.get('/list/', summary='用户列表')
 async def user_list(
         request: Request,
         page: int = Query(default=1, ge=1),
@@ -97,7 +96,7 @@ async def user_list(
     return response_ok(data=[obj.to_dict(exclude={'status', 'password_hash'}) for obj in objs], total=_count, pages=pages)
 
 
-@router_base_admin.post('/address/update/', summary='更新用户地址')
+@router_admin.post('/address/update/', summary='更新用户地址')
 async def user_address_update(
         request: Request,
         addr: UserAddressUpdate,
@@ -117,7 +116,7 @@ async def user_address_update(
     return response_ok(data=obj.to_dict())
 
 
-@router_base_admin.get('/address/list/', summary='用户地址列表')
+@router_admin.get('/address/list/', summary='用户地址列表')
 async def user_address_list(
         request: Request,
         db: AsyncSession = Depends(get_db),

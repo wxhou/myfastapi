@@ -18,9 +18,10 @@ logger = get_task_logger(__name__)
 async def update_inventory(args: list):
     """更新库存"""
     async with async_session() as session:
-        for arg in args:
-            await session.execute(update(Goods).where(Goods.id==arg['goods_id'], Goods.status==0).values(goods_num=Goods.goods_num+arg['goods_num']))
-        await session.commit()
+        async with session.begin():
+            for arg in args:
+                await session.execute(update(Goods).where(Goods.id==arg['goods_id'], Goods.status==0).values(goods_num=Goods.goods_num+arg['goods_num']))
+            await session.commit()
 
 
 @celery.task
@@ -28,10 +29,11 @@ async def update_inventory(args: list):
 async def update_cart(goods, current_user_id):
     """更新购物车"""
     async with async_session() as session:
-        for gd in goods:
-            await session.execute(update(ShoppingCart).where(
-                ShoppingCart.user_id==current_user_id,
-                ShoppingCart.goods_id==gd.goods_id,
-                ShoppingCart.status==0).values(
-                    goods_num=ShoppingCart.goods_num-gd.goods_num))
-        await session.commit()
+        async with session.begin():
+            for gd in goods:
+                await session.execute(update(ShoppingCart).where(
+                    ShoppingCart.user_id==current_user_id,
+                    ShoppingCart.goods_id==gd.goods_id,
+                    ShoppingCart.status==0).values(
+                        goods_num=ShoppingCart.goods_num-gd.goods_num))
+            await session.commit()

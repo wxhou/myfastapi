@@ -13,7 +13,7 @@ from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token
 from app.utils.logger import logger
-from .model import BaseUser, UploadModel, BasePermission
+from app.api.user.model import BaseUser
 from .auth import oauth2_scheme, authenticate, get_current_active_user
 from .schemas import Token, RefreshToken
 

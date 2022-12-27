@@ -8,13 +8,13 @@ from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.randomly import random_str
-from app.api.base.model import BaseUser
+from app.utils.AliPay import ALIPAY, AlipayTradePagePayModel, AlipayTradePagePayRequest, verify_with_rsa
+from app.api.user.model import BaseUser, UserAddress
+from app.api.goods.model import Goods
 from app.api.base.auth import get_current_active_user
 from .model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
 from .schemas import ShoppingChartInsert, ShoppingChartDelete, ShoppingOrderInsert, ShoppingOrderDelete
 from .tasks import update_inventory, update_cart
-from ..goods.model import Goods
-from ..base.model import UserAddress
 
 
 router_trade_admin = APIRouter()
@@ -164,15 +164,15 @@ async def trade_order_pay(request: Request,
     goods_price = await db.execute(select(Goods.id, Goods.shop_price).where(
         Goods.id.in_([x.goods_id for x in order_goods_objs]), Goods.status==0))
     goods_price_dict = dict(goods_price.all())
-    # model = AlipayTradePagePayModel()
-    # model.out_trade_no = obj.order_sn
-    # model.total_amount = sum(goods_price_dict.get(order_good_obj.goods_id) * order_good_obj.goods_num for order_good_obj in order_goods_objs)
-    # model.subject = 'weblog支付'
-    # model.time_expire = '10m'
-    # pay_request = AlipayTradePagePayRequest(biz_model=model)
-    # pay_request.notify_url = request.url_for("trade_order_notice")
-    # pay_url = MYALIPAY.client().page_execute(pay_request, http_method='GET')
-    # return response_ok(data={"url": pay_url, "order_id": order_id})
+    model = AlipayTradePagePayModel()
+    model.out_trade_no = obj.order_sn
+    model.total_amount = sum(goods_price_dict.get(order_good_obj.goods_id) * order_good_obj.goods_num for order_good_obj in order_goods_objs)
+    model.subject = 'weblog支付'
+    model.timeout_express = '10m'
+    pay_request = AlipayTradePagePayRequest(biz_model=model)
+    pay_request.notify_url = request.url_for("trade_order_notice")
+    pay_url = ALIPAY.client().page_execute(pay_request, http_method='GET')
+    return response_ok(data={"url": pay_url, "order_id": order_id})
     # TODO WeChat支付
     return response_ok()
 
