@@ -12,10 +12,10 @@ timezone: str = "Asia/Shanghai"
 result_expires: int = 60 * 60 * 24 # 任务过期时间
 worker_max_tasks_per_child: int = 8 # 池工作进程在被新进程替换之前可以执行的最大任务数。默认为无限制。
 imports: Tuple[str] = (
-    'app.api.base.tasks',
     'app.api.blog.tasks',
     'app.api.trade.tasks',
     'app.api.goods.tasks',
+    'app.api.user.tasks',
 ) # 导入任务
 worker_log_format: str = "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s"
 task_queues: Tuple[Queue] = (

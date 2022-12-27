@@ -12,7 +12,7 @@ class DeviceInfo(Base):
     device_name = Column(String(64))  # 设备名称
     device_type = Column(SmallInteger, nullable=False, index=True)  # 设备类型  1:竖屏 2:横屏
     device_position = Column(String(64))  # 设备位置
-    device_number = Column(String(64))  # 设备主机编号
+    device_guid = Column(String(64), nullable=False)  # 设备唯一编号
     device_screen_type = Column(SmallInteger, nullable=False) # 屏幕类型 1竖屏  2横屏
     device_screen_number = Column(String(64))  # 设备屏幕编号
     device_app_version = Column(String(64))  # 设备APP相关版本号

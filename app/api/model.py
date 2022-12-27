@@ -1,3 +1,4 @@
+from datetime import datetime, date
 from sqlalchemy import func, Column, DateTime, SmallInteger
 from sqlalchemy.orm import as_declarative, declared_attr
 from fastapi.encoders import jsonable_encoder
@@ -21,5 +22,10 @@ class Base:
     def update_time(cls):  # 更新时间
         return Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), comment='更新时间')
 
-    def to_dict(self, exclude={'status'}):
-        return jsonable_encoder(self, exclude=exclude)
+    def to_dict(self,
+                exclude={'status'},
+                custom_encoder={
+                    date: lambda dt: dt.strftime("%Y-%m-%d"),
+                    datetime: lambda dt: dt.strftime("%Y-%m-%d %H:%M:%S")
+                }):
+        return jsonable_encoder(self, exclude=exclude, custom_encoder=custom_encoder)
