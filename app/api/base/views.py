@@ -1,6 +1,8 @@
 import os
-import hashlib
+import platform
+import subprocess
 from uuid import uuid4
+from platform import platform
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,15 +38,18 @@ async def create_upload_file(file: UploadFile = File(),
     if not os.path.exists(root_path):
         os.makedirs(root_path)
     save_file = os.path.join(root_path, new_fname)
-    # 计算文件MD5
-    md5_obj = hashlib.md5()
     with open(save_file, 'wb+') as buffer:
-        FileStream = await file.read()
-        md5_obj.update(FileStream)
-        buffer.write(FileStream)
-    obj = await db.scalar(select(UploadModel).where(UploadModel.uniqueId==md5_obj.hexdigest(), UploadModel.status==0))
-    if obj is not None:
-        return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId'}))
+        buffer.write(await file.read())
+    # 对比文件MD5
+    if platform().startswith('Windows'):
+        md5_value = subprocess.getoutput(['certutil', '-hashfile', save_file, 'MD5'])
+    if platform().startswith('Linux'):
+        md5_value = subprocess.run(['md5sum', '-b', save_file])
+    else:
+        md5_value = ''
+    if md5 not in md5_value:
+        os.remove(save_file)
+        return response_err(ErrCode.FILE_MD5_ERROR)
     obj = UploadModel(fileUrl='/upload' + save_file.split(settings.UPLOAD_MEDIA_FOLDER)[1],
                       uniqueId=md5,
                       filename=file.filename,
@@ -52,7 +57,7 @@ async def create_upload_file(file: UploadFile = File(),
                       uid=current_user.id)
     db.add(obj)
     await db.commit()
-    return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId'}))
+    return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId', 'uid'}))
 
 
 

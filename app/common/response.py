@@ -12,6 +12,7 @@ class ErrCode(object):
     TOKEN_INVALID_ERROR = (1004, 'Token错误')
     USER_NOT_ACTIVE = (1005, '用户未激活')
     FILE_TYPE_ERROR = (1006, "文件类型错误")
+    FILE_MD5_ERROR = (1006, "文件校验失败")
     QUERY_NOT_EXISTS = (1007, "数据不存在")
     QUERY_HAS_EXISTS = (1008, "数据已存在")
     TOO_MANY_REQUEST = (1009, "太多的请求")

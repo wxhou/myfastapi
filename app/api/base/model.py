@@ -11,3 +11,8 @@ class UploadModel(Base):
     filename = Column(String(128)) # 图片名称
     fileUrl = Column(String(256)) # 图片地址
     content_type = Column(String(128))
+
+    def to_dict(self, *args, **kwargs):
+        ret = super(UploadModel, self).to_dict(*args, **kwargs)
+        ret['fileUrl'] = ret['fileUrl'].replace('\\', '/')
+        return ret
