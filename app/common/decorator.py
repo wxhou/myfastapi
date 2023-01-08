@@ -1,6 +1,5 @@
 import asyncio
 from functools import wraps
-from asgiref.sync import sync_to_async, async_to_sync
 from app.utils.times import sleep
 from app.extensions.redis import redis_redlock, RedLockError
 

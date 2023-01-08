@@ -44,7 +44,11 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) 
 
 async def decrypt_access_token(token: str)-> Union[str, Any]:
     """ 解密token """
+    if not token:
+        raise JWTError
     payload = jwt.decode(token=token, key=settings.JWT_SECRET_KEY, algorithms=settings.ALGORITHM)
+    if not payload:
+        raise JWTError
     username = payload.get("sub")
     uid = payload.get("id")
     if username is None or uid is None:
@@ -54,7 +58,11 @@ async def decrypt_access_token(token: str)-> Union[str, Any]:
 
 async def decrypt_refresh_token(token: str)-> Union[str, Any]:
     """ 解密token """
+    if not token:
+        raise JWTError
     payload = jwt.decode(token=token, key=settings.JWT_REFRESH_SECRET_KEY, algorithms=settings.ALGORITHM)
+    if not payload:
+        raise JWTError
     username = payload.get("sub")
     uid = payload.get("id")
     if username is None or uid is None:
