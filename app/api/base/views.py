@@ -44,9 +44,9 @@ async def create_upload_file(file: UploadFile = File(),
     if platform().startswith('Windows'):
         md5_value = subprocess.getoutput(['certutil', '-hashfile', save_file, 'MD5'])
     if platform().startswith('Linux'):
-        md5_value = subprocess.run(['md5sum', '-b', save_file])
+        md5_value = subprocess.getoutput(['md5sum', '-b', save_file])
     else:
-        md5_value = ''
+        md5_value = subprocess.getoutput(['md5', save_file])
     if md5 not in md5_value:
         os.remove(save_file)
         return response_err(ErrCode.FILE_MD5_ERROR)
