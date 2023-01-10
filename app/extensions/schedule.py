@@ -64,8 +64,8 @@ class MyScheduler(metaclass=Singleton):
 scheduler = MyScheduler()
 
 
-@scheduler.task("interval", id='hello_scheduler', seconds=5)
-@singe_task("hello_scheduler")
-def hello_scheduler():
-    # TODO 测试scheduler
-    logger.info("hello scheduler!")
+# @scheduler.task("interval", id='hello_scheduler', seconds=5)
+# @singe_task("hello_scheduler")
+# def hello_scheduler():
+#     # TODO 测试scheduler
+#     logger.info("hello scheduler!")

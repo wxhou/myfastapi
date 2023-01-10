@@ -30,7 +30,7 @@ server {
         proxy_buffering off;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
-        proxy_pass http://127.0.0.1:8200/socket.io;
+        proxy_pass http://127.0.0.1:8199/ws/socket.io;
     }
     location /weblog/media {
         add_header Cache-Control max-age=60*60*24;

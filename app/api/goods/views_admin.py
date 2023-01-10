@@ -2,10 +2,7 @@ from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
-from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
-from app.core.sio import sio_line
-from app.core.settings import settings
-from app.extensions.websocket import manager
+from app.api.deps import get_db, get_redis, get_socketio, MyRedis, AsyncSession, AsyncServer
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.randomly import random_str
@@ -50,12 +47,13 @@ async def goods_list(request: Request,
 async def goods_info(request: Request,
                     goods_id: int = Query(..., description='商品ID'),
                     db: AsyncSession = Depends(get_db),
-                    redis: MyRedis = Depends(get_redis)):
+                    redis: MyRedis = Depends(get_redis),
+                    socketio: AsyncServer= Depends(get_socketio)):
     obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     add_goods_click_num.delay(goods_id)
-    await sio_line.emit_dispatch('my event', {'data': 'foobar'}, to=[1])
+    await socketio.emit('message', {'data': 'foobar'})
     return response_ok(data=obj.to_dict())
 
 

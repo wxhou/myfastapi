@@ -8,6 +8,10 @@ from app.extensions.redis import redis
 from app.utils.logger import logger
 from app.utils.times import timestamp
 
+"""
+fastapi用gunicorn workers大于1时需要单独起服务,一般情况下用=1的
+"""
+
 
 mgr = socketio.AsyncRedisManager(settings.REDIS_SOCKETIO_URL)
 sio = socketio.AsyncServer(
@@ -32,64 +36,4 @@ async def test_discontect(sid: str) -> None:
 async def test_heartbeat(sid: str, message) -> None:
     """心跳 10S一次"""
     msg = literal_eval(message)
-    logger.bind(websocket=True).info("[Socket.IO] OD({}) heartbeat {} to:{}".format(
-        len(sio_line), msg['DeviceID'], sid))
-    await sio_line.heartbeat(sid=sid, client_id=msg['DeviceID'])
-
-
-class SocketIOnline:
-    """在线设备"""
-
-    __slots__ = ('device', 'key_fix')
-
-    def __init__(self):
-        self.device: NamedTuple = namedtuple('OnlineDevice', 'sid device_id timestamp')
-        self.key_fix: str = "socketio_active_connection"
-
-    def socketio_online(self) -> Generator:
-        """获取所有的对象"""
-        return (load_object(x) for x in redis.smembers(self.key_fix))
-
-    def sadd(self, value) -> None:
-        """添加对象"""
-        redis.sadd(self.key_fix, dump_object(value))
-
-    def srem(self, value) -> None:
-        """移除对象"""
-        redis.srem(self.key_fix, dump_object(value))
-
-    async def heartbeat(self, sid, client_id) -> None:
-        """心跳检测"""
-        _this = False
-        for device in self.socketio_online():
-            if device.device_id == client_id:
-                device._replace(sid=sid, timestamp=timestamp())
-                _this = True
-            if (timestamp() - device.timestamp) > 10:
-                self.srem(device)
-        if not _this:
-            self.sadd(self.device(sid=sid, device_id=client_id, timestamp=timestamp()))
-
-    def __contains__(self, client_id) -> bool:
-        return any(ret.device_id == client_id for ret in self.socketio_online())
-
-    def __len__(self) -> int:
-        return redis.scard(self.key_fix)
-
-    async def emit(self, event, data=None, to=None, room=None, skip_sid=None,
-                   namespace=None, callback=None, **kwargs):
-        """重新封装发送消息"""
-        await sio.emit(event, data=data, to=to, room=room, skip_sid=skip_sid,
-                       namespace=namespace, callback=callback, **kwargs)
-
-    async def emit_dispatch(self, event, data=None, to: Optional[list]=None, room=None, skip_sid=None,
-                   namespace=None, callback=None, **kwargs):
-        """可以发送给多个客户端"""
-        if not to:
-            return
-        rest = [await sio.emit(event, data=data, to=d.sid, room=room, skip_sid=skip_sid, namespace=namespace,
-                callback=callback, **kwargs) for d in self.socketio_online() if d.device_id in to]
-        return rest
-
-
-sio_line = SocketIOnline()
+    logger.bind(websocket=True).info("[Socket.IO] heartbeat {} to:{}".format(msg['DeviceID'], sid))

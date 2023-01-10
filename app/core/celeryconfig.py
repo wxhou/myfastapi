@@ -6,6 +6,10 @@ from .settings import settings
 security_key: str = settings.CELERY_SECURITY_KEY
 broker_url: str = settings.CELERY_BROKER_URL
 result_backend: str = settings.CELERY_RESULT_BACKEND
+redbeat_redis_url: str = settings.CELERY_BROKER_URL
+redbeat_key_prefix: str = 'celery:redbeat'
+redbeat_lock_timeout: int = 300
+beat_max_loop_interval: int = 5
 result_serializer: str = "json"
 accept_content: List[str] = ['json']
 timezone: str = "Asia/Shanghai"
