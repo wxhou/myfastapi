@@ -66,8 +66,21 @@ celery
 
 > 不能使用-P gevent/eventlet ，并发请求下会报错，perfork测试正常
 
+linux
+
 ```shell
 celery -A app.core.celery_app.celery worker -l info
+```
+windows
+
+```cmd
+celery -A app.core.celery_app.celery worker -l info -P processes
+```
+
+celery beat 定时任务
+
+```shell
+celery -A app.core.celery_app.celery beat -S redbeat.RedBeatScheduler -l info
 ```
 
 

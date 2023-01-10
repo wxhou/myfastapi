@@ -1,4 +1,4 @@
-import asyncio
+import sys, asyncio
 from functools import wraps
 from app.utils.times import sleep
 from asgiref.sync import sync_to_async, async_to_sync # NO DEL
@@ -13,11 +13,12 @@ def sync_run_async(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if asyncio.iscoroutinefunction(func):
+            if sys.platform == 'win32':
+                return async_to_sync(func)(*args, **kwargs) # QA Fail
             loop = asyncio.get_event_loop()
             task = loop.create_task(func(*args, **kwargs))
             loop.run_until_complete(task)
             return task.result()
-            # return async_to_sync(func)(*args, **kwargs) # QA Fail
         else:
             return func(*args, **kwargs)
 

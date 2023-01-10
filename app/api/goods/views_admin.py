@@ -2,6 +2,8 @@ from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
+from celery.schedules import crontab
+from redbeat.schedulers import RedBeatSchedulerEntry
 from app.api.deps import get_db, get_redis, get_socketio, MyRedis, AsyncSession, AsyncServer
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -10,7 +12,7 @@ from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Goods, GoodsCategory
 from .schemas import GoodsInsert, GoodsUpdate, GoodsDelete
-from .tasks import add_goods_click_num
+from .tasks import celery as celery_app, add_goods_click_num
 
 
 
@@ -73,6 +75,9 @@ async def goods_insert(
     await db.commit()
     if _num := args.get("goods_num"):
         await redis.set(f"goods_num_{args['id']}", _num)
+    entry = RedBeatSchedulerEntry('hellogoods', 'app.api.goods.tasks.hello_goods',
+                                  crontab(), args=(obj.id,), app=celery_app)
+    entry.save()
     return response_ok(data={"id": obj.id})
 
 
