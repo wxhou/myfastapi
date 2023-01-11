@@ -1,3 +1,4 @@
+from celery.schedules import crontab, schedule
 from typing import List, Tuple
 from kombu import Queue, Exchange
 from .settings import settings
@@ -15,15 +16,33 @@ accept_content: List[str] = ['json']
 timezone: str = "Asia/Shanghai"
 result_expires: int = 60 * 60 * 24 # 任务过期时间
 worker_max_tasks_per_child: int = 8 # 池工作进程在被新进程替换之前可以执行的最大任务数。默认为无限制。
-imports: Tuple[str] = (
-    'app.api.blog.tasks',
-    'app.api.trade.tasks',
-    'app.api.goods.tasks',
-    'app.api.user.tasks',
-) # 导入任务
 worker_log_format: str = "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s"
 task_queues: Tuple[Queue] = (
     Queue('celery', routing_key='celery'),
     Queue('transient', Exchange('transient', delivery_mode=1), # delivery_mode=1不会写入磁盘
           routing_key='transient', durable=False), # task.apply_async((2,3), queue='transient', ignore_result=True)
 )
+imports: Tuple[str] = (
+    'app.api.tasks',
+    'app.api.blog.tasks',
+    'app.api.trade.tasks',
+    'app.api.goods.tasks',
+    'app.api.user.tasks',
+) # 导入任务
+
+# 定时任务
+beat_schedule = {
+
+    # Executes every Monday morning at 7:30 a.m.
+
+    'add-hello-celery': {
+
+        'task': 'app.api.tasks.hello_celery',
+
+        'schedule': crontab(),
+
+        'args': ('world',),
+
+    },
+
+}

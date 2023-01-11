@@ -31,7 +31,7 @@ class DevelopmentSettings(BaseSettings):
             'host': 'localhost',
             'port': 6379,
             'db': db_number,
-        } for db_number in (2, 3, 6, 7)
+        } for db_number in range(1, 17)
     ]
 
     # MongoDB
@@ -40,7 +40,8 @@ class DevelopmentSettings(BaseSettings):
     # celery
     CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"
     CELERY_BROKER_URL: str = "redis://localhost:6379/6"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
+    CELERY_RESULT_BACKEND: str = "db+mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    # CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
 
     # JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8

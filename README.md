@@ -169,6 +169,9 @@ No.2 使用gunicorn的多worker会导致apscheduler定时任务重复生成
     ```shell
     gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
     ```
-- 使用Redis锁限制定时任务执行
+- 使用Redis锁限制定时任务执行一次
 
-    我选择的
+
+- 使用celery beat定时任务
+
+    我采用的
