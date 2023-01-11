@@ -5,32 +5,39 @@ from fastapi.responses import ORJSONResponse
 
 class ErrCode(object):
     """错误码"""
-    USER_NOT_EXISTS = (1000, '用户不存在')
-    USER_HAS_EXISTS = (1001, '用户已存在')
-    UNAME_OR_PWD_ERROR = (1002, "用户名或密码错误")
-    TOKEN_EXPIRED_ERROR = (1003, 'Token过期')
-    TOKEN_INVALID_ERROR = (1004, 'Token错误')
-    USER_NOT_ACTIVE = (1005, '用户未激活')
-    FILE_TYPE_ERROR = (1006, "文件类型错误")
-    FILE_MD5_ERROR = (1006, "文件校验失败")
-    QUERY_NOT_EXISTS = (1007, "数据不存在")
-    QUERY_HAS_EXISTS = (1008, "数据已存在")
+    # 公共错误
+    SYSTEM_ERROR = (1000, '系统错误')
+    QUERY_NOT_EXISTS = (1001, "数据不存在")
+    QUERY_HAS_EXISTS = (1002, "数据已存在")
+    COMMON_INTERNAL_ERR = (1004, '内部错误')
+    COMMON_PERMISSION_ERR = (1005, '无访问权限')
+    REQUEST_PARAMS_ERROR = (1006, "请求参数错误")
+    DB_INTEGRITY_ERROR = (1007, '数据冲突')
+    DB_CONNECTION_ERROR = (1008, 'DB连接失败')
     TOO_MANY_REQUEST = (1009, "太多的请求")
-    DEVICE_NOT_FOUND = (1010, "设备不存在")
-    DEVICE_IS_EXISTS = (1011, "设备已存在")
-    NOT_AUTHENTICATED = (1012, "JWT验证失败")
-    # params
-    REQUEST_PARAMS_ERROR = (2000, "请求参数错误")
-    COMMON_INTERNAL_ERR = (2001, '内部错误')
-    DB_INTEGRITY_ERROR = (2002, '数据冲突')
-    REDIS_CONNECTION_ERROR = (2003, 'redis连接失败')
-    DB_CONNECTION_ERROR = (2004, 'DB连接失败')
-    COMMON_PERMISSION_ERR = (2005, '无访问权限')
+
+    # 登录用户相关
+    USER_NOT_EXISTS = (2000, '用户不存在')
+    USER_HAS_EXISTS = (2001, '用户已存在')
+    USER_NOT_ACTIVE = (2002, '用户未激活')
+    UNAME_OR_PWD_ERROR = (2003, "用户名或密码错误")
+    TOKEN_INVALID_ERROR = (2004, 'Token错误')
+    TOKEN_EXPIRED_ERROR = (2005, 'Token过期')
+
+    # 文件相关
+    FILE_TYPE_ERROR = (3000, "文件类型错误")
+    FILE_MD5_ERROR = (3001, "文件校验失败")
+
+    # device
+    DEVICE_NOT_FOUND = (4000, "设备不存在")
+    DEVICE_IS_EXISTS = (4001, "设备已存在")
+    NOT_AUTHENTICATED = (4002, "JWT验证失败")
+
     # goods
-    GOODS_NOT_FOUND = (3000, '商品走丢了')
-    GOODS_NUM_NOT_ENOUGH = (3001, '库存不够了')
-    GOODS_SELL_OUT = (3002, '商品售罄了')
-    ORDER_NOT_FOUND = (3003, '订单不存在')
+    GOODS_NOT_FOUND = (5000, '商品走丢了')
+    GOODS_NUM_NOT_ENOUGH = (5001, '库存不够了')
+    GOODS_SELL_OUT = (5002, '商品售罄了')
+    ORDER_NOT_FOUND = (5003, '订单不存在')
 
 
 def response_ok(data: Union[List, Dict, None] = None, msg: str = 'success', status_code=status.HTTP_200_OK,  **kwargs) -> ORJSONResponse:
