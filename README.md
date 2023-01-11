@@ -59,12 +59,12 @@
 
 uvicorn
 ```shell
-gunicorn weblog:app --workers 3 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199 --reload
+gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199 --reload
 ```
 
 celery
 
-> 不能使用-P gevent/eventlet ，并发请求下会报错，perfork测试正常
+> 不能使用-P gevent/eventlet ，并发请求下会报错，Linux下perfork测试正常
 
 linux
 
@@ -158,7 +158,9 @@ async def async_main():
     await engine.dispose()
 ```
 
-No.2 使用gunicorn的多worker会导致apscheduler定时任务重复生成
+No.2 使用gunicorn的多worker问题
+
+1、 apscheduler
 
 > 讨论链接: https://www.v2ex.com/t/294165
 > uvicorn测试多workers不会重复生成。BUT查阅资料后说uvicorn是单进程
@@ -174,4 +176,16 @@ No.2 使用gunicorn的多worker会导致apscheduler定时任务重复生成
 
 - 使用celery beat定时任务
 
-    我采用的
+2、 socketio
+
+> 多个进程启动会导致socket连接失败
+
+解决方案
+
+- 使用单个进程启动
+
+    ```shell
+    gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199
+    ```
+
+- 将socketio做为单独的服务启动
