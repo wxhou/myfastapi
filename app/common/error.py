@@ -17,14 +17,8 @@ class PermissionError(Exception):
         self.msg = msg
 
 
-class AccessTokenFail(Exception):
-    """ 访问令牌失败 """
-
-    def __init__(self, msg: str = "访问令牌失败"):
-        self.msg = msg
-
-class NotAuthenticated(Exception):
-    def __init__(self, msg: str = "JWT验证失败"):
+class TokenExpiredError(Exception):
+    def __init__(self, msg: str = "Token已过期"):
         self.msg = msg
 
 

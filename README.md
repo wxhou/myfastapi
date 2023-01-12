@@ -126,6 +126,10 @@ $ rabbitmqctl set_user_tags test test_tag
 $ rabbitmqctl set_permissions -p test_vhost test ".*" ".*" ".*"
 ```
 
+### API Limiter
+
+使用slowapi进行限速，使用装饰器进行规则过滤。
+
 
 ### Question
 

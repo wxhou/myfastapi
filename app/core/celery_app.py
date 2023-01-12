@@ -9,7 +9,7 @@ celery.config_from_object("app.core.celeryconfig")
 
 
 class RedisSchedulerEntry(object):
-    def __init__(self) -> None:
+    def __init__(self, celery) -> None:
         self.app = celery
 
     async def get(self, key_name):
@@ -41,4 +41,4 @@ class RedisSchedulerEntry(object):
         entry.delete()
 
 
-redis_scheduler_entry = RedisSchedulerEntry()
+redis_scheduler_entry = RedisSchedulerEntry(celery)

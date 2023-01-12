@@ -17,18 +17,17 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup():
     """初始化"""
-    import motor.motor_asyncio
     from app.core.exceptions import register_exceptions
     from app.core.middleware import register_middleware
-    from app.extensions.redis import init_redis_pool
-    from app.extensions.socketio import register_socketio
+    from app.core.socketio import register_socketio
+    from app.extensions import register_extensions
     from app.api.router import register_router
     register_router(app)
+    await register_extensions(app)
     register_exceptions(app)
     register_middleware(app)
     register_socketio(app)
-    app.state.mongo = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGO_URL)
-    app.state.redis = await init_redis_pool()  # redis
+  # redis
 
 
 @app.on_event("shutdown")

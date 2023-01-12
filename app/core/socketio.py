@@ -36,7 +36,7 @@ def register_socketio(app: FastAPI):
 
 
 
-class SocketIOnline:
+class SocketIOnline(object):
     """在线设备"""
 
     __slots__ = ('device', 'key_fix')

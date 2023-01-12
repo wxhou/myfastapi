@@ -31,7 +31,6 @@ class ErrCode(object):
     # device
     DEVICE_NOT_FOUND = (4000, "设备不存在")
     DEVICE_IS_EXISTS = (4001, "设备已存在")
-    NOT_AUTHENTICATED = (4002, "JWT验证失败")
 
     # goods
     GOODS_NOT_FOUND = (5000, '商品走丢了')

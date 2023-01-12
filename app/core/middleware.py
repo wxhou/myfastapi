@@ -1,18 +1,19 @@
 import traceback
 from datetime import timedelta
-from fastapi import FastAPI, Request
+from jose import jwt, JWTError
+from sqlalchemy import select
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.openapi.docs import (
-    get_redoc_html,
-    get_swagger_ui_html,
-    get_swagger_ui_oauth2_redirect_html,
-)
+from starlette.middleware.authentication import AuthenticationMiddleware, AuthenticationBackend
 from app.core.settings import settings
-from app.extensions.redis import MyRedis
+from app.extensions.db import async_session
 from app.utils.logger import logger
+from app.common.error import UserNotExist, TokenExpiredError
 from app.common.response import ErrCode, response_err
+from app.common.security import decrypt_access_token
+from app.api.base.schemas import TokenData
+from app.api.user.model import BaseUser
 
 # 权限验证 https://www.cnblogs.com/mazhiyong/p/13433214.html
 # 得到真实ip https://stackoverflow.com/questions/60098005/fastapi-starlette-get-client-real-ip
@@ -21,7 +22,7 @@ from app.common.response import ErrCode, response_err
 
 def register_middleware(app: FastAPI):
     """ 请求拦截与响应拦截 -- https://fastapi.tiangolo.com/tutorial/middleware/ """
-
+    app.add_middleware(AuthenticationMiddleware, backend=BearerTokenAuthBackend())
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,
@@ -35,30 +36,44 @@ def register_middleware(app: FastAPI):
         minimum_size=500
     )
 
-    # 注册swagger
-    # app.mount("/static", StaticFiles(directory="static"), name="static")
-    # @app.get("/docs", include_in_schema=False)
-    # async def custom_swagger_ui_html():
-    #     return get_swagger_ui_html(
-    #         openapi_url=f"/{app.title}/openapi.json",
-    #         title=app.title + " - Swagger UI",
-    #         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-    #         swagger_js_url=f"/{app.title}/static/swagger-ui-bundle.js",
-    #         swagger_css_url=f"/{app.title}/static/swagger-ui.css",
-    #     )
-
-
-    # @app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
-    # async def swagger_ui_redirect():
-    #     return get_swagger_ui_oauth2_redirect_html()
-
     # @app.middleware("http")
     # async def many_request(request: Request, call_next):
-    #     redis: MyRedis = await request.app.state.redis
+    #     redis = await request.app.state.redis
     #     _key_name = request.client.host + str(request.url)
     #     amount = await redis.get(_key_name)
-    #     if amount and int(amount) > 60:
+    #     if amount and int(amount) > 60 :
     #         return response_err(ErrCode.TOO_MANY_REQUEST)
     #     await redis.incr(_key_name)
     #     await redis.expire(_key_name, timedelta(minutes=1))
     #     return await call_next(request)  # 返回请求(跳过token)
+
+
+# Authentication Backend Class
+class BearerTokenAuthBackend(AuthenticationBackend):
+    """
+    This is a custom auth backend class that will allow you to authenticate your request and return auth and user as
+    a tuple
+    """
+    async def authenticate(self, request):
+        # This function is inherited from the base class and called by some other class
+        if "Authorization" not in request.headers:
+            return
+        auth = request.headers["Authorization"]
+        try:
+            scheme, token = auth.split()
+            if scheme.lower() != 'bearer':
+                return
+            is_token_alive = await request.app.state.redis.exists("weblog_access_token_{}".format(token))
+            if not is_token_alive:
+                raise TokenExpiredError
+            username, uid = await decrypt_access_token(token)
+        except (ValueError, UnicodeDecodeError, JWTError) as exc:
+            raise JWTError
+        token_data = TokenData(username=username)
+        async with async_session() as db:
+            obj = await db.scalar(select(BaseUser).where(BaseUser.id==uid,
+                                                    BaseUser.username == token_data.username,
+                                                    BaseUser.status == 0))
+            if obj is None:
+                raise UserNotExist
+        return auth, obj

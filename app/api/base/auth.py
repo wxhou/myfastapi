@@ -7,7 +7,7 @@ from app.api.deps import get_db, get_redis
 from app.extensions.redis import MyRedis
 from app.core.settings import settings
 from app.common.security import verify_password, decrypt_access_token
-from app.common.error import UserNotExist, UserNotActive, PermissionError, AccessTokenFail, NotAuthenticated
+from app.common.error import UserNotExist, UserNotActive, PermissionError, TokenExpiredError
 from app.utils.logger import logger
 from app.api.user.model import BaseUser, BasePermission, RolePermission
 from .schemas import TokenData
@@ -22,7 +22,7 @@ async def get_current_user(db: AsyncSession = Depends(get_db),
     """获取当前登录用户"""
     is_token_alive = await redis.exists("weblog_access_token_{}".format(token))
     if not is_token_alive:
-        raise NotAuthenticated
+        raise TokenExpiredError
     username, uid = await decrypt_access_token(token)
     token_data = TokenData(username=username)
     obj = await db.scalar(select(BaseUser).where(BaseUser.id==uid,

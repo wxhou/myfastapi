@@ -5,13 +5,14 @@ from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db, get_redis, get_socketio, MyRedis, AsyncSession, AsyncServer
 from app.core.celery_app import redis_scheduler_entry
 from app.common.response import ErrCode, response_ok, response_err
+from app.extensions import limiter
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Goods, GoodsCategory
 from .schemas import GoodsInsert, GoodsUpdate, GoodsDelete
-from .tasks import celery as celery_app, add_goods_click_num
+from .tasks import add_goods_click_num
 
 
 
@@ -45,6 +46,7 @@ async def goods_list(request: Request,
 
 
 @router_goods_admin.get('/info/', summary='商品详情')
+@limiter.limit('1/seconds')
 async def goods_info(request: Request,
                     goods_id: int = Query(..., description='商品ID'),
                     db: AsyncSession = Depends(get_db),

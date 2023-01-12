@@ -16,7 +16,12 @@ accept_content: List[str] = ['json']
 timezone: str = "Asia/Shanghai"
 result_expires: int = 60 * 60 * 24 # 任务过期时间
 worker_max_tasks_per_child: int = 8 # 池工作进程在被新进程替换之前可以执行的最大任务数。默认为无限制。
+worker_max_memory_per_child = 100 * 1000  # 100MB
 worker_log_format: str = "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s"
+broker_transport_options = {
+    'visibility_timeout': 6*60*60,
+    'max_retries': 3
+}
 task_queues: Tuple[Queue] = (
     Queue('celery', routing_key='celery'),
     Queue('transient', Exchange('transient', delivery_mode=1), # delivery_mode=1不会写入磁盘
