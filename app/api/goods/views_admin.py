@@ -39,7 +39,7 @@ async def goods_list(request: Request,
     query_filter = [Goods.status == 0]
     if search:
         query_filter.append(or_(Goods.goods_name.ilike(f'%{search}%'), Goods.goods_sn.ilike(f"{search}")))
-    objs = await db.scalars(select(Goods).filter(*query_filter).limit(page_size).offset((page - 1) * page))
+    objs = (await db.scalars(select(Goods).filter(*query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
     _count = await db.scalar(select(func.count()).filter(*query_filter))
     pages = int(ceil(_count / float(page_size)))
     return response_ok(data=[obj.to_dict() for obj in objs], total=_count, pages=pages)

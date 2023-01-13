@@ -28,7 +28,7 @@ async def trade_shopping_list(request: Request,
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_list'])):
     """购物车列表"""
     query_filter = [ShoppingCart.status == 0, ShoppingCart.user_id==current_user.id]
-    objs = await db.scalars(select(ShoppingCart).where(*query_filter).limit(page_size).offset((page - 1) * page))
+    objs = (await db.scalars(select(ShoppingCart).where(*query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
     result_data = []
     for obj in objs:
         goods_obj = await db.scalar(select(Goods).where(Goods.id==obj.goods_id, Goods.status==0))

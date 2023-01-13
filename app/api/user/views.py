@@ -90,7 +90,7 @@ async def user_list(
     if email:
         query_filter.append(BaseUser.email.ilike(f"%{email}%"))
     objs = (await db.scalars(select(BaseUser).filter(
-        *query_filter).limit(page_size).offset((page - 1) * page))).all()
+        *query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
     _count = await db.scalar(select(func.count(BaseUser.id)).filter(*query_filter))
     pages = int(ceil(_count / float(page_size)))
     return response_ok(data=[obj.to_dict(exclude={'status', 'password_hash'}) for obj in objs], total=_count, pages=pages)

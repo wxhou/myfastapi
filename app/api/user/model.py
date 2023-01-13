@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, SmallInteger, Integer, BigInteger, Boolean, Text, DATETIME
+from sqlalchemy.dialects.postgresql import ARRAY
 from app.api.model import Base
 
 
@@ -13,7 +14,6 @@ class BaseUser(Base):
     email = Column(String(254), unique=True, index=True) # 邮箱
     avatar_id = Column(Integer, index=True) # 头像ID
     is_active = Column(Boolean, default=0, nullable=False) # 是否激活
-    role_id = Column(Integer, index=True)
 
 
 class BaseRole(Base):
@@ -22,6 +22,14 @@ class BaseRole(Base):
     id = Column(BigInteger, primary_key=True)
     name = Column(String(64), unique=True, index=True)  # 角色名称
     order_num = Column(String(64), unique=True, index=True)  # 排序
+
+
+
+class UserRole(Base):
+    __tablename__ = 't_base_user_role'
+    id = Column(BigInteger, primary_key=True)
+    user_id = Column(BigInteger, nullable=False, index=True)
+    role_id = Column(BigInteger, nullable=False, index=True)
 
 
 class BasePermission(Base):
@@ -38,8 +46,26 @@ class RolePermission(Base):
     """角色权限关系表"""
     __tablename__ = 't_base_role_permission'
     id = Column(BigInteger, primary_key=True)
-    role_id = Column(Integer, nullable=False, index=True)
-    permission_id = Column(Integer, nullable=False, index=True)
+    role_id = Column(BigInteger, nullable=False, index=True)
+    permission_id = Column(BigInteger, nullable=False, index=True)
+
+
+class DataRule(Base):
+    __tablename__ = 't_base_data_rule'
+    id = Column(BigInteger, primary_key=True)
+    rule_name = Column(String(128)) #
+    rule_conditions = Column(String(128))
+    rule_values = Column(ARRAY(BigInteger))
+
+
+class DataRuleSet(Base):
+    __tablename__ = 't_base_data_rule_set'
+    id = Column(BigInteger, primary_key=True)
+    name = Column(String(128)) # 名称
+    column = Column(ARRAY(String(128))) # 字段
+    op_type = Column(SmallInteger, default=1) # 1,2
+    rule_id = Column(BigInteger)
+
 
 
 class UserCollect(Base):

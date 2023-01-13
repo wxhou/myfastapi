@@ -65,7 +65,7 @@ async def device_list(
     if device_name:
         query_filter.append(DeviceInfo.device_name.ilike(f'%{device_name}%'))
     objs = (await db.scalars(select(DeviceInfo).filter(
-        *query_filter).limit(page_size).offset((page - 1) * page)))
+        *query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
     _count = await db.scalar(select(func.count()).filter(*query_filter))
     return response_ok(data=[obj.to_dict() for obj in objs],
                        total=_count,

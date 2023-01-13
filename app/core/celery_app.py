@@ -12,12 +12,13 @@ class RedisSchedulerEntry(object):
     def __init__(self, celery) -> None:
         self.app = celery
 
-    async def get(self, key_name):
+    async def from_key(self, name):
+        key_name = self.app.redbeat_conf.key_prefix + name
         entry = RedBeatSchedulerEntry.from_key(key_name, app=self.app)
         return entry
 
     async def update(self, key_name, schedule=None, args=None, kwargs=None, enabled=True):
-        entry = RedBeatSchedulerEntry.from_key(key_name, app=self.app)
+        entry = await self.from_key(key_name)
         entry.args = args
         entry.kwargs = kwargs
         entry.enabled = enabled
@@ -27,7 +28,7 @@ class RedisSchedulerEntry(object):
 
     async def next_run_time(self, key_name):
         """获取下次运行时间"""
-        entry = RedBeatSchedulerEntry.from_key(key_name, app=self.app)
+        entry = await self.from_key(key_name)
         return entry.due_at
 
     async def save(self, name=None, task=None, schedule=None, args=None, kwargs=None, enabled=True, **clsargs):
@@ -36,7 +37,7 @@ class RedisSchedulerEntry(object):
         entry.save()
 
     async def delete(self, key_name):
-        entry = RedBeatSchedulerEntry.from_key(key_name, app=self.app)
+        entry = self.from_key(key_name)
         celery.log.info(entry)
         entry.delete()
 

@@ -78,7 +78,7 @@ async def post_list(request: Request,
         query_filter.append(Post.is_publish==is_publish)
     if is_comment:
         query_filter.append(Post.is_comment==is_comment)
-    objs = await db.scalars(select(Post).filter(*query_filter).limit(page_size).offset((page - 1) * page))
+    objs = (await db.scalars(select(Post).filter(*query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
     _count = await db.scalar(select(func.count()).filter(*query_filter))
     _pages = int(ceil(_count / float(page_size)))
     return response_ok(data=[obj.to_dict() for obj in objs],

@@ -1,5 +1,6 @@
 from datetime import datetime, date
 from sqlalchemy import func, Column, DateTime, SmallInteger
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm import as_declarative, declared_attr
 from fastapi.encoders import jsonable_encoder
 
@@ -21,6 +22,10 @@ class Base:
     @declared_attr
     def update_time(cls):  # 更新时间
         return Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    @property
+    def fields(self):
+        return (field for field in self.__dict__.keys() if not field.startswith('_'))
 
     def to_dict(self,
                 exclude={'status'},
