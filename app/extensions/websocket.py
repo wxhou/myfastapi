@@ -31,7 +31,7 @@ class ConnectionManager:
             if connection.client_id == client_id:
                 logger.bind(websocket=True).info("Send to {}: {}".format(client_id, message))
                 try:
-                    await connection.websocket.send_json(message)
+                    await connection.websocket.send_text(message)
                 except WebSocketDisconnect:
                     self.disconnect(connection.websocket, connection.client_id)
 
@@ -40,7 +40,7 @@ class ConnectionManager:
         for connection in self.active_connections:
             try:
                 logger.bind(websocket=True).info("Broadcast: {}-{}".format(connection.client_id, message))
-                await connection.websocket.send_json(message)
+                await connection.websocket.send_text(message)
             except WebSocketDisconnect:
                 self.disconnect(connection.websocket, connection.client_id)
 

@@ -46,7 +46,6 @@ async def goods_list(request: Request,
 
 
 @router_goods_admin.get('/info/', summary='商品详情')
-@limiter.limit('1/seconds')
 async def goods_info(request: Request,
                     goods_id: int = Query(..., description='商品ID'),
                     db: AsyncSession = Depends(get_db),

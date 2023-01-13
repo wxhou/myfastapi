@@ -29,7 +29,7 @@ async def index():
             <script>
                 var client_id = Date.now()
                 document.querySelector("#ws-id").textContent = client_id;
-                var ws = new WebSocket(`ws://127.0.0.1:8200/weblog/message/admin/ws/${client_id}`);
+                var ws = new WebSocket(`ws://127.0.0.1:8199/message/admin/ws/${client_id}`);
                 ws.onmessage = function(event) {
                     var messages = document.getElementById('messages')
                     var message = document.createElement('li')
@@ -55,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket, client_id)
     try:
         while 1:
-            data = await websocket.receive_json()
+            data = await websocket.receive_text()
             await manager.send_personal_message(f"You wrote: {data}", websocket)
             await manager.broadcast(f"Client #{client_id} says: {data}")
     except WebSocketDisconnect:
