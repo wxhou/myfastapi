@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, SmallInteger, Integer, BigInteger, Boolean, Text, DATETIME
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Column, String, SmallInteger, Integer, BigInteger, Boolean, Text, JSON
 from app.api.model import Base
 
 
@@ -55,14 +54,14 @@ class DataRule(Base):
     id = Column(BigInteger, primary_key=True)
     rule_name = Column(String(128)) #
     rule_conditions = Column(String(128))
-    rule_values = Column(ARRAY(BigInteger))
+    rule_values = Column(JSON) # ARRAY(INTEGER)
 
 
 class DataRuleSet(Base):
     __tablename__ = 't_base_data_rule_set'
     id = Column(BigInteger, primary_key=True)
     name = Column(String(128)) # 名称
-    column = Column(ARRAY(String(128))) # 字段
+    column = Column(JSON) # 字段 ARRAY(INTEGER)
     op_type = Column(SmallInteger, default=1) # 1,2
     rule_id = Column(BigInteger)
 

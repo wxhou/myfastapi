@@ -6,7 +6,6 @@ from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Body, Security
 from app.api.deps import get_db, get_redis, get_mongo, MyRedis, AsyncSession, MongoClient
 from app.core.settings import settings
-from app.extensions.schedule import scheduler
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.user.model import BaseUser

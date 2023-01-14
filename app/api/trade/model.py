@@ -45,7 +45,7 @@ class RaffleActivity(Base):
     start_time = Column(DateTime)  # 活动开始时间
     end_time = Column(DateTime)  # 活动开始时间
     image_id = Column(Integer)  # 活动图片
-    appendix = Column(ARRAY(Integer))  # 活动附件
+    appendix = Column(Integer)  # 活动附件
 
 
 class RafflePrize(Base):

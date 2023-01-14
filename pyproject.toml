@@ -27,6 +27,13 @@ ulid-py = "1.1.0"
 orjson = "^3.8.3"
 alipay-sdk-python = "^3.6.498"
 asgiref = "^3.6.0"
+uvicorn = {extras = ["standard"], version = "^0.20.0"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+slowapi = "^0.1.7"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.5"
+celery-redbeat = "^2.0.0"
+pydantic = {extras = ["email"], version = "^1.10.4"}
 
 
 [build-system]

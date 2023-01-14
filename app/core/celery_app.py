@@ -2,16 +2,13 @@ import socketio
 from celery import Celery
 from redbeat.schedulers import RedBeatSchedulerEntry
 from app.core.settings import settings
+from app.core.socketio import sio
 
 
 celery = Celery(settings.PROJECT_NAME)
 celery.config_from_object("app.core.celeryconfig")
 # celery -A  app.core.celery_app.celery worker -l info
-# celery socketio
-mgr = socketio.RedisManager(settings.REDIS_SOCKETIO_URL)
-celery_sio = socketio.Server(client_manager=mgr)
-socketio.WSGIApp(celery_sio)
-celery.sio = celery_sio
+celery.sio = sio
 
 
 class RedisSchedulerEntry(object):
