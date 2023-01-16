@@ -14,6 +14,9 @@ class BaseUser(Base):
     avatar_id = Column(Integer, index=True) # 头像ID
     is_active = Column(Boolean, default=0, nullable=False) # 是否激活
 
+    def __str__(self) -> str:
+        return "{}({})".format(self.username, self.id)
+
 
 class BaseRole(Base):
     """角色表"""

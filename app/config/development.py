@@ -58,9 +58,9 @@ class DevelopmentSettings(BaseSettings):
 
     # alipay
     ALIPAY_SERVER_URL: str = "https://openapi.alipaydev.com/gateway.do"
-    ALIPAY_APP_ID: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_ID.txt')
-    ALIPAY_APP_PRIVATE_KEY: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_PRIVATE_KEY.txt')
-    ALIPAY_PUBLIC_KEY: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_PUBLIC_KEY.txt')
+    ALIPAY_APP_ID: str = ''
+    ALIPAY_APP_PRIVATE_KEY: str = ''
+    ALIPAY_PUBLIC_KEY: str = ''
 
     # email
     MAIL_SERVER: str = 'smtp.126.com'
@@ -81,11 +81,6 @@ class DevelopmentSettings(BaseSettings):
     ALLOWED_AUDIO_EXTENSIONS: Set[str] = {'.mp3'}
     ALLOWED_VIDEO_EXTENSIONS: Set[str] = {'.mp4'}
 
-    PERMISSION_DATA: Dict[str, str] = {
-        "admin": "管理员",
-        "author": "作者",
-        "user": "普通用户"
-    }
 
     # swagger
     SERVERS: Optional[List] = None

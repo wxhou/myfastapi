@@ -24,6 +24,7 @@ class TestingSettings(BaseSettings):
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:26379/12"
+    REDIS_SOCKETIO_URL: str = "redis://localhost:26379/13"
     REDIS_CONNECTIONS = [
         {
             'host': 'localhost',
@@ -34,6 +35,11 @@ class TestingSettings(BaseSettings):
             'host': 'localhost',
             'port': 26379,
             'db': 12,
+        },
+        {
+            'host': 'localhost',
+            'port': 26379,
+            'db': 13,
         }
     ]
 
@@ -56,9 +62,9 @@ class TestingSettings(BaseSettings):
 
     # alipay
     ALIPAY_SERVER_URL: str = "https://openapi.alipay.com/gateway.do"
-    ALIPAY_APP_ID: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_ID.txt')
-    ALIPAY_APP_PRIVATE_KEY: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_APP_PRIVATE_KEY.txt')
-    ALIPAY_PUBLIC_KEY: str = os.path.join(BASEDIR, 'cert', 'ALIPAY_PUBLIC_KEY.txt')
+    ALIPAY_APP_ID: str = ''
+    ALIPAY_APP_PRIVATE_KEY: str = ''
+    ALIPAY_PUBLIC_KEY: str = ''
 
     # email
     MAIL_SERVER: str = 'smtp.126.com'
@@ -79,13 +85,8 @@ class TestingSettings(BaseSettings):
     ALLOWED_AUDIO_EXTENSIONS: Set[str] = {'.mp3'}
     ALLOWED_VIDEO_EXTENSIONS: Set[str] = {'.mp4'}
 
-    PERMISSION_DATA: Dict[str, str] = {
-        "admin": "管理员",
-        "author": "作者",
-        "user": "普通用户"
-    }
 
-    SERVERS: List[Dict[str, str]] = [{"url":"https://tx.yunjinginc.com/weblog"}]
+    SERVERS: List[Dict[str, str]] = [{"url":"https://xx.xxx.com/weblog"}]
     SWAGGER_LOGIN = f"/{PROJECT_NAME}/login/"
     SWAGGER_DOCS_URL: str = f'/{PROJECT_NAME}/docs'
     SWAGGER_REDOC_URL: str = f'/{PROJECT_NAME}/redocs'

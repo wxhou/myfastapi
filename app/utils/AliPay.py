@@ -12,12 +12,10 @@ class AliPay(object):
     def __init__(self) -> None:
         self.logger = logger.bind(alipay=True)
         self.server_url = settings.ALIPAY_SERVER_URL
-        with open(settings.ALIPAY_APP_ID) as fp1:
-            self.app_id = fp1.read()
-        with open(settings.ALIPAY_APP_PRIVATE_KEY) as fp2:
-            self.app_private_key = fp2.read()
-        with open(settings.ALIPAY_PUBLIC_KEY) as fp3:
-            self.alipay_public_key = fp3.read()
+        self.app_id = settings.ALIPAY_APP_ID
+        self.app_private_key = settings.ALIPAY_APP_PRIVATE_KEY
+        self.alipay_public_key = settings.ALIPAY_PUBLIC_KEY
+
 
     def config(self):
         alipay_client_config = AlipayClientConfig(sandbox_debug=True)
