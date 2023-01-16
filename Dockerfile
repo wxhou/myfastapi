@@ -8,16 +8,19 @@ COPY . .
 
 ENV MY_WEBLOG_ENV=development
 
-RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-RUN chmod +x run.sh
+RUN pip install --no-cache-dir --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install --no-cache-dir poetry -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip config set global.index-url http://mirrors.aliyun.com/pypi/simple
+RUN pip config set install.trusted-host mirrors.aliyun.com
+RUN poetry install
+RUN pip install --no-cache-dir alembic -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 RUN mkdir logs && mkdir upload
 
-RUN alembic revision --autogenerate -m "update"
+RUN python -m alembic revision --autogenerate -m "update"
 
-RUN alembic upgrade head
+RUN python -m alembic upgrade head
 
 EXPOSE 8199
 
-CMD uvicorn weblog:app --host 0.0.0.0 --port 8199 --workers=8
+CMD gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199

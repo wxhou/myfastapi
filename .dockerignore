@@ -3,5 +3,5 @@ logs
 upload
 env
 venv
-**/versions
 .history
+nohup.out
