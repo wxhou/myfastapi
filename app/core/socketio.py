@@ -19,11 +19,11 @@ sio_asgi = socketio.ASGIApp(sio)
 
 @sio.on("connect")
 async def test_connect(sid: str, *args, **kwargs):
-    logger.bind(websocket=True).info(f"{sid} is connect")
+    logger.bind(websocket=True).info(f"[Socket.IO] {sid} is connect")
 
 @sio.on("disconnect")
 async def test_discontect(sid: str, *args, **kwargs):
-    logger.bind(websocket=True).info(f"{sid} close connect")
+    logger.bind(websocket=True).info(f"[Socket.IO] {sid} close connect")
 
 
 @sio.on('heartbeat')

@@ -31,7 +31,7 @@ stderr_logfile_backups=10     ; stdout 日志文件备份数
 stderr_logfile=/root/weblog/logs/celery_app.log
 environment=XMP_FLASK_ENV=production
 
-[program:weblog_celery]
+[program:weblog_celery_beat]
 directory=/root/weblog
 command=/root/weblog/env/bin/celery -A app.core.celery_app.celery beat -S redbeat.RedBeatScheduler -l info
 user=root
