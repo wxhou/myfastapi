@@ -24,8 +24,8 @@ from app.api.user.model import BaseUser
 
 def register_middleware(app: FastAPI):
     """ 请求拦截与响应拦截 -- https://fastapi.tiangolo.com/tutorial/middleware/ """
-    app.add_middleware(CSRFMiddleware, secret="__CHANGE_ME__")
-    app.add_middleware(SessionMiddleware, secret_key='__CHANGE_ME__')
+    app.add_middleware(CSRFMiddleware, secret=settings.SECRET_KEY)
+    app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
     app.add_middleware(AuthenticationMiddleware, backend=BearerTokenAuthBackend())
     app.add_middleware(
         CORSMiddleware,

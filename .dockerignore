@@ -5,3 +5,5 @@ env
 venv
 .history
 nohup.out
+poetry.lock
+docker-compose.yml
