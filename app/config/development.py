@@ -9,6 +9,7 @@ class DevelopmentSettings(BaseSettings):
     PROJECT_NAME = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
+    SERVER_HOST: str = '192.168.0.173'
     PORT: int = 8199
     RELOAD: bool = True
     SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
@@ -17,31 +18,23 @@ class DevelopmentSettings(BaseSettings):
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+asyncmy://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    ASYNC_SQLALCHEMY_DATABASE_URL: str = f"mysql+asyncmy://root:root1234@{SERVER_HOST}:3306/db_weblog?charset=utf8"
     # MySQL(同步)
-    SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_DATABASE_URL: str = f"mysql+pymysql://root:root1234@{SERVER_HOST}:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
 
     # Redis
-    REDIS_URL: str = "redis://localhost:6379/2"
-    REDIS_SOCKETIO_URL: str = "redis://localhost:6379/3"
-    REDIS_CONNECTIONS = [
-        {
-            'host': 'localhost',
-            'port': 6379,
-            'db': db_number,
-        } for db_number in range(1, 17)
-    ]
-
+    REDIS_URL: str = f"redis://{SERVER_HOST}:6379/2"
+    REDIS_SOCKETIO_URL: str = f"redis://{SERVER_HOST}:6379/3"
     # MongoDB
     MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
 
     # celery
     CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"
-    CELERY_BROKER_URL: str = "redis://localhost:6379/6"
-    CELERY_RESULT_BACKEND: str = "db+mysql+pymysql://root:root1234@localhost:3306/db_weblog?charset=utf8"
-    # CELERY_RESULT_BACKEND: str = "redis://localhost:6379/7"
+    CELERY_BROKER_URL: str = f"redis://{SERVER_HOST}:6379/6"
+    CELERY_RESULT_BACKEND: str = f"db+mysql+pymysql://root:root1234@{SERVER_HOST}:3306/db_weblog?charset=utf8"
+    # CELERY_RESULT_BACKEND: str = f"redis://{SERVER_HOST}:6379/7"
 
     # JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8

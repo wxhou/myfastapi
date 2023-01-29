@@ -1,5 +1,4 @@
 from typing import Any
-from redlock import RedLockFactory, RedLockError
 from aioredis import Redis as AsyncRedis
 from app.common.resolve import load_object, dump_object
 from app.utils.logger import logger
@@ -31,4 +30,3 @@ async def init_redis_pool() -> MyRedis:
 from redis import Redis as SYNC_REDIS
 from redis import ConnectionPool
 redis = SYNC_REDIS(connection_pool=ConnectionPool.from_url(settings.REDIS_URL), decode_responses=True)
-redis_redlock = RedLockFactory(connection_details=settings.REDIS_CONNECTIONS)

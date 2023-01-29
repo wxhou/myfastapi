@@ -4,6 +4,9 @@ upload
 env
 venv
 .history
+.vscode
+cert
 nohup.out
 poetry.lock
+pyproject.toml
 docker-compose.yml

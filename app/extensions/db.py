@@ -1,8 +1,8 @@
 # https://www.osgeo.cn/sqlalchemy/orm/extensions/asyncio.html?highlight=async#asynchronous-i-o-asyncio
 
 from asyncio import current_task
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql.dml import Update, Delete
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session, async_sessionmaker
 from ..core.settings import settings
 
 
@@ -12,9 +12,18 @@ engine = create_async_engine(
     echo=settings.SQLALCHEMY_ECHO,
     future=True
 )
-async_session_factory = sessionmaker(
+
+class AsyncRoutingSession(AsyncSession):
+    """读写分离"""
+    def get_bind(self, mapper=None, clause=None, **kw):
+        if self._flushing or isinstance(clause, (Update, Delete)):
+            return engine
+        else:
+            return engine
+
+
+async_session_factory = async_sessionmaker(
     bind=engine,
-    class_=AsyncSession,
     expire_on_commit=False # 防止提交后属性过期
 )
 

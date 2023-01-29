@@ -4,7 +4,7 @@ from slowapi import Limiter
 from slowapi.util import get_ipaddr
 from app.core.settings import settings
 from .db import async_session
-from .redis import init_redis_pool, redis, redis_redlock
+from .redis import init_redis_pool, redis
 
 
 

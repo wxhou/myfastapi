@@ -112,6 +112,12 @@ alembic upgrade head
 alembic downgrade head
 ```
 
+### DOCKER
+
+
+```shell
+docker-compose -f docker-compose.yml up  --build
+```
 
 ### RabbitMQ
 

@@ -25,23 +25,6 @@ class TestingSettings(BaseSettings):
     SQLALCHEMY_ECHO: bool = True
     REDIS_URL: str = "redis://localhost:26379/12"
     REDIS_SOCKETIO_URL: str = "redis://localhost:26379/13"
-    REDIS_CONNECTIONS = [
-        {
-            'host': 'localhost',
-            'port': 26379,
-            'db': 11,
-        },
-        {
-            'host': 'localhost',
-            'port': 26379,
-            'db': 12,
-        },
-        {
-            'host': 'localhost',
-            'port': 26379,
-            'db': 13,
-        }
-    ]
 
     MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
 
