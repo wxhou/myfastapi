@@ -10,3 +10,5 @@ nohup.out
 poetry.lock
 pyproject.toml
 docker-compose.yml
+alembic
+alembic.ini

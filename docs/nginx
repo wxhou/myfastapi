@@ -1,4 +1,8 @@
 # 我的fastapi项目
+map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
 server {
     listen 443;
     server_name localhost;
@@ -32,7 +36,6 @@ server {
     ssl_prefer_server_ciphers on;
 
 
-    # XMP智慧运维
     location ~* ^/weblog/(?<module_name>(blog|form|goods|login)/.*) {
         client_max_body_size 100M;
         proxy_pass http://127.0.0.1:8199/$module_name$is_args$args;
@@ -58,6 +61,16 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_pass http://127.0.0.1:8199/ws/socket.io;
+    }
+    location /weblog/ws {
+        # 启用支持websocket连接
+        proxy_pass http://127.0.0.1:8199/message/admin/ws;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Origin "";  # 解决403问题
     }
     location /weblog/media {
         limit_rate 512K; # 限制静态资源请求网速
