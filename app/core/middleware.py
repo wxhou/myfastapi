@@ -5,7 +5,6 @@ from sqlalchemy import select
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from starlette_csrf import CSRFMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.authentication import AuthenticationMiddleware, AuthenticationBackend
 from app.core.settings import settings

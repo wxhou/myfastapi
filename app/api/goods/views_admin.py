@@ -1,11 +1,12 @@
+import json
 from math import ceil
 from celery.schedules import crontab
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
-from app.api.deps import get_db, get_redis, get_socketio, MyRedis, AsyncSession, AsyncServer
+from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.celery_app import redis_scheduler_entry
 from app.common.response import ErrCode, response_ok, response_err
-from app.extensions import limiter
+from app.extensions import limiter, ws_manage
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.api.user.model import BaseUser
@@ -49,13 +50,12 @@ async def goods_list(request: Request,
 async def goods_info(request: Request,
                     goods_id: int = Query(..., description='商品ID'),
                     db: AsyncSession = Depends(get_db),
-                    redis: MyRedis = Depends(get_redis),
-                    socketio: AsyncServer= Depends(get_socketio)):
+                    redis: MyRedis = Depends(get_redis)):
     obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     add_goods_click_num.delay(goods_id)
-    await socketio.emit('message', {'data': 'foobar'})
+    await ws_manage.broadcast(json.dumps({'data': 'foobar'}))
     return response_ok(data=obj.to_dict())
 
 

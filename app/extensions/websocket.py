@@ -15,6 +15,7 @@ class ConnectionManager:
         new_device = self.device(client_id=client_id, websocket=websocket)
         if new_device not in self.active_connections:
             self.active_connections.add(new_device)
+        logger.bind(websocket=True).info("Client connect {}".format(client_id))
 
     def __len__(self):
         """当前用户数"""

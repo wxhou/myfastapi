@@ -19,16 +19,12 @@ async def startup():
     """初始化"""
     from app.core.exceptions import register_exceptions
     from app.core.middleware import register_middleware
-    from app.core.socketio import sio, sio_asgi
     from app.extensions import register_extensions
     from app.api.router import register_router
     register_router(app)
     await register_extensions(app)
     register_exceptions(app)
     register_middleware(app)
-    app.mount('/ws', sio_asgi, name='socket')
-    app.state.sio = sio
-  # redis
 
 
 @app.on_event("shutdown")
