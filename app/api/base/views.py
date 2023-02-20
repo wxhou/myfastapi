@@ -3,10 +3,10 @@ import sys
 import subprocess
 from uuid import uuid4
 from platform import platform
-
+from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Request, File, UploadFile, Form
+from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
 from app.api.deps import get_db
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
@@ -82,8 +82,5 @@ async def api_routes(request: Request,
 
 
 @router.get("/sync", summary="同步路由", deprecated=True)
-def sync_routes(request: Request,
-                db:AsyncSession = Depends(get_db)):
-    ret = async_to_sync(request.body)()
-    logger.info(ret)
-    return response_ok()
+def sync_routes(user_agent: Optional[str] = Header(...)):
+    return response_ok(data=user_agent)

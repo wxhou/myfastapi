@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, File, UploadFile
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from app.api.deps import get_db, get_redis
 from app.extensions.redis import MyRedis
@@ -41,7 +41,7 @@ async def login_access_token(
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     # 'access_token'和'token_type'一定要写,否则get_current_user依赖拿不到token
     # 可添加字段(先修改schemas/token里面的Token返回模型)
-    return ORJSONResponse({
+    return JSONResponse({
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": settings.JWT_TOKEN_TYPE
@@ -61,7 +61,7 @@ async def login_refresh_token(
     _key_name = 'weblog_login_temporary'
     res = await redis.get_pickle(_key_name)
     if res:
-        return ORJSONResponse(res)
+        return JSONResponse(res)
     user_obj = await db.scalar(select(BaseUser).where(BaseUser.username==username, BaseUser.status==0))
     if user_obj is None:
         return response_err(ErrCode.TOKEN_INVALID_ERROR)
@@ -72,7 +72,7 @@ async def login_refresh_token(
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     result = {"access_token": access_token, "token_type": settings.JWT_TOKEN_TYPE}
     await redis.set_pickle(_key_name, result, timeout=10)
-    return ORJSONResponse(result)
+    return JSONResponse(result)
 
 
 @router_login.api_route('/logout/', methods=['GET', 'POST'], summary='退出登录')

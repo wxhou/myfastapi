@@ -1,10 +1,11 @@
 import json
-from math import ceil
 from celery.schedules import crontab
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
 from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
 from app.core.celery_app import redis_scheduler_entry
+from app.core.settings import settings
+from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.extensions import limiter, ws_manage
 from app.utils.logger import logger
@@ -33,17 +34,15 @@ async def goods_category_list(request: Request,
 @router_goods_admin.get('/list/', summary='商品列表')
 async def goods_list(request: Request,
         page: int = Query(default=1, ge=1),
-        page_size: int = Query(default=20, ge=1),
+        page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
         search: str = Query(default=None),
         db: AsyncSession = Depends(get_db)):
     """商品列表"""
     query_filter = [Goods.status == 0]
     if search:
         query_filter.append(or_(Goods.goods_name.ilike(f'%{search}%'), Goods.goods_sn.ilike(f"{search}")))
-    objs = (await db.scalars(select(Goods).filter(*query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
-    _count = await db.scalar(select(func.count()).filter(*query_filter))
-    pages = int(ceil(_count / float(page_size)))
-    return response_ok(data=[obj.to_dict() for obj in objs], total=_count, pages=pages)
+    res = await PageNumberPagination(db, page, page_size)(Goods, query_filter)
+    return response_ok(**res)
 
 
 @router_goods_admin.get('/info/', summary='商品详情')

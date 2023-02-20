@@ -9,12 +9,13 @@ class DevelopmentSettings(BaseSettings):
     PROJECT_NAME = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
-    SERVER_HOST: str = '192.168.0.173'
+    SERVER_HOST: str = '192.168.0.172'
     PORT: int = 8199
     RELOAD: bool = True
     SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[str] = ['*']
+    PER_PAGE_NUMBER: int = 15
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
