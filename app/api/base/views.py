@@ -3,11 +3,10 @@ import sys
 import subprocess
 from uuid import uuid4
 from platform import platform
-from typing import Optional
+from typing import Optional, Annotated
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
-from app.api.deps import get_db
+from app.extensions import async_db, async_redis
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.decorator import async_to_sync
@@ -22,9 +21,9 @@ router = APIRouter()
 
 
 @router.post("/upload/", summary='上传文件')
-async def create_upload_file(file: UploadFile = File(),
+async def create_upload_file(file: Annotated[UploadFile, File()],
+                             db: async_redis,
                              md5 = Form(..., description="文件MD5值"),
-                             db:AsyncSession = Depends(get_db),
                              current_user: BaseUser = Depends(get_current_active_user)):
     """上传文件"""
     obj = await db.scalar(select(UploadModel).where(UploadModel.uniqueId==md5, UploadModel.status==0))
@@ -65,7 +64,7 @@ async def create_upload_file(file: UploadFile = File(),
 
 @router.get("/routes", summary="所有路由", deprecated=True)
 async def api_routes(request: Request,
-                     db:AsyncSession = Depends(get_db)):
+                     db: async_db):
     result = []
     number = 1
     for route in request.app.routes:

@@ -1,3 +1,4 @@
+from typing import Annotated
 import os, shutil
 from uuid import uuid4
 from datetime import timedelta
@@ -7,8 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from app.api.deps import get_db, get_redis
-from app.extensions.redis import MyRedis
+from app.extensions import async_redis, async_db
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token
@@ -25,9 +25,9 @@ router_login = APIRouter(tags=['Login'])
 @router_login.post('/login/', response_model=Token, summary='登录')
 async def login_access_token(
         request: Request,
-        db: AsyncSession = Depends(get_db),
-        redis: MyRedis = Depends(get_redis),
-        form_data: OAuth2PasswordRequestForm = Depends(),
+        db: async_db,
+        redis: async_redis,
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
     """登录接口"""
     user = await authenticate(db, username=form_data.username, password=form_data.password)
@@ -52,8 +52,8 @@ async def login_access_token(
 async def login_refresh_token(
         request: Request,
         data: RefreshToken,
-        db: AsyncSession = Depends(get_db),
-        redis: MyRedis = Depends(get_redis)
+        db: async_db,
+        redis: async_redis
 ):
     """登录接口"""
 
@@ -77,8 +77,8 @@ async def login_refresh_token(
 
 @router_login.api_route('/logout/', methods=['GET', 'POST'], summary='退出登录')
 async def logout(request: Request,
-                 redis: MyRedis = Depends(get_redis),
-                 token: str = Depends(oauth2_scheme)):
+                 redis: async_redis,
+                 token: Annotated[str, Depends(oauth2_scheme)]):
     """退出登录"""
     refresh_token = await redis.get("weblog_access_token_{}".format(token))
     await redis.delete("weblog_access_token_{}".format(token))

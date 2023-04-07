@@ -3,8 +3,7 @@ from datetime import timedelta
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, Path, Security
-from app.api.deps import get_db, get_redis
-from app.extensions.redis import MyRedis
+from app.extensions import async_db, async_redis
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
@@ -21,8 +20,8 @@ router_admin = APIRouter()
 @router_admin.post('/register/', summary='用户注册,并发送邮件')
 async def user_register(request: Request,
                         user: UserRegister,
-                        db: AsyncSession = Depends(get_db),
-                        redis: MyRedis = Depends(get_redis)):
+                        db: async_db,
+                        redis: async_redis):
     """用户注册"""
     obj = await db.execute(select(BaseUser).where(or_(BaseUser.username == user.username,
                                     BaseUser.email == user.email)))
@@ -44,9 +43,9 @@ async def user_register(request: Request,
 
 @router_admin.get('/active/{token}', summary='用户激活')
 async def user_active(request: Request,
-                    token :str = Path(title="激活用户token"),
-                    db: AsyncSession = Depends(get_db),
-                    redis: MyRedis = Depends(get_redis)):
+                    db: async_db,
+                    redis: async_redis,
+                    token :str = Path(title="激活用户token")):
     """用户激活"""
     _uid = await redis.get(f"user_register_{token}")
     obj = await db.scalar(select(BaseUser).where(BaseUser.id==_uid, BaseUser.status==0))
@@ -61,7 +60,7 @@ async def user_active(request: Request,
 async def user_update(
         request: Request,
         user: UserModify,
-        db: AsyncSession = Depends(get_db),
+        db: async_db,
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_update'])):
     """更新用户信息"""
     sql = select(BaseUser).where(BaseUser.id == user.id, BaseUser.status == 0)
@@ -77,11 +76,11 @@ async def user_update(
 @router_admin.get('/list/', summary='用户列表')
 async def user_list(
         request: Request,
+        db: async_db,
         page: int = Query(default=1, ge=1),
         page_size: int = Query(default=15, ge=1),
         username: str = Query(default=None),
         email: str = Query(default=None),
-        db: AsyncSession = Depends(get_db),
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_list'])):
     """更新用户信息"""
     query_filter = [BaseUser.status == 0]
@@ -100,7 +99,7 @@ async def user_list(
 async def user_address_update(
         request: Request,
         addr: UserAddressUpdate,
-        db: AsyncSession = Depends(get_db),
+        db: async_db,
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_address_update'])):
     """更新用户信息"""
     args = addr.dict(exclude_none=True)
@@ -119,7 +118,7 @@ async def user_address_update(
 @router_admin.get('/address/list/', summary='用户地址列表')
 async def user_address_list(
         request: Request,
-        db: AsyncSession = Depends(get_db),
+        db: async_db,
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_address_list'])):
     """用户地址列表"""
     objs = await db.scalars(select(UserAddress).where(UserAddress.user_id==current_user.id,

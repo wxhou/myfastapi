@@ -1,9 +1,28 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.settings import settings
+
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load
+    from app.core.exceptions import register_exceptions
+    from app.extensions import register_extensions
+    from app.api.router import register_router
+    register_exceptions(app)
+    await register_extensions(app)
+    register_router(app)
+    yield
+    # Clean
+    await app.state.redis.close()  # 关闭 redis
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version='1.0.0',
+    lifespan=lifespan,
     description=settings.SWAGGER_DESCRIPTION,
     servers=settings.SERVERS,
     docs_url=settings.SWAGGER_DOCS_URL,
@@ -13,23 +32,9 @@ app = FastAPI(
     swagger_ui_parameters=settings.SWAGGER_SCHEMAS
 )
 
+from app.core.middleware import register_middleware
 
-@app.on_event("startup")
-async def startup():
-    """初始化"""
-    from app.core.exceptions import register_exceptions
-    from app.core.middleware import register_middleware
-    from app.extensions import register_extensions
-    from app.api.router import register_router
-    register_router(app)
-    await register_extensions(app)
-    register_exceptions(app)
-    register_middleware(app)
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await app.state.redis.close()  # 关闭 redis
+register_middleware(app)
 
 
 if __name__ == '__main__':

@@ -1,11 +1,11 @@
 from typing import Any
-from aioredis import Redis as AsyncRedis
+from aioredis import Redis as _AsyncRedis
 from app.common.resolve import load_object, dump_object
 from app.utils.logger import logger
 from app.core.settings import settings
 
 
-class MyRedis(AsyncRedis):
+class AsyncRedis(_AsyncRedis):
     """自定义Redis"""
 
     async def get_pickle(self, key) -> Any:
@@ -20,8 +20,8 @@ class MyRedis(AsyncRedis):
 # 参考: https://github.com/grillazz/fastapi-redis/tree/main/app
 
 
-async def init_redis_pool() -> MyRedis:
-    redis = await MyRedis.from_url(url=settings.REDIS_URL,
+async def init_redis_pool() -> AsyncRedis:
+    redis = await AsyncRedis.from_url(url=settings.REDIS_URL,
                                    encoding=settings.GLOBAL_ENCODING)
     return redis
 

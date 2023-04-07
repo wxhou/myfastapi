@@ -4,7 +4,7 @@ from datetime import timedelta
 from bson.objectid import ObjectId
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Body, Security
-from app.api.deps import get_db, get_redis, get_mongo, MyRedis, AsyncSession, MongoClient
+from app.extensions import async_db, async_redis, async_mongo
 from app.core.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -21,8 +21,8 @@ router_form_admin = APIRouter()
 @router_form_admin.post('/insert/', summary='新建模板')
 async def template_insert(
     args: TemplateInsert,
-    db: AsyncSession = Depends(get_db),
-    redis: MyRedis = Depends(get_redis),
+    db: async_db,
+    redis: async_redis,
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_insert'])
 ):
     """新建模板"""
@@ -41,10 +41,10 @@ async def template_insert(
 async def template_design(
     content: dict,
     request: Request,
+    db: async_db,
+    redis: async_redis,
+    mg_client: async_mongo,
     template_id: int = Query(description='模板ID'),
-    db: AsyncSession = Depends(get_db),
-    redis: MyRedis = Depends(get_redis),
-    mg_client: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_design'])
 ):
     """表单设计"""
@@ -95,10 +95,10 @@ async def template_design(
 
 @router_form_admin.get('/info/', summary='模板详情')
 async def template_info(
+    db: async_db,
+    redis: async_redis,
+    mg_client: async_mongo,
     template_id: int = Query(description='模板ID'),
-    db: AsyncSession = Depends(get_db),
-    redis: MyRedis = Depends(get_redis),
-    mg_client: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_info'])
 ):
     """表单设计"""
@@ -124,10 +124,10 @@ async def template_info(
 
 @router_form_admin.post('/publish/', summary='模板发布')
 async def template_publish(
+    db: async_db,
+    redis: async_redis,
     template_id: int = Body(description='模板ID', ge=1),
     version_id: int = Body(description='版本ID', ge=1),
-    db: AsyncSession = Depends(get_db),
-    redis: MyRedis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_info'])
 ):
     """表单发布"""

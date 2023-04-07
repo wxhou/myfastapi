@@ -9,7 +9,7 @@ class ErrCode(object):
     SYSTEM_ERROR = (1000, '系统错误')
     QUERY_NOT_EXISTS = (1001, "数据不存在")
     QUERY_HAS_EXISTS = (1002, "数据已存在")
-    COMMON_INTERNAL_ERR = (1004, '内部错误')
+    COMMON_INTERNAL_ERR = (1004, '服务器错误')
     COMMON_PERMISSION_ERR = (1005, '无访问权限')
     REQUEST_PARAMS_ERROR = (1006, "请求参数错误")
     DB_INTEGRITY_ERROR = (1007, '数据冲突')

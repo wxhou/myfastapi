@@ -9,7 +9,7 @@ class DevelopmentSettings(BaseSettings):
     PROJECT_NAME = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
-    SERVER_HOST: str = '192.168.0.172'
+    SERVER_HOST: str = '192.168.0.174'
     PORT: int = 8199
     RELOAD: bool = True
     SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
@@ -29,7 +29,7 @@ class DevelopmentSettings(BaseSettings):
     REDIS_URL: str = f"redis://{SERVER_HOST}:6379/2"
     REDIS_SOCKETIO_URL: str = f"redis://{SERVER_HOST}:6379/3"
     # MongoDB
-    MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
+    MONGO_URL: str = f'mongodb://admin:123456@{SERVER_HOST}:27017'
 
     # celery
     CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"

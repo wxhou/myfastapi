@@ -1,16 +1,17 @@
 from typing import Optional
 from sqlalchemy import select
 from fastapi import Depends, Header
-from app.api.deps import get_db, get_redis, MyRedis, AsyncSession
+from app.extensions import async_db, async_redis
 from app.api.device.model import DeviceInfo
 from app.common.error import DeviceNotFound
 
 
 
 async def check_device_exists(
+    db: async_db,
+    redis: async_redis,
     device_id: Optional[str] =Header(default=None),
-    db: AsyncSession = Depends(get_db),
-    redis: MyRedis = Depends(get_redis)):
+):
     """检查设备是否存在"""
     if device_id is None:
         raise DeviceNotFound

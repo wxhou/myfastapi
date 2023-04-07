@@ -34,6 +34,7 @@ celery-redbeat = "^2.0.0"
 pydantic = {extras = ["email"], version = "^1.10.4"}
 starlette-csrf = "^1.4.5"
 setuptools = "^66.0.0"
+broadcaster = "^0.2.0"
 
 
 [build-system]

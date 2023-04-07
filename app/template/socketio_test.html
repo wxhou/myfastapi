@@ -28,7 +28,7 @@
 <body>
     <h2>SocketClient_V1.0</h2>
     <div style="border: 1px;"> 
-    <label>socketurl:</label><input type="text" id="url" value="http://127.0.0.1:8200">
+    <label>socketurl:</label><input type="text" id="url" value="https://tx.yunjinginc.com">
     <br>
     <label>clientId:</label><input type="text" id="clientId" value="123456">
     <br>
@@ -56,7 +56,7 @@
     
     function connect(url,clientId) {
         if(url==''||url== null||url==undefined){
-            url= 'http://127.0.0.1:8199';
+            url= 'wss://tx.yunjinginc.com';
         }
 
         if(clientId==''||clientId==null||clientId==undefined){
@@ -67,7 +67,7 @@
         };
         console.log(url)
         socket = io(url, {
-            path: '/ws/socket.io',
+            path: '/xmp/socket.io',
         });
 
         socket.on('connect', function () {
