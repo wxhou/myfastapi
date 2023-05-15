@@ -1,17 +1,16 @@
 from typing import Annotated, AsyncGenerator
 import motor.motor_asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Depends
 from slowapi import Limiter
 from slowapi.util import get_ipaddr
-from app.core.settings import settings
-from .db import async_session
-from .redis import init_redis_pool, redis
-from .websocket import manager as ws_manage
-from fastapi import Request, Depends
 from pymongo import MongoClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.extensions.db import async_session
 from app.extensions.redis import AsyncRedis
+from app.core.settings import settings
+from .db import async_session
+from .redis import init_redis_pool, redis
+from .websocket import manager as ws_manage
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

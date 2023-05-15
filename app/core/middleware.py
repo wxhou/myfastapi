@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from starlette_csrf import CSRFMiddleware
 from starlette.authentication import AuthCredentials, AuthenticationBackend, SimpleUser
 from starlette.middleware.authentication import AuthenticationMiddleware
 from app.core.settings import settings
@@ -24,7 +25,7 @@ from app.api.user.model import BaseUser
 
 def register_middleware(app: FastAPI):
     """ 请求拦截与响应拦截 -- https://fastapi.tiangolo.com/tutorial/middleware/ """
-    # app.add_middleware(CSRFMiddleware, secret=settings.SECRET_KEY) # 使用此插件无法使用websocket
+    app.add_middleware(CSRFMiddleware, secret=settings.SECRET_KEY) # 使用此插件无法使用websocket
     app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
     app.add_middleware(
         CORSMiddleware,

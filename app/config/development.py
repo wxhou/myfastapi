@@ -9,7 +9,7 @@ class DevelopmentSettings(BaseSettings):
     PROJECT_NAME = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
-    SERVER_HOST: str = '192.168.0.174'
+    SERVER_HOST: str = '192.168.0.172'
     PORT: int = 8199
     RELOAD: bool = True
     SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
@@ -46,7 +46,7 @@ class DevelopmentSettings(BaseSettings):
     JWT_TOKEN_TYPE: str = 'Bearer'
 
     # MINIO
-    MINIO_HOST: str = "192.168.0.174:9000"
+    MINIO_HOST: str = f"{SERVER_HOST}:9000"
     MINIO_ACCESS_KEY: str = "admin"
     MINIO_SECRET_KEY: str = "admin123"
 
