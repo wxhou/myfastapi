@@ -38,11 +38,10 @@ async def login_access_token(
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     # 'access_token'和'token_type'一定要写,否则get_current_user依赖拿不到token
     # 可添加字段(先修改schemas/token里面的Token返回模型)
-    return JSONResponse({
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": settings.JWT_TOKEN_TYPE
-    })
+    return response_ok(data=user.to_dict(),
+                    access_token=access_token,
+                    refresh_token=refresh_token,
+                    token_type=settings.JWT_TOKEN_TYPE)
 
 
 @router_login.post('/login/refresh/', summary='刷新Token')
@@ -69,7 +68,7 @@ async def login_refresh_token(
                     ex=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     result = {"access_token": access_token, "token_type": settings.JWT_TOKEN_TYPE}
     await redis.set_pickle(_key_name, result, timeout=10)
-    return JSONResponse(result)
+    return response_ok(data=result)
 
 
 @router_login.api_route('/logout/', methods=['GET', 'POST'], summary='退出登录')

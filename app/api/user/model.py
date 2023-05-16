@@ -17,6 +17,8 @@ class BaseUser(Base):
     def __str__(self) -> str:
         return "{}({})".format(self.username, self.id)
 
+    def to_dict(self):
+        return super().to_dict(exclude={'status', 'password_hash', 'is_active'})
 
 class BaseRole(Base):
     """角色表"""
