@@ -9,7 +9,7 @@ from app.utils.logger import logger
 from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Category, Post, Comment
-from .schemas import PostInsert, PostUpdate, PostDelete, CommentInsert
+from .schemas import PostInsert, PostUpdate, CommentInsert
 
 
 router_blog_admin = APIRouter()
@@ -44,19 +44,20 @@ async def post_insert(request: Request,
     return response_ok(data=obj.to_dict())
 
 
-@router_blog_admin.post('/post/update/', summary='更新文章')
+@router_blog_admin.put('/post/update/', summary='更新文章')
 async def post_update(request: Request,
-                      post: PostUpdate,
                       db: async_db,
-                      current_user: Annotated[BaseUser, Security(get_current_active_user, scopes=['post_update'])]):
+                      post: PostUpdate,
+                      post_id: int = Query(title="文章ID", ge=1),
+                      current_user: BaseUser = Security(get_current_active_user, scopes=['post_update'])):
     """更新文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==post.category_id, Category.status==0))
     if cate_obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    post_obj = await db.scalar(select(Post).filter(Post.id==post.id, Post.status==0))
+    post_obj = await db.scalar(select(Post).filter(Post.id==post_id, Post.status==0))
     if post_obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    await db.execute(update(Post).filter(Post.id==post.id, Post.status==0).values(post.dict(exclude={'id'}, exclude_none=True)))
+    await db.execute(update(Post).filter(Post.id==post_id, Post.status==0).values(post.dict(exclude_none=True)))
     await db.commit()
     return response_ok(data=post_obj.to_dict())
 
@@ -143,13 +144,13 @@ async def post_top(request: Request,
                        total=_count, pages=_pages)
 
 
-@router_blog_admin.post('/post/delete/', summary="文章删除")
+@router_blog_admin.delete('/post/delete/', summary="文章删除")
 async def post_delete(request: Request,
-                       args: PostDelete,
                        db: async_db,
+                       post_id: int = Query(title='文章ID', ge=1),
                        current_user: BaseUser = Security(get_current_active_user, scopes=['post_publish'])):
     """文章删除"""
-    query_filter = [Post.id==args.id, Post.status==0, Post.user_id==current_user.id]
+    query_filter = [Post.id==post_id, Post.status==0, Post.user_id==current_user.id]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
     if post_obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)

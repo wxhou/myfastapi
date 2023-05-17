@@ -13,7 +13,7 @@ from app.api.user.model import BaseUser, UserAddress
 from app.api.goods.model import Goods
 from app.api.base.auth import get_current_active_user
 from .model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
-from .schemas import ShoppingChartInsert, ShoppingChartDelete, ShoppingOrderInsert, ShoppingOrderDelete
+from .schemas import ShoppingChartInsert, ShoppingOrderInsert
 from .tasks import update_inventory, update_cart
 
 
@@ -72,11 +72,11 @@ async def trade_shopping_insert(request: Request,
     return response_ok()
 
 
-@router_trade_admin.post('/shopping/delete/', summary='购物车删除商品')
+@router_trade_admin.delete('/shopping/delete/', summary='购物车删除商品')
 async def trade_shopping_delete(request: Request,
-        args: ShoppingChartDelete,
         db: async_db,
         redis: async_redis,
+        goos_id: int = Query(title='商品ID', ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_delete'])):
     """购物车删除"""
     good_num = await db.scalar(select(ShoppingCart.goods_num).where(ShoppingCart.user_id==current_user.id,
@@ -188,11 +188,11 @@ async def trade_order_notice(data: dict):
         return Response('error')
 
 
-@router_trade_admin.post('/order/delete/', summary='删除订单')
+@router_trade_admin.delete('/order/delete/', summary='删除订单')
 async def trade_order_delete(request: Request,
-        args: ShoppingOrderDelete,
         db: async_db,
         redis: async_redis,
+        order_id: int = Query(title='订单ID', ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_delete'])):
     """删除订单"""
     obj = await db.scalar(select(ShoppingOrder).where(ShoppingOrder.id==args.order_id,

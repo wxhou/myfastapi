@@ -13,14 +13,10 @@ class PostInsert(BaseModel):
 
 class PostUpdate(BaseModel):
     """更新文章"""
-    id: int = Field(ge=1, title='文章ID')
     title: Optional[str] = Field(default=None, max_length=64, title='标题')
     body: Optional[str] = Field(default=None, max_length=2048, title='内容')
     category_id: Optional[int] = Field(default=None, ge=1, title='分类ID')
     is_publish: Optional[bool] = Field(default=None, title='是否发布')
-
-class PostDelete(BaseModel):
-    id: int = Field(ge=1, title='文章ID')
 
 
 class CommentInsert(BaseModel):

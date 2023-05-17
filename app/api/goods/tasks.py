@@ -2,7 +2,7 @@ import traceback
 from sqlalchemy import update
 from celery.utils.log import get_task_logger
 from app.core.celery_app import celery
-from app.extensions import async_session, redis, ws_manage
+from app.extensions import async_session, redis, websocket
 from app.common.decorator import sync_run_async
 from .model import Goods
 
@@ -19,7 +19,7 @@ async def add_goods_click_num(obj_id):
             await session.execute(update(Goods).where(Goods.id==obj_id, Goods.status==0).values(click_num=Goods.click_num+1))
             await session.commit()
     redis.incr("add_goods_click_num", 1)
-    await ws_manage.broadcast({'data': 'banana'})
+    await websocket.broadcast({'data': 'banana'})
 
 
 @celery.task

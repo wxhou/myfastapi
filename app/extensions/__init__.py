@@ -10,7 +10,7 @@ from app.extensions.redis import AsyncRedis
 from app.core.settings import settings
 from .db import async_session
 from .redis import init_redis_pool, redis
-from .websocket import manager as ws_manage
+from .websocket import manager as websocket
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

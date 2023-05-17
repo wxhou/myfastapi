@@ -1,13 +1,13 @@
 from math import ceil
 from sqlalchemy import func, select, update
-from fastapi import APIRouter, Request, Query, Security
+from fastapi import APIRouter, Request, Query, Body, Security
 from app.extensions import async_db, async_redis
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.base.auth import get_current_active_user
 from app.api.user.model import BaseUser
 from .model import DeviceInfo
-from .schemas import DeviceInsert, DeviceModify, DeviceDelete
+from .schemas import DeviceInsert, DeviceUpdate
 
 
 router_device_admin = APIRouter()
@@ -33,20 +33,21 @@ async def device_insert(request: Request,
 
 
 
-@router_device_admin.post('/modify/', summary='修改设备')
-async def device_modify(request: Request,
-        args: DeviceModify,
+@router_device_admin.put('/update/', summary='更新设备')
+async def device_update(request: Request,
+        args: DeviceUpdate,
         db: async_db,
+        device_id: int = Query(title='设备ID', ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['device_modify'])):
     """修改设备"""
-    obj = await db.scalar(select(DeviceInfo).filter(DeviceInfo.id==args.id,
+    obj = await db.scalar(select(DeviceInfo).filter(DeviceInfo.id==device_id,
                             DeviceInfo.status==0,
                             DeviceInfo.is_registered==False))
     if obj is None:
         return response_err(ErrCode.DEVICE_NOT_FOUND)
-    await db.execute(update(DeviceInfo).filter(DeviceInfo.id==args.id,
+    await db.execute(update(DeviceInfo).filter(DeviceInfo.id==device_id,
                             DeviceInfo.status==0,
-                            DeviceInfo.is_registered==False).values(args.dict(exclude={'id'}, exclude_none=True)))
+                            DeviceInfo.is_registered==False).values(args.dict(exclude_none=True)))
     await db.commit()
     return response_ok(data=obj.to_dict())
 
@@ -85,18 +86,18 @@ async def device_info(
     return response_ok(data=obj.to_dict())
 
 
-@router_device_admin.post('/delete/', summary='删除设备')
+@router_device_admin.delete('/delete/', summary='删除设备')
 async def device_delete(
         request: Request,
         db: async_db,
-        args : DeviceDelete,
+        device_id : int = Query(description='设备ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['device_delete'])):
     """删除设备"""
-    obj = await db.scalar(select(DeviceInfo.id).filter(DeviceInfo.id==args.id,
+    obj = await db.scalar(select(DeviceInfo.id).filter(DeviceInfo.id==device_id,
                             DeviceInfo.status==0))
     if obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    await db.execute(update(DeviceInfo).where(DeviceInfo.id==args.id,
+    await db.execute(update(DeviceInfo).where(DeviceInfo.id==device_id,
                             DeviceInfo.status==0, DeviceInfo.is_registered==0).values(status=-1))
     await db.commit()
     return response_ok()

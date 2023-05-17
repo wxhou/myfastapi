@@ -56,19 +56,19 @@ async def user_active(request: Request,
     return response_ok()
 
 
-@router_admin.post('/update/', summary='更新用户信息')
+@router_admin.put('/update/', summary='更新用户信息')
 async def user_update(
         request: Request,
-        user: UserModify,
         db: async_db,
+        user: UserModify,
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_update'])):
     """更新用户信息"""
-    sql = select(BaseUser).where(BaseUser.id == user.id, BaseUser.status == 0)
+    sql = select(BaseUser).where(BaseUser.id == current_user.id, BaseUser.status == 0)
     obj = await db.scalar(sql)
     if obj is None:
         return response_err(ErrCode.USER_NOT_EXISTS)
-    await db.execute(update(BaseUser).where(BaseUser.id == user.id,
-                                            BaseUser.status == 0).values(user.dict(exclude={'id'}, exclude_none=True)))
+    await db.execute(update(BaseUser).where(BaseUser.id == current_user.id,
+                                            BaseUser.status == 0).values(user.dict(exclude_none=True)))
     await db.commit()
     return response_ok(data=obj.id)
 
@@ -95,21 +95,27 @@ async def user_list(
     return response_ok(data=[obj.to_dict(exclude={'status', 'password_hash'}) for obj in objs], total=_count, pages=pages)
 
 
-@router_admin.post('/address/update/', summary='更新用户地址')
+@router_admin.put('/address/update/', summary='更新用户地址')
 async def user_address_update(
         request: Request,
-        addr: UserAddressUpdate,
         db: async_db,
+        addr: UserAddressUpdate,
+        addr_id: int = Query(ge=1, title='用户ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_address_update'])):
     """更新用户信息"""
     args = addr.dict(exclude_none=True)
-    args['user_id'] = current_user.id
-    obj = await db.scalar(select(UserAddress).where(UserAddress.id==args.pop('id', None), UserAddress.status==0))
+    obj = await db.scalar(select(UserAddress).where(UserAddress.id==addr_id,
+                                                    UserAddress.user_id==current_user.id,
+                                                    UserAddress.status==0))
     if obj is None:
         obj = UserAddress(**args)
+        obj.user_id = current_user.id
         db.add(obj)
+        await db.flush()
     else:
-        sql = update(UserAddress).where(UserAddress.id==obj.id, UserAddress.status==0).values(**args)
+        sql = update(UserAddress).where(UserAddress.id==addr_id,
+                                        UserAddress.user_id==current_user.id,
+                                        UserAddress.status==0).values(**args)
         await db.execute(sql)
     await db.commit()
     return response_ok(data=obj.to_dict())

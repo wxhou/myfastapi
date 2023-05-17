@@ -3,7 +3,7 @@
 from asyncio import current_task
 from sqlalchemy.sql.dml import Update, Delete
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session, async_sessionmaker
-from ..core.settings import settings
+from app.core.settings import settings
 
 
 engine = create_async_engine(

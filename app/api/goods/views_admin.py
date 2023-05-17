@@ -7,13 +7,13 @@ from app.core.celery_app import redis_scheduler_entry
 from app.core.settings import settings
 from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
-from app.extensions import async_db, async_redis, limiter, ws_manage
+from app.extensions import async_db, async_redis, limiter, websocket
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Goods, GoodsCategory
-from .schemas import GoodsInsert, GoodsUpdate, GoodsDelete
+from .schemas import GoodsInsert, GoodsUpdate
 from .tasks import add_goods_click_num
 
 
@@ -54,7 +54,7 @@ async def goods_info(request: Request,
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     add_goods_click_num.delay(goods_id)
-    await ws_manage.broadcast(json.dumps({'data': 'foobar'}))
+    await websocket.broadcast(json.dumps({'data': 'foobar'}))
     return response_ok(data=obj.to_dict())
 
 
@@ -79,32 +79,33 @@ async def goods_insert(
     return response_ok(data={"id": obj.id})
 
 
-@router_goods_admin.post('/update/', summary='更新商品')
+@router_goods_admin.put('/update/', summary='更新商品')
 async def goods_update(
         request: Request,
-        goods: GoodsUpdate,
         db: async_db,
         redis: async_redis,
+        goods: GoodsUpdate,
+        goods_id: int = Query(default=True, ge=1, title='商品ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['goods_update'])):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
-    obj = await db.scalar(select(Goods).where(Goods.id==args.get('id', None), Goods.status==0))
+    obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
-    await db.execute(update(Goods).where(Goods.id==args.pop('id', None), Goods.status==0).values(**args))
+    await db.execute(update(Goods).where(Goods.id==goods_id, Goods.status==0).values(**args))
     await db.commit()
     if _num := args.get("goods_num"):
         await redis.set(f"goods_num_{args['id']}", _num)
     return response_ok(data=obj.to_dict())
 
 
-@router_goods_admin.post('/delete/', summary='删除商品')
+@router_goods_admin.delete('/delete/', summary='删除商品')
 async def goods_delete(
         request: Request,
-        goods: GoodsDelete,
         db: async_db,
+        goods_id: int = Query(ge=1, title='商品ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['goods_delete'])):
     """更新用户信息"""
-    await db.execute(update(Goods).where(Goods.id==goods.id, Goods.status==0).values(status=-1))
+    await db.execute(update(Goods).where(Goods.id==goods_id, Goods.status==0).values(status=-1))
     await db.commit()
     return response_ok()
