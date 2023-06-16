@@ -4,7 +4,7 @@ from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security, Form
 from fastapi.responses import Response
 from app.extensions import async_db, async_redis
-from app.core.settings import settings
+from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.randomly import random_str
@@ -24,7 +24,7 @@ router_trade_admin = APIRouter()
 async def trade_shopping_list(request: Request,
         db: async_db,
         page: int = Query(default=1, ge=1),
-        page_size: int = Query(default=20, ge=1),
+        page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_list'])):
     """购物车列表"""
     query_filter = [ShoppingCart.status == 0, ShoppingCart.user_id==current_user.id]

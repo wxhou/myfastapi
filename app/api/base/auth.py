@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import Request, Depends, Security
 from fastapi.security import SecurityScopes, OAuth2PasswordBearer
-from app.core.settings import settings
+from app.settings import settings
 from app.extensions import async_db, async_redis
 from app.common.security import verify_password, decrypt_access_token
 from app.common.error import UserNotExist, UserNotActive, PermissionError, TokenExpiredError

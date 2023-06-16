@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Body, Security
 from app.extensions import async_db, async_redis, async_mongo
-from app.core.settings import settings
+from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.user.model import BaseUser

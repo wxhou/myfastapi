@@ -7,7 +7,7 @@ from typing import Optional, Annotated
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
 from app.extensions import async_db, async_redis
-from app.core.settings import settings
+from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.decorator import async_to_sync
 from app.utils.logger import logger

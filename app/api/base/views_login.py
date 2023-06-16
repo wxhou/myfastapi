@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from app.extensions import async_redis, async_db
-from app.core.settings import settings
+from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token
 from app.utils.logger import logger

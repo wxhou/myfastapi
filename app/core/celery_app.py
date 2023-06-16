@@ -1,6 +1,6 @@
 from celery import Celery
 from redbeat.schedulers import RedBeatSchedulerEntry
-from app.core.settings import settings
+from app.settings import settings
 
 
 celery = Celery(settings.PROJECT_NAME)

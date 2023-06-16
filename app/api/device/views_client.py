@@ -1,7 +1,7 @@
 from sqlalchemy import select, update
 from fastapi import APIRouter, Depends, Security, Request, Query, Header
 from app.extensions import async_db, async_redis
-from app.core.settings import settings
+from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from .auth import check_device_exists

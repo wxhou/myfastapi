@@ -1,7 +1,7 @@
 from celery.schedules import crontab, schedule
 from typing import List, Tuple
 from kombu import Queue, Exchange
-from .settings import settings
+from app.settings import settings
 # https://docs.celeryq.dev/en/stable/
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html
 security_key: str = settings.CELERY_SECURITY_KEY
@@ -15,7 +15,7 @@ result_serializer: str = "json"
 accept_content: List[str] = ['json']
 timezone: str = "Asia/Shanghai"
 result_expires: int = 60 * 60 * 24 # 任务过期时间
-worker_max_tasks_per_child: int = 8 # 池工作进程在被新进程替换之前可以执行的最大任务数。默认为无限制。
+worker_max_tasks_per_child: int = 10 # 池工作进程在被新进程替换之前可以执行的最大任务数。默认为无限制。
 worker_max_memory_per_child = 100 * 1000  # 100MB
 worker_log_format: str = "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s"
 broker_transport_options = {

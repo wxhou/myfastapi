@@ -3,7 +3,7 @@ from alipay.aop.api.DefaultAlipayClient import DefaultAlipayClient
 from alipay.aop.api.domain.AlipayTradePagePayModel import AlipayTradePagePayModel
 from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest
 from alipay.aop.api.util.SignatureUtils import verify_with_rsa
-from app.core.settings import settings
+from app.settings import settings
 from app.utils.logger import logger
 
 

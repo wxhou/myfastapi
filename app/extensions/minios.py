@@ -1,5 +1,5 @@
 from minio import Minio
-from app.core.settings import settings
+from app.settings import settings
 
 
 class MinioClient(object):

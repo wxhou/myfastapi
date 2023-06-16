@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette_csrf import CSRFMiddleware
 from starlette.authentication import AuthCredentials, AuthenticationBackend, SimpleUser
 from starlette.middleware.authentication import AuthenticationMiddleware
-from app.core.settings import settings
+from app.settings import settings
 from app.extensions.db import async_session
 from app.utils.logger import logger
 from app.common.error import UserNotExist, TokenExpiredError
@@ -31,7 +31,7 @@ def register_middleware(app: FastAPI):
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,
         allow_credentials=True,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
         allow_headers=["*"],
     )
     # 500字节以上才开启gzip

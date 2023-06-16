@@ -3,6 +3,7 @@ from math import ceil
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, Security
+from app.settings import settings
 from app.extensions import async_db, async_redis
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -66,7 +67,7 @@ async def post_update(request: Request,
 async def post_list(request: Request,
                     db: async_db,
                     page: int = Query(default=1, ge=1),
-                    page_size: int = Query(default=15, ge=1),
+                    page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
                     title: str = Query(default=None),
                     is_publish: bool = Query(default=None),
                     is_comment: bool = Query(default=None),
@@ -120,7 +121,7 @@ async def post_top(request: Request,
                 db: async_db,
                 redis: async_redis,
                 page: int = Query(default=1, ge=1),
-                page_size: int = Query(default=100, ge=1),
+                page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
                 title: str = Query(default=None),
                 order_type: int = Query(default=1, gt=0, le=3),
                 ):

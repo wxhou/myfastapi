@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.extensions.db import async_session
 from app.extensions.redis import AsyncRedis
-from app.core.settings import settings
+from app.settings import settings
 from .db import async_session
 from .redis import init_redis_pool, redis
 from .websocket import manager as websocket

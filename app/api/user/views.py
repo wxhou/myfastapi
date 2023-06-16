@@ -1,10 +1,9 @@
 from math import ceil
 from datetime import timedelta
 from sqlalchemy import func, or_, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, Path, Security
 from app.extensions import async_db, async_redis
-from app.core.settings import settings
+from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
 from app.utils.logger import logger
@@ -78,7 +77,7 @@ async def user_list(
         request: Request,
         db: async_db,
         page: int = Query(default=1, ge=1),
-        page_size: int = Query(default=15, ge=1),
+        page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
         username: str = Query(default=None),
         email: str = Query(default=None),
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_list'])):

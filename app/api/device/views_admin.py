@@ -2,6 +2,7 @@ from math import ceil
 from sqlalchemy import func, select, update
 from fastapi import APIRouter, Request, Query, Body, Security
 from app.extensions import async_db, async_redis
+from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.base.auth import get_current_active_user
@@ -57,7 +58,7 @@ async def device_list(
         request: Request,
         db: async_db,
         page: int = Query(default=1, ge=1, title='页码'),
-        page_size: int = Query(default=15, ge=1, title='每页数量'),
+        page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1, title='每页数量'),
         device_name: str = Query(default=None, title='设备名称'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['device_list'])):
     """设备列表信息"""

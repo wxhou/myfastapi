@@ -4,7 +4,7 @@ from celery.schedules import crontab
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
 from app.core.celery_app import redis_scheduler_entry
-from app.core.settings import settings
+from app.settings import settings
 from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.extensions import async_db, async_redis, limiter, websocket

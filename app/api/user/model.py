@@ -29,7 +29,7 @@ class BaseRole(Base):
 
 
 
-class UserRole(Base):
+class BaseUserRole(Base):
     __tablename__ = 't_base_user_role'
     id = Column(BigInteger, primary_key=True)
     user_id = Column(BigInteger, nullable=False, index=True)
@@ -46,7 +46,7 @@ class BasePermission(Base):
     remark = Column(String(512))
 
 
-class RolePermission(Base):
+class BaseRolePermission(Base):
     """角色权限关系表"""
     __tablename__ = 't_base_role_permission'
     id = Column(BigInteger, primary_key=True)
@@ -54,15 +54,15 @@ class RolePermission(Base):
     permission_id = Column(BigInteger, nullable=False, index=True)
 
 
-class DataRule(Base):
+class BaseDataRule(Base):
     __tablename__ = 't_base_data_rule'
     id = Column(BigInteger, primary_key=True)
-    rule_name = Column(String(128)) #
-    rule_conditions = Column(String(128))
-    rule_values = Column(JSON) # ARRAY(INTEGER)
+    rule_name = Column(String(128)) #规则名称
+    rule_conditions = Column(String(128)) # 规则条件
+    rule_values = Column(JSON) # ARRAY(INTEGER) 过滤值
 
 
-class DataRuleSet(Base):
+class BaseDataRuleSet(Base):
     __tablename__ = 't_base_data_rule_set'
     id = Column(BigInteger, primary_key=True)
     name = Column(String(128)) # 名称
@@ -72,7 +72,7 @@ class DataRuleSet(Base):
 
 
 
-class UserCollect(Base):
+class BaseUserCollect(Base):
     """用户收藏"""
     __tablename__ = 't_base_user_collect'
     id = Column(Integer, primary_key=True)
@@ -80,7 +80,7 @@ class UserCollect(Base):
     goods_id = Column(Integer, index=True) # 商品ID
 
 
-class UserAddress(Base):
+class BaseUserAddress(Base):
     __tablename__ = 't_base_user_address'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, index=True) # 用户ID
@@ -92,7 +92,7 @@ class UserAddress(Base):
     signer_mobile = Column(String(11)) # 签收电话
 
 
-class UserComment(Base):
+class BaseUserComment(Base):
     """用户评论"""
     __tablename__ = 't_base_user_comment'
     id = Column(Integer, primary_key=True)

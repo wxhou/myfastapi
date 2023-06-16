@@ -2,7 +2,7 @@ from typing import Any
 from aioredis import Redis as _AsyncRedis
 from app.common.resolve import load_object, dump_object
 from app.utils.logger import logger
-from app.core.settings import settings
+from app.settings import settings
 
 
 class AsyncRedis(_AsyncRedis):

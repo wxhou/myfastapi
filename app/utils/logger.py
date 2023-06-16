@@ -7,7 +7,7 @@ https://github.com/tiangolo/fastapi/issues/81#issuecomment-473677039
 """
 from loguru import logger
 
-from app.core.settings import settings
+from app.settings import settings
 
 
 # 日志简单配置 文件区分不同级别的日志
