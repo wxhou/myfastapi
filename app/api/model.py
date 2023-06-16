@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from sqlalchemy import func, Column, DateTime, Boolean
+from sqlalchemy import func, Column, DateTime, SmallInteger
 from sqlalchemy.orm import DeclarativeBase
 from fastapi.encoders import jsonable_encoder
 
@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
     __mapper_args__ = {"eager_defaults": True}  # 防止 insert 插入后不刷新,如不添加created update不显示,但是会增加性能消耗
     # https://www.wenjiangs.com/doc/sqlalchemy-orm-mapping_api
 
-    is_deleted = Column(Boolean, server_default=False, comment='是否删除')
+    status = Column(SmallInteger, server_default="0", comment='是否删除')
     create_time = Column(DateTime(timezone=True), server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), comment='更新时间')
 

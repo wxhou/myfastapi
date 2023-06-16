@@ -5,4 +5,4 @@ from .device.model import DeviceInfo
 from .goods.model import Goods, GoodsCategory, GoodsCategoryBrand, HotSearchWord
 from .trade.model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods, RaffleActivity, RafflePrize, RaffleLog
 from .form.model import FormTemplate, FormTemplateVersion, FormFillRecord
-from .user.model import BaseUser, BaseRole, BasePermission, UserAddress, UserCollect, UserComment
+from .user.model import BaseUser, BaseRole, BasePermission, BaseUserAddress, BaseUserCollect, BaseUserComment

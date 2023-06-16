@@ -9,7 +9,7 @@ from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.utils.AliPay import ALIPAY, AlipayTradePagePayModel, AlipayTradePagePayRequest, verify_with_rsa
-from app.api.user.model import BaseUser, UserAddress
+from app.api.user.model import BaseUser, BaseUserAddress
 from app.api.goods.model import Goods
 from app.api.base.auth import get_current_active_user
 from .model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
@@ -131,8 +131,8 @@ async def trade_order_info(request: Request,
     if obj is None:
         return response_err(ErrCode.ORDER_NOT_FOUND)
     result = obj.to_dict()
-    addr_obj = await db.scalar(select(UserAddress).where(UserAddress.id==result['user_address_id'],
-                                                         UserAddress.status==0))
+    addr_obj = await db.scalar(select(BaseUserAddress).where(BaseUserAddress.id==result['user_address_id'],
+                                                         BaseUserAddress.status==0))
     result['address_info'] = addr_obj.to_dict()
     order_goods_objs = await db.scalars(select(ShoppingOrderGoods).where(ShoppingOrderGoods.order_id==result['id'],
                                                                    ShoppingOrderGoods.status==0))

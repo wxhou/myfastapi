@@ -8,7 +8,7 @@ from app.extensions import async_db, async_redis
 from app.common.security import verify_password, decrypt_access_token
 from app.common.error import UserNotExist, UserNotActive, PermissionError, TokenExpiredError
 from app.utils.logger import logger
-from app.api.user.model import BaseUser, BasePermission, RolePermission
+from app.api.user.model import BaseUser, BasePermission, BaseRolePermission
 from .schemas import TokenData
 
 
@@ -54,8 +54,8 @@ async def get_current_active_user(
         BasePermission.function_name.in_(scopes), BasePermission.status==0))
     if perm_ids is None:
         raise PermissionError
-    sql = select(RolePermission.id).filter(RolePermission.role_id==current_user.role_id,
-                                    RolePermission.permission_id.in_(perm_ids))
+    sql = select(BaseRolePermission.id).filter(BaseRolePermission.role_id==current_user.role_id,
+                                    BaseRolePermission.permission_id.in_(perm_ids))
     res = await db.scalar(sql)
     if res is None:
         raise PermissionError

@@ -8,7 +8,7 @@ from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
 from app.utils.logger import logger
 from app.api.base.auth import get_current_active_user
-from .model import BaseUser, UserCollect, UserAddress, UserComment
+from .model import BaseUser, BaseUserCollect, BaseUserAddress
 from .tasks import send_register_email
 from .schemas import UserRegister, UserModify, UserAddressUpdate
 
@@ -103,18 +103,18 @@ async def user_address_update(
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_address_update'])):
     """更新用户信息"""
     args = addr.dict(exclude_none=True)
-    obj = await db.scalar(select(UserAddress).where(UserAddress.id==addr_id,
-                                                    UserAddress.user_id==current_user.id,
-                                                    UserAddress.status==0))
+    obj = await db.scalar(select(BaseUserAddress).where(BaseUserAddress.id==addr_id,
+                                                    BaseUserAddress.user_id==current_user.id,
+                                                    BaseUserAddress.status==0))
     if obj is None:
-        obj = UserAddress(**args)
+        obj = BaseUserAddress(**args)
         obj.user_id = current_user.id
         db.add(obj)
         await db.flush()
     else:
-        sql = update(UserAddress).where(UserAddress.id==addr_id,
-                                        UserAddress.user_id==current_user.id,
-                                        UserAddress.status==0).values(**args)
+        sql = update(BaseUserAddress).where(BaseUserAddress.id==addr_id,
+                                        BaseUserAddress.user_id==current_user.id,
+                                        BaseUserAddress.status==0).values(**args)
         await db.execute(sql)
     await db.commit()
     return response_ok(data=obj.to_dict())
@@ -126,6 +126,6 @@ async def user_address_list(
         db: async_db,
         current_user: BaseUser = Security(get_current_active_user, scopes=['user_address_list'])):
     """用户地址列表"""
-    objs = await db.scalars(select(UserAddress).where(UserAddress.user_id==current_user.id,
-                                               UserAddress.status==0))
+    objs = await db.scalars(select(BaseUserAddress).where(BaseUserAddress.user_id==current_user.id,
+                                               BaseUserAddress.status==0))
     return response_ok(data=[obj.to_dict() for obj in objs])

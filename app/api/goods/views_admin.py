@@ -3,9 +3,9 @@ import json
 from celery.schedules import crontab
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
-from app.core.celery_app import redis_scheduler_entry
 from app.settings import settings
 from app.common.pagation import PageNumberPagination
+from app.core.celery_app import redis_scheduler_entry
 from app.common.response import ErrCode, response_ok, response_err
 from app.extensions import async_db, async_redis, limiter, websocket
 from app.utils.logger import logger
@@ -34,8 +34,8 @@ async def goods_category_list(request: Request,
 @router_goods_admin.get('/list/', summary='商品列表')
 async def goods_list(request: Request,
         db: async_db,
-        page: int = Query(default=1, ge=1),
-        page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
+        page: int = Query(1, ge=1, description="Page number"),
+        page_size: int = Query(settings.PER_PAGE_NUMBER, ge=1, le=10000, description="Page size"),
         search: str = Query(default=None)):
     """商品列表"""
     query_filter = [Goods.status == 0]
