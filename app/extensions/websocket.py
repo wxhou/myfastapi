@@ -7,14 +7,14 @@ from app.utils.logger import logger
 class ConnectionManager:
     def __init__(self):
         self.device = namedtuple('OnlineDevice', 'client_id websocket')
-        self.active_connections: Set[self.device] = set()
+        self.active_connections: Set[self.device] = []
 
     async def connect(self, websocket: WebSocket, client_id: int):
         """链接"""
         await websocket.accept()
         new_device = self.device(client_id=client_id, websocket=websocket)
         if new_device not in self.active_connections:
-            self.active_connections.add(new_device)
+            self.active_connections.append(new_device)
         logger.bind(websocket=True).info("Client connect {}".format(client_id))
 
     def __len__(self):
@@ -23,7 +23,7 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket, client_id: int):
         """断开链接"""
-        self.active_connections.discard(self.device(
+        self.active_connections.remove(self.device(
             client_id=client_id, websocket=websocket))
 
     async def send_personal_message(self, message: str, client_id: int):

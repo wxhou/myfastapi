@@ -1,9 +1,10 @@
 import os
 import sys
+import aiofiles
 import subprocess
 from uuid import uuid4
-from platform import platform
 from typing import Optional, Annotated
+from anyio import Path
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
 from app.extensions import async_db, async_redis
@@ -11,10 +12,11 @@ from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.decorator import async_to_sync
 from app.utils.logger import logger
-from app.utils.times import dt_strftime
+from app.utils.times import dt_strftime, now, timedelta
 from app.api.user.model import BaseUser, BasePermission
 from .model import UploadModel
 from .auth import get_current_active_user
+from .tasks import verify_upload_file_is_exists
 
 
 router = APIRouter()
@@ -22,7 +24,7 @@ router = APIRouter()
 
 @router.post("/upload/", summary='上传文件')
 async def create_upload_file(file: Annotated[UploadFile, File()],
-                             db: async_redis,
+                             db: async_db,
                              md5 = Form(..., description="文件MD5值"),
                              current_user: BaseUser = Depends(get_current_active_user)):
     """上传文件"""
@@ -30,27 +32,25 @@ async def create_upload_file(file: Annotated[UploadFile, File()],
     if obj is not None:
         return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId'}))
     ext = os.path.splitext(file.filename)[1]
-    if ext not in settings.ALLOWED_IMAGE_EXTENSIONS:
+    if ext not in settings.ALLOWED_EXTENSIONS:
         return response_err(ErrCode.FILE_TYPE_ERROR)
-    root_path = os.path.join(settings.UPLOAD_MEDIA_FOLDER, dt_strftime(fmt="%Y%m"))
+    root_path = os.path.join(settings.UPLOAD_MEDIA_FOLDER, dt_strftime(fmt="%Y/%m"))
     new_fname = "{}{}".format(uuid4(), ext)
     if not os.path.exists(root_path):
         os.makedirs(root_path)
     save_file = os.path.join(root_path, new_fname)
-    with open(save_file, 'wb+') as buffer:
-        buffer.write(await file.read())
+    # 异步上传文件1
+    # async with aiofiles.open(save_file, 'wb+') as fp:
+    #     while content := await file.read(1024):
+    #         logger.info(content)
+    #         await fp.write(content)
+    # 异步上传文件2
+    await Path(save_file).write_bytes(await file.read())
+
+    # 同步上传文件
+    # with open(save_file, 'wb+') as buffer:
+    #     buffer.write(await file.read())
     # 对比文件MD5
-    if sys.platform.lower() == 'win32':
-        md5_value = subprocess.getoutput(['certutil', '-hashfile', save_file, 'MD5'])
-    elif sys.platform.lower() == 'linux':
-        md5_value = subprocess.getoutput(['md5sum', '-b', save_file])
-    elif sys.platform.lower() == 'darwin':
-        md5_value = subprocess.getoutput(['md5', save_file])
-    else:
-        return response_err(ErrCode.SYSTEM_ERROR)
-    if md5 not in md5_value:
-        os.remove(save_file)
-        return response_err(ErrCode.FILE_MD5_ERROR)
     obj = UploadModel(fileUrl='/upload' + save_file.split(settings.UPLOAD_MEDIA_FOLDER)[1],
                       uniqueId=md5,
                       filename=file.filename,
@@ -58,6 +58,7 @@ async def create_upload_file(file: Annotated[UploadFile, File()],
                       uid=current_user.id)
     db.add(obj)
     await db.commit()
+    verify_upload_file_is_exists.apply_async(args=(md5, save_file), eta=now(utc=1) + timedelta(seconds=60))
     return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId', 'uid'}))
 
 

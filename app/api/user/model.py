@@ -68,7 +68,7 @@ class BaseDataRuleSet(Base):
     name = Column(String(128)) # 名称
     column = Column(JSON) # 字段 ARRAY(INTEGER)
     op_type = Column(SmallInteger, default=1) # 1,2
-    rule_id = Column(BigInteger)
+    rule_id = Column(BigInteger, index=True)
 
 
 

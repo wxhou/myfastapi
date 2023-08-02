@@ -15,7 +15,11 @@ def sync_run_async(func):
         if asyncio.iscoroutinefunction(func):
             if sys.platform == 'win32':
                 return async_to_sync(func)(*args, **kwargs) # QA Fail
-            loop = asyncio.get_event_loop()
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
             task = loop.create_task(func(*args, **kwargs))
             loop.run_until_complete(task)
             return task.result()

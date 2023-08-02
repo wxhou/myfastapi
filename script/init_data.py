@@ -1,10 +1,33 @@
-import json
+import json, click
 from sqlalchemy import select, values, delete
-from app.extensions.db import async_session
+from app.extensions.db import engine, async_session
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 
+from app.api.model import Base
+from app.api.user.model import BaseUser
 from app.api.goods.model import Goods, GoodsCategory
+from app.common.security import set_password
+
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        await engine.dispose()
+
+
+async def init_super_user(username, password, email, nickname):
+    async with async_session() as db:
+        obj = await db.execute(select(BaseUser).where(BaseUser.status==0))
+        if obj.first():
+            click.echo('######Super User is Exists!######')
+            return
+        obj = BaseUser(username=username,
+                       email=email,
+                       nickname=nickname)
+        db.add(obj)
+        obj.is_active=True
+        obj.password_hash = set_password(password)
+        await db.commit()
 
 
 async def init_goods_category():

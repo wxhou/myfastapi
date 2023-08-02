@@ -1,12 +1,19 @@
 from celery import Celery
 from redbeat.schedulers import RedBeatSchedulerEntry
-from app.settings import settings
+from app.settings import settings, celery_settings
 
 
 celery = Celery(settings.PROJECT_NAME)
-celery.config_from_object("app.core.celeryconfig")
-# celery -A  app.core.celery_app.celery worker -l info
+celery.config_from_object(celery_settings)
 
+# shell
+# celery -A  app.core.celery_app.celery worker -l info | debug
+
+# beat
+# celery -A app.core.celery_app.celery beat -S redbeat.RedBeatScheduler -l info | debug
+
+# clear all tasks
+# celery -A app.core.celery_app.celery purge
 
 class RedisSchedulerEntry(object):
     def __init__(self, celery) -> None:

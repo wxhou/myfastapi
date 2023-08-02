@@ -12,11 +12,17 @@ def timestamp(fmt: Optional[int]=None) -> int:
 def sleep(s=1):
     time.sleep(s)
 
+def now(utc=False):
+    if utc:
+        return datetime.utcnow()
+    return datetime.now()
 
-def dt_strftime(t=datetime.now(), fmt: str="%Y-%m-%d %H:%M:%S"):
+def dt_strftime(dt=None, fmt: str="%Y-%m-%d %H:%M:%S"):
     """格式化当前时间"""
-    return t.strftime(fmt)
+    if dt is None:
+        dt = datetime.now()
+    return dt.strftime(fmt)
 
 
 if __name__=='__main__':
-    dt_strftime()
+    print(dt_strftime())

@@ -89,7 +89,7 @@ async def goods_update(
         current_user: BaseUser = Security(get_current_active_user, scopes=['goods_update'])):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
-    obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
+    obj: Goods = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
     await db.execute(update(Goods).where(Goods.id==goods_id, Goods.status==0).values(**args))

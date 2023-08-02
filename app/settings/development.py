@@ -19,9 +19,9 @@ class DevelopmentSettings(BaseSettings):
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = f"mysql+asyncmy://root:root1234@{SERVER_HOST}:3306/db_weblog?charset=utf8"
+    ASYNC_SQLALCHEMY_DATABASE_URL: str = f"mysql+asyncmy://root:yunjingtest@192.168.0.100:3306/db_weblog?charset=utf8"
     # MySQL(同步)
-    SQLALCHEMY_DATABASE_URL: str = f"mysql+pymysql://root:root1234@{SERVER_HOST}:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_DATABASE_URL: str = f"mysql+pymysql://root:yunjingtest@192.168.0.100:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
 
@@ -34,7 +34,7 @@ class DevelopmentSettings(BaseSettings):
     # celery
     CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"
     CELERY_BROKER_URL: str = f"redis://{SERVER_HOST}:6379/6"
-    CELERY_RESULT_BACKEND: str = f"db+mysql+pymysql://root:root1234@{SERVER_HOST}:3306/db_weblog?charset=utf8"
+    CELERY_RESULT_BACKEND: str = f"db+mysql+pymysql://root:yunjingtest@192.168.0.100:3306/db_weblog?charset=utf8"
     # CELERY_RESULT_BACKEND: str = f"redis://{SERVER_HOST}:6379/7"
 
     # JWT
@@ -74,7 +74,7 @@ class DevelopmentSettings(BaseSettings):
     ALLOWED_IMAGE_EXTENSIONS: Set[str] = {'.png', '.jpg', '.jpeg'}
     ALLOWED_AUDIO_EXTENSIONS: Set[str] = {'.mp3'}
     ALLOWED_VIDEO_EXTENSIONS: Set[str] = {'.mp4'}
-
+    ALLOWED_EXTENSIONS: Set[str] = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_VIDEO_EXTENSIONS | ALLOWED_AUDIO_EXTENSIONS
 
     # swagger
     SERVERS: Optional[List] = None
