@@ -73,7 +73,20 @@ def text_to_audio(args:InputText,
     # 改变语速  范围为0-200   默认值为200
     rate = engine.getProperty('rate')  #获取当前语速
     engine.setProperty('rate', rate-40)
+    # 获取可用的语音列表
+    voices = engine.getProperty("voices")
 
+    # 设置中文女声
+    chinese_female_voice = None
+    for voice in voices:
+        if "chinese" in voice.languages and "female" in voice.gender.lower():
+            chinese_female_voice = voice.id
+            break
+
+    if chinese_female_voice is not None:
+        engine.setProperty("voice", chinese_female_voice)
+    else:
+        logger.info("找不到中文女声，使用默认语音")
     filename = f"/upload/{uuid.uuid4()}.mp3"
     engine.save_to_file(args.text, '.' + filename)
     engine.runAndWait()
