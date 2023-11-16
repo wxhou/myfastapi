@@ -10,7 +10,7 @@ class DeviceInsert(BaseModel):
     device_position: Optional[str] = Field(default=None, title='设备位置', max_length=64)
     device_screen_type: Literal[1,2] = Field(title='屏幕分类', description='1竖屏2横屏')
     device_screen_number: Optional[str] = Field(default=None, title='设备屏幕编号', max_length=64)
-    device_mac_addr: str = Field(title='设备Mac', max_length=64, regex=r'[A-Fa-f0-9:]{17}')
+    device_mac_addr: str = Field(title='设备Mac', max_length=64, pattern=r'[A-Fa-f0-9:]{17}')
     device_ip_addr: IPvAnyNetwork = Field(title='设备IP', )
     annotation: Optional[str] = Field(default=None, title='备注', max_length=32)
 
@@ -22,7 +22,7 @@ class DeviceUpdate(BaseModel):
     device_position: Optional[str] = Field(default=None, title='设备位置', max_length=64)
     device_number: Optional[str] = Field(default=None, title='设备编号', max_length=64)
     device_screen_number: Optional[str] = Field(default=None, title='设备屏幕编号', max_length=64)
-    device_mac_addr: str = Field(default=None, title='设备Mac', max_length=64, regex=r'[A-Fa-f0-9:]{17}')
+    device_mac_addr: str = Field(default=None, title='设备Mac', max_length=64, pattern=r'[A-Fa-f0-9:]{17}')
     device_ip_addr: IPvAnyNetwork = Field(default=None, title='设备IP')
     annotation: Optional[str] = Field(default=None, title='备注', max_length=32)
 
@@ -30,4 +30,4 @@ class DeviceUpdate(BaseModel):
 class DeviceRegister(BaseModel):
     """设备注册"""
     device_register_code: str = Field(title='设备序列号', max_length=64)
-    device_app_version: str = Field(title='设备名称', regex=r'[Vv0-9.]{5-7}')
+    device_app_version: str = Field(title='设备名称', pattern=r'[Vv0-9.]{5,7}')

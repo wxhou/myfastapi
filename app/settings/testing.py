@@ -1,13 +1,13 @@
 import os
 import logging
-from typing import List, Dict, Set, Sequence
-from pydantic import BaseSettings
+from typing import List, Dict, Set, Sequence, ClassVar
+from pydantic_settings import BaseSettings
 
 
 
 class TestingSettings(BaseSettings):
     """"测试设置"""
-    PROJECT_NAME = 'weblog'
+    PROJECT_NAME: ClassVar = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
     PORT: int = 8199
@@ -15,6 +15,7 @@ class TestingSettings(BaseSettings):
     SECRET_KEY: str = 'WeH0a!lIsBx7xYxUpaM5Wb'
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: Sequence[str] = ['*']
+    PER_PAGE_NUMBER: int = 15
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
@@ -67,10 +68,11 @@ class TestingSettings(BaseSettings):
     ALLOWED_IMAGE_EXTENSIONS: Set[str] = {'.png', '.jpg', '.jpeg'}
     ALLOWED_AUDIO_EXTENSIONS: Set[str] = {'.mp3'}
     ALLOWED_VIDEO_EXTENSIONS: Set[str] = {'.mp4'}
+    ALLOWED_EXTENSIONS: Set[str] = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_VIDEO_EXTENSIONS | ALLOWED_AUDIO_EXTENSIONS
 
 
     SERVERS: List[Dict[str, str]] = [{"url":"https://xx.xxx.com/weblog"}]
-    SWAGGER_LOGIN = f"/{PROJECT_NAME}/login/"
+    SWAGGER_LOGIN: str = f"/{PROJECT_NAME}/login/"
     SWAGGER_DOCS_URL: str = f'/{PROJECT_NAME}/docs'
     SWAGGER_REDOC_URL: str = f'/{PROJECT_NAME}/redocs'
     OPENAPI_URL: str = f'/{PROJECT_NAME}/openapi.json'

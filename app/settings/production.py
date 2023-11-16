@@ -1,13 +1,13 @@
 import os
 import logging
-from typing import List, Optional, Dict, Set, Sequence
-from pydantic import BaseSettings
+from typing import List, Optional, Dict, Set, ClassVar
+from pydantic_settings import BaseSettings
 
 
 
 class ProductionSettings(BaseSettings):
     """生产配置"""
-    PROJECT_NAME = 'weblog'
+    PROJECT_NAME: ClassVar = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(
         os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = False
@@ -16,6 +16,7 @@ class ProductionSettings(BaseSettings):
     SECRET_KEY: str = 'Xs8nWV1P45jiKrjLV6OSnj'
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[str] = ['http://localhost']
+    PER_PAGE_NUMBER: int = 15
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
@@ -60,7 +61,7 @@ class ProductionSettings(BaseSettings):
     }
 
     SERVERS: Optional[str] = None
-    SWAGGER_LOGIN = "/login/"
+    SWAGGER_LOGIN: str = "/login/"
     SWAGGER_DOCS_URL: Optional[str] = None
     SWAGGER_REDOC_URL: Optional[str] = None
     OPENAPI_URL: str = "/openapi.json"

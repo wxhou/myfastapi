@@ -64,14 +64,14 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
 
 
 
-@router.post("/text/audio", summary="文本转语音")
-def text_to_audio(args:InputText,
-                request: Request):
-    engine = pyttsx3.init()
-    filename = f"/upload/{uuid.uuid4()}.mp3"
-    engine.save_to_file(args.text, '.' + filename)
-    engine.runAndWait()
-    return response_ok(data={'url': filename})
+# @router.post("/text/audio", summary="文本转语音")
+# def text_to_audio(args:InputText,
+#                 request: Request):
+#     engine = pyttsx3.init()
+#     filename = f"/upload/{uuid.uuid4()}.mp3"
+#     engine.save_to_file(args.text, '.' + filename)
+#     engine.runAndWait()
+#     return response_ok(data={'url': filename})
 
 
 @router.get("/routes", summary="所有路由", deprecated=True)

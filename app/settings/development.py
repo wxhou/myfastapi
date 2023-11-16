@@ -1,12 +1,12 @@
 import os
 import logging
-from typing import List, Optional, Dict, Set
-from pydantic import BaseSettings
+from typing import List, Optional, Dict, Set, ClassVar
+from pydantic_settings import BaseSettings
 
 
 class DevelopmentSettings(BaseSettings):
     """"开发设置"""
-    PROJECT_NAME = 'weblog'
+    PROJECT_NAME: ClassVar = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
     SERVER_HOST: str = '127.0.0.1'
@@ -78,7 +78,7 @@ class DevelopmentSettings(BaseSettings):
 
     # swagger
     SERVERS: Optional[List] = None
-    SWAGGER_LOGIN = "/login/"
+    SWAGGER_LOGIN: str = "/login/"
     SWAGGER_DOCS_URL: str = '/docs'
     SWAGGER_REDOC_URL: str = '/redocs'
     OPENAPI_URL: str = "/openapi.json"

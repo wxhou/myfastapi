@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, EmailStr
 class UserRegister(BaseModel):
     """注册用户"""
     username: str = Field(title='用户名', min_length=1, max_length=16)
-    password: str = Field(title='密码', regex=r'[A-Za-z0-9]', min_length=8, max_length=16)
+    password: str = Field(title='密码', pattern=r'[A-Za-z0-9]', min_length=8, max_length=16)
     nickname: str = Field(title='昵称', min_length=1, max_length=16)
     email: Optional[EmailStr] = Field(default=None, title='邮箱')
 

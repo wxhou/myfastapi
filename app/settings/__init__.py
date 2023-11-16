@@ -17,6 +17,7 @@ def get_settings():
     }
     if env is None or env not in env_config:
         raise EnvironmentError("MY_WEBLOG_ENV is Undefined!")
+    print(env)
     return env_config[env]
 
 
