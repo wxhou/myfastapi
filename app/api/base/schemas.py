@@ -16,3 +16,8 @@ class RefreshToken(BaseModel):
 class TokenData(BaseModel):
     """token data"""
     username: Optional[str] = None
+
+
+class InputText(BaseModel):
+    """输入文本"""
+    text: str = Field(max_length=2048, title='内容')

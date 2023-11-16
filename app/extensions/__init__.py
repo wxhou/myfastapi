@@ -1,4 +1,4 @@
-from typing import Annotated, AsyncGenerator
+from typing import AsyncGenerator
 import motor.motor_asyncio
 from fastapi import FastAPI, Request, Depends
 from slowapi import Limiter
@@ -28,9 +28,6 @@ async def get_mongo(request: Request) -> MongoClient:
     return request.app.state.mongo
 
 
-async_db = Annotated[AsyncSession, Depends(get_db)]
-async_redis = Annotated[AsyncRedis, Depends(get_redis)]
-async_mongo = Annotated[MongoClient, Depends(get_mongo)]
 limiter = Limiter(key_func=get_ipaddr)
 
 

@@ -1,10 +1,9 @@
-from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import Request, Depends, Security
 from fastapi.security import SecurityScopes, OAuth2PasswordBearer
 from app.settings import settings
-from app.extensions import async_db, async_redis
+from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.common.security import verify_password, decrypt_access_token
 from app.common.error import UserNotExist, UserNotActive, PermissionError, TokenExpiredError
 from app.utils.logger import logger
@@ -15,9 +14,9 @@ from .schemas import TokenData
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.SWAGGER_LOGIN)
 
-async def get_current_user(db: async_db,
-                           redis: async_redis,
-                           token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(db: AsyncSession = Depends(get_db),
+                           redis: AsyncRedis = Depends(get_redis),
+                           token: str = Depends(oauth2_scheme)):
     """获取当前登录用户"""
     is_token_alive = await redis.exists("weblog_access_token_{}".format(token))
     if not is_token_alive:
@@ -31,13 +30,11 @@ async def get_current_user(db: async_db,
         raise UserNotExist
     return obj
 
-CurrentUser = Annotated[BaseUser, Depends(get_current_user)]
-
 async def get_current_active_user(
     security_scopes: SecurityScopes,
-    db: async_db,
-    redis: async_redis,
-    current_user: CurrentUser):
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Depends(get_current_user)):
     """
     获取激活用户
     """

@@ -11,6 +11,7 @@ redbeat_redis_url: str = settings.CELERY_BROKER_URL
 redbeat_key_prefix: str = 'celery:redbeat'
 redbeat_lock_timeout: int = 300
 beat_max_loop_interval: int = 5
+broker_connection_retry_on_startup: bool= True
 result_serializer: str = "json"
 accept_content: List[str] = ['json']
 timezone: str = "Asia/Shanghai"
@@ -23,8 +24,11 @@ broker_transport_options = {
     'visibility_timeout': 6*60*60,
     'max_retries': 3
 }
+
+task_default_queue = 'celery'
+task_default_routing_key = task_default_queue
 task_queues: Tuple[Queue] = (
-    Queue('celery', routing_key='celery'),
+    Queue(task_default_queue, routing_key=task_default_routing_key),
     Queue('transient', Exchange('transient', delivery_mode=1), # delivery_mode=1不会写入磁盘
           routing_key='transient', durable=False), # task.apply_async((2,3), queue='transient', ignore_result=True)
 )

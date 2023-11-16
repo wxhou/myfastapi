@@ -1,4 +1,3 @@
-from typing import Annotated
 import json
 from celery.schedules import crontab
 from sqlalchemy import func, or_, select, update
@@ -7,7 +6,7 @@ from app.settings import settings
 from app.common.pagation import PageNumberPagination
 from app.core.celery_app import redis_scheduler_entry
 from app.common.response import ErrCode, response_ok, response_err
-from app.extensions import async_db, async_redis, limiter, websocket
+from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis, limiter, websocket
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.api.user.model import BaseUser
@@ -22,8 +21,8 @@ router_goods_admin = APIRouter()
 
 @router_goods_admin.get('/category/', summary='商品分类列表')
 async def goods_category_list(request: Request,
-                        db: async_db,
-                        current_user: Annotated[BaseUser, Security(get_current_active_user)]):
+                        db: AsyncSession = Depends(get_db),
+                        current_user: BaseUser = Security(get_current_active_user)):
     """商品分类列表"""
     query_filter = [GoodsCategory.status == 0]
     objs = await db.scalars(select(GoodsCategory).filter(*query_filter))
@@ -33,7 +32,7 @@ async def goods_category_list(request: Request,
 
 @router_goods_admin.get('/list/', summary='商品列表')
 async def goods_list(request: Request,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         page: int = Query(1, ge=1, description="Page number"),
         page_size: int = Query(settings.PER_PAGE_NUMBER, ge=1, le=10000, description="Page size"),
         search: str = Query(default=None)):
@@ -47,8 +46,8 @@ async def goods_list(request: Request,
 
 @router_goods_admin.get('/info/', summary='商品详情')
 async def goods_info(request: Request,
-                    db: async_db,
-                    redis: async_redis,
+                    db: AsyncSession = Depends(get_db),
+                    redis: AsyncRedis = Depends(get_redis),
                     goods_id: int = Query(..., description='商品ID')):
     obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
@@ -63,8 +62,8 @@ async def goods_info(request: Request,
 async def goods_insert(
         request: Request,
         goods: GoodsInsert,
-        db: async_db,
-        redis: async_redis,
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         current_user: BaseUser = Security(get_current_active_user, scopes=['goods_insert'])):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
@@ -82,10 +81,10 @@ async def goods_insert(
 @router_goods_admin.put('/update/', summary='更新商品')
 async def goods_update(
         request: Request,
-        db: async_db,
-        redis: async_redis,
         goods: GoodsUpdate,
         goods_id: int = Query(default=True, ge=1, title='商品ID'),
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         current_user: BaseUser = Security(get_current_active_user, scopes=['goods_update'])):
     """更新用户信息"""
     args = goods.dict(exclude_none=True)
@@ -102,7 +101,7 @@ async def goods_update(
 @router_goods_admin.delete('/delete/', summary='删除商品')
 async def goods_delete(
         request: Request,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         goods_id: int = Query(ge=1, title='商品ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['goods_delete'])):
     """更新用户信息"""

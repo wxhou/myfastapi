@@ -50,7 +50,7 @@ async def index():
     return HTMLResponse(html)
 
 
-@router_message_admin.websocket('/ws/{client_id}')
+@router_message_admin.websocket_route() websocket('/ws/{client_id}')
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket, client_id)
     try:

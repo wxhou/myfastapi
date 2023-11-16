@@ -3,7 +3,7 @@ from datetime import timedelta
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Security, Form
 from fastapi.responses import Response
-from app.extensions import async_db, async_redis
+from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -22,7 +22,7 @@ router_trade_admin = APIRouter()
 
 @router_trade_admin.get('/shopping/chart/', summary='购物车列表')
 async def trade_shopping_list(request: Request,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         page: int = Query(default=1, ge=1),
         page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_list'])):
@@ -45,8 +45,8 @@ async def trade_shopping_list(request: Request,
 @router_trade_admin.post('/shopping/insert/', summary='购物车新增商品')
 async def trade_shopping_insert(request: Request,
         args: ShoppingChartInsert,
-        db: async_db,
-        redis: async_redis,
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_insert'])):
     """购物车新增"""
     _key_name = f"goods_num_{args.goods_id}"
@@ -74,8 +74,8 @@ async def trade_shopping_insert(request: Request,
 
 @router_trade_admin.delete('/shopping/delete/', summary='购物车删除商品')
 async def trade_shopping_delete(request: Request,
-        db: async_db,
-        redis: async_redis,
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         goos_id: int = Query(title='商品ID', ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_delete'])):
     """购物车删除"""
@@ -96,8 +96,8 @@ async def trade_shopping_delete(request: Request,
 @router_trade_admin.post('/order/insert/', summary='新增订单')
 async def trade_order_insert(request: Request,
         args: ShoppingOrderInsert,
-        db: async_db,
-        redis: async_redis,
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_insert'])):
     """新增订单"""
     obj = ShoppingOrder(user_id=current_user.id,
@@ -120,8 +120,8 @@ async def trade_order_insert(request: Request,
 
 @router_trade_admin.get('/order/info/', summary='订单详情')
 async def trade_order_info(request: Request,
-        db: async_db,
-        redis: async_redis,
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         order_id : int = Query(description='订单ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])):
     """详情订单"""
@@ -148,8 +148,8 @@ async def trade_order_info(request: Request,
 
 @router_trade_admin.get('/order/pay/', summary='订单支付')
 async def trade_order_pay(request: Request,
-        db: async_db,
-        redis: async_redis,
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         order_id : int = Query(description='订单ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])):
     """详情订单"""
@@ -190,8 +190,8 @@ async def trade_order_notice(data: dict):
 
 @router_trade_admin.delete('/order/delete/', summary='删除订单')
 async def trade_order_delete(request: Request,
-        db: async_db,
-        redis: async_redis,
+        db: AsyncSession = Depends(get_db),
+        redis: AsyncRedis = Depends(get_redis),
         order_id: int = Query(title='订单ID', ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_delete'])):
     """删除订单"""

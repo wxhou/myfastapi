@@ -1,9 +1,9 @@
 import os
 from typing import Dict
 from functools import lru_cache
-from .development import DevelopmentSettings
-from .testing import TestingSettings
-from .production import ProductionSettings
+from app.settings.development import DevelopmentSettings
+from app.settings.testing import TestingSettings
+from app.settings.production import ProductionSettings
 
 
 @lru_cache()

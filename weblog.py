@@ -33,9 +33,8 @@ app = FastAPI(
 )
 
 from app.core.middleware import register_middleware
-from fastapi_pagination import add_pagination
+
 register_middleware(app)
-add_pagination(app)
 
 if __name__ == '__main__':
     import uvicorn

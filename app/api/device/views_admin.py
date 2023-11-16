@@ -1,7 +1,7 @@
 from math import ceil
 from sqlalchemy import func, select, update
-from fastapi import APIRouter, Request, Query, Body, Security
-from app.extensions import async_db, async_redis
+from fastapi import APIRouter, Request, Query, Body, Security, Depends
+from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -18,7 +18,7 @@ router_device_admin = APIRouter()
 @router_device_admin.post('/insert/', summary='创建设备')
 async def device_insert(request: Request,
         args: DeviceInsert,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         current_user: BaseUser = Security(get_current_active_user, scopes=['device_insert'])):
     """新建设备"""
     obj = await db.scalar(select(DeviceInfo.id).filter(DeviceInfo.device_ip_addr==args.device_ip_addr,
@@ -37,7 +37,7 @@ async def device_insert(request: Request,
 @router_device_admin.put('/update/', summary='更新设备')
 async def device_update(request: Request,
         args: DeviceUpdate,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         device_id: int = Query(title='设备ID', ge=1),
         current_user: BaseUser = Security(get_current_active_user, scopes=['device_modify'])):
     """修改设备"""
@@ -56,7 +56,7 @@ async def device_update(request: Request,
 @router_device_admin.get('/list/', summary='设备列表')
 async def device_list(
         request: Request,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         page: int = Query(default=1, ge=1, title='页码'),
         page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1, title='每页数量'),
         device_name: str = Query(default=None, title='设备名称'),
@@ -76,7 +76,7 @@ async def device_list(
 @router_device_admin.get('/info/', summary='设备详情')
 async def device_info(
         request: Request,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         id : int = Query(description='设备ID'),
         current_user: BaseUser = Security(get_current_active_user,scopes=['device_info'])):
     """设备详情信息"""
@@ -90,7 +90,7 @@ async def device_info(
 @router_device_admin.delete('/delete/', summary='删除设备')
 async def device_delete(
         request: Request,
-        db: async_db,
+        db: AsyncSession = Depends(get_db),
         device_id : int = Query(description='设备ID'),
         current_user: BaseUser = Security(get_current_active_user, scopes=['device_delete'])):
     """删除设备"""

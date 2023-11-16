@@ -1,13 +1,13 @@
 import os
-import sys
-import aiofiles
+import uuid
+import pyttsx3
 import subprocess
 from uuid import uuid4
-from typing import Optional, Annotated
+from typing import Optional
 from anyio import Path
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
-from app.extensions import async_db, async_redis
+from app.extensions import get_db, AsyncSession
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.decorator import async_to_sync
@@ -15,6 +15,7 @@ from app.utils.logger import logger
 from app.utils.times import dt_strftime, now, timedelta
 from app.api.user.model import BaseUser, BasePermission
 from .model import UploadModel
+from .schemas import InputText
 from .auth import get_current_active_user
 from .tasks import verify_upload_file_is_exists
 
@@ -23,8 +24,8 @@ router = APIRouter()
 
 
 @router.post("/upload/", summary='上传文件')
-async def create_upload_file(file: Annotated[UploadFile, File()],
-                             db: async_db,
+async def create_upload_file(db: AsyncSession = Depends(get_db),
+                             file: UploadFile = File(),
                              md5 = Form(..., description="文件MD5值"),
                              current_user: BaseUser = Depends(get_current_active_user)):
     """上传文件"""
@@ -63,9 +64,19 @@ async def create_upload_file(file: Annotated[UploadFile, File()],
 
 
 
+@router.post("/text/audio", summary="文本转语音")
+def text_to_audio(args:InputText,
+                request: Request):
+    engine = pyttsx3.init()
+    filename = f"/upload/{uuid.uuid4()}.mp3"
+    engine.save_to_file(args.text, '.' + filename)
+    engine.runAndWait()
+    return response_ok(data={'url': filename})
+
+
 @router.get("/routes", summary="所有路由", deprecated=True)
 async def api_routes(request: Request,
-                     db: async_db):
+                     db: AsyncSession = Depends(get_db)):
     result = []
     number = 1
     for route in request.app.routes:
