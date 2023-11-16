@@ -68,6 +68,12 @@ def text_to_audio(args:InputText,
                 request: Request):
     import pyttsx3
     engine = pyttsx3.init()
+    engine.setProperty('voice', 'zh') #开启支持中文
+
+    # 改变语速  范围为0-200   默认值为200
+    rate = engine.getProperty('rate')  #获取当前语速
+    engine.setProperty('rate', rate-40)
+
     filename = f"/upload/{uuid.uuid4()}.mp3"
     engine.save_to_file(args.text, '.' + filename)
     engine.runAndWait()
