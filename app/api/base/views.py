@@ -1,11 +1,10 @@
 import os
 import uuid
-import subprocess
 from uuid import uuid4
 from typing import Optional
 from anyio import Path
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
+from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header, BackgroundTasks
 from app.extensions import get_db, AsyncSession
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
@@ -65,32 +64,22 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
 
 @router.post("/text/audio", summary="文本转语音")
 def text_to_audio(args:InputText,
-                request: Request):
-    import pyttsx3
-    engine = pyttsx3.init()
-    engine.setProperty('voice', 'zh') #开启支持中文
+                background_tasks: BackgroundTasks):
+    import edge_tts
 
-    # 改变语速  范围为0-200   默认值为200
-    rate = engine.getProperty('rate')  #获取当前语速
-    engine.setProperty('rate', rate-40)
-    # 获取可用的语音列表
-    voices = engine.getProperty("voices")
-
-    # 设置中文女声
-    chinese_female_voice = None
-    for voice in voices:
-        if "chinese" in voice.languages and "female" in voice.gender.lower():
-            chinese_female_voice = voice.id
-            break
-
-    if chinese_female_voice is not None:
-        engine.setProperty("voice", chinese_female_voice)
+    if not args.text:
+        TEXT = "你好哟，我是智能语音助手，小伊"
     else:
-        logger.info("找不到中文女声，使用默认语音")
-    filename = f"/upload/{uuid.uuid4()}.mp3"
-    engine.save_to_file(args.text, '.' + filename)
-    engine.runAndWait()
-    return response_ok(data={'url': filename})
+        TEXT = args.text
+    VOICE = "zh-CN-XiaoyiNeural"
+    OUTPUT_FILE = f"/upload/{uuid.uuid4()}.mp3"
+
+
+    async def _main() -> None:
+        communicate = edge_tts.Communicate(TEXT, VOICE)
+        await communicate.save('.' + OUTPUT_FILE)
+    background_tasks.add_task(_main)
+    return response_ok(data={'url': OUTPUT_FILE})
 
 
 @router.get("/routes", summary="所有路由", deprecated=True)
