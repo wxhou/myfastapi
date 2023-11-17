@@ -64,10 +64,12 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
 
 
 @router.get("/text/audio", summary="文本转语音")
-async def text_to_audio(text: str = Query(default='你好哟，我是智能语音助手，小布', max_length=500, description='合成的文本'),
+async def text_to_audio(text: str = Query(..., example='你好哟，我是智能语音助手，小布', max_length=500),
+                        lang: str = Query(default='zh', title="选择语言", description='zh中文|en英文', pattern=r'zh|en'),
                         redis: AsyncRedis = Depends(get_redis)):
 
-    VOICE = "zh-CN-XiaoxiaoNeural"
+    VOICE = settings.EDGE_VOICE_LANG[lang]
+
     audio_dir = os.path.join(settings.UPLOAD_MEDIA_FOLDER, 'navigation')
     if not os.path.exists(audio_dir):
         os.makedirs(audio_dir)
