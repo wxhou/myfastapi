@@ -82,4 +82,4 @@ class TestingSettings(BaseSettings):
     SWAGGER_SCHEMAS: Dict[str, int] = {"defaultModelsExpandDepth": -1}
     SWAGGER_UI_PARAMETERS: str = f'/{PROJECT_NAME}/docs/oauth2-redirect'
 
-    EDGE_VOICE_LANG: Dict[str, str] = {"zh": "zh-CN-XiaoxiaoNeural", 'en': 'en-US-MichelleNeural'}
+    EDGE_VOICE_LANG: Dict[str, str] = {"zh": "zh-CN-XiaoxiaoNeural", 'en': 'en-CA-ClaraNeural'}

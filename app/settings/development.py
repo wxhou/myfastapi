@@ -89,4 +89,4 @@ class DevelopmentSettings(BaseSettings):
     SWAGGER_UI_PARAMETERS: str = '/docs/oauth2-redirect'
 
 
-    EDGE_VOICE_LANG: Dict[str, str] = {"zh": "zh-CN-XiaoxiaoNeural", 'en': 'en-US-MichelleNeural'}
+    EDGE_VOICE_LANG: Dict[str, str] = {"zh": "zh-CN-XiaoxiaoNeural", 'en': 'en-CA-ClaraNeural'}
