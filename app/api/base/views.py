@@ -74,7 +74,7 @@ async def text_to_audio(text: str = Query(..., example='你好哟，我是智能
     if not os.path.exists(audio_dir):
         os.makedirs(audio_dir)
     res = await redis.get(VOICE + text)
-    if res:
+    if res and os.path.exists(res.decode()):
         logger.info("VOICE IS: {}".format(res))
         return FileResponse(res, media_type="audio/mpeg")
 
