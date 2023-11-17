@@ -68,12 +68,18 @@ async def text_to_audio(text: str = Query(default='你好哟，我是智能语�
     import edge_tts
 
     VOICE = "zh-CN-XiaoxiaoNeural"
-    OUTPUT_FILE = f"/upload/{uuid.uuid4()}.mp3"
+    audio_dir = os.path.join(settings.UPLOAD_MEDIA_FOLDER, 'navigation')
+    if not os.path.exists(audio_dir):
+        os.makedirs(audio_dir)
+
+
+    FILE_NAME = f"{uuid.uuid4()}.mp3"
+    OUTPUT_FILE = os.path.join(audio_dir, FILE_NAME)
 
     communicate = edge_tts.Communicate(text, VOICE)
-    await communicate.save('.' + OUTPUT_FILE)
-    logger.info("OUTPUT_FILE: {}".format(OUTPUT_FILE))
-    return FileResponse("."+ OUTPUT_FILE, media_type="audio/mpeg")
+    await communicate.save(OUTPUT_FILE)
+    logger.info("OUTPUT_FILE: {}".format(os.path.basename(OUTPUT_FILE)))
+    return FileResponse(OUTPUT_FILE, media_type="audio/mpeg")
 
 
 @router.get("/routes", summary="所有路由", deprecated=True)

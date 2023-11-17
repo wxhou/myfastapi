@@ -17,6 +17,7 @@ class ProductionSettings(BaseSettings):
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[str] = ['http://localhost']
     PER_PAGE_NUMBER: int = 15
+    PROFILING_ENABLED: bool=False
 
     # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
