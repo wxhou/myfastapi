@@ -64,7 +64,7 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
 
 
 @router.get("/text/audio", summary="文本转语音")
-async def text_to_audio(text: str = Query(default='你好哟，我是智能语音助手，小布', max_length=50, description='合成的文本')):
+async def text_to_audio(text: str = Query(default='你好哟，我是智能语音助手，小布', max_length=500, description='合成的文本')):
     import edge_tts
 
     VOICE = "zh-CN-XiaoxiaoNeural"
