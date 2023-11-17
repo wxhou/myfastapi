@@ -4,7 +4,8 @@ from uuid import uuid4
 from typing import Optional
 from anyio import Path
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header, BackgroundTasks
+from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
+from fastapi.responses import FileResponse
 from app.extensions import get_db, AsyncSession
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
@@ -62,24 +63,17 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
 
 
 
-@router.post("/text/audio", summary="文本转语音")
-def text_to_audio(args:InputText,
-                background_tasks: BackgroundTasks):
+@router.get("/text/audio", summary="文本转语音")
+async def text_to_audio(text: str = Query(default='你好哟，我是智能语音助手，小布', max_length=50, description='合成的文本')):
     import edge_tts
 
-    if not args.text:
-        TEXT = "你好哟，我是智能语音助手，小伊"
-    else:
-        TEXT = args.text
-    VOICE = "zh-CN-XiaoyiNeural"
+    VOICE = "zh-CN-XiaoxiaoNeural"
     OUTPUT_FILE = f"/upload/{uuid.uuid4()}.mp3"
 
-
-    async def _main() -> None:
-        communicate = edge_tts.Communicate(TEXT, VOICE)
-        await communicate.save('.' + OUTPUT_FILE)
-    background_tasks.add_task(_main)
-    return response_ok(data={'url': OUTPUT_FILE})
+    communicate = edge_tts.Communicate(text, VOICE)
+    await communicate.save('.' + OUTPUT_FILE)
+    logger.info("OUTPUT_FILE: {}".format(OUTPUT_FILE))
+    return FileResponse("."+ OUTPUT_FILE, media_type="audio/mpeg")
 
 
 @router.get("/routes", summary="所有路由", deprecated=True)
