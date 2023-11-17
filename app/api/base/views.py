@@ -1,12 +1,12 @@
 import os
-import uuid
+import edge_tts
 from uuid import uuid4
 from typing import Optional
 from anyio import Path
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
 from fastapi.responses import FileResponse
-from app.extensions import get_db, AsyncSession
+from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.decorator import async_to_sync
@@ -64,21 +64,25 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
 
 
 @router.get("/text/audio", summary="文本转语音")
-async def text_to_audio(text: str = Query(default='你好哟，我是智能语音助手，小布', max_length=500, description='合成的文本')):
-    import edge_tts
+async def text_to_audio(text: str = Query(default='你好哟，我是智能语音助手，小布', max_length=500, description='合成的文本'),
+                        redis: AsyncRedis = Depends(get_redis)):
 
     VOICE = "zh-CN-XiaoxiaoNeural"
     audio_dir = os.path.join(settings.UPLOAD_MEDIA_FOLDER, 'navigation')
     if not os.path.exists(audio_dir):
         os.makedirs(audio_dir)
+    res = await redis.get(VOICE + text)
+    if res:
+        logger.info("VOICE IS: {}".format(res))
+        return FileResponse(res, media_type="audio/mpeg")
 
-
-    FILE_NAME = f"{uuid.uuid4()}.mp3"
+    FILE_NAME = f"{uuid4()}.mp3"
     OUTPUT_FILE = os.path.join(audio_dir, FILE_NAME)
 
     communicate = edge_tts.Communicate(text, VOICE)
     await communicate.save(OUTPUT_FILE)
     logger.info("OUTPUT_FILE: {}".format(os.path.basename(OUTPUT_FILE)))
+    await redis.set(VOICE + text, OUTPUT_FILE, ex=24*60*60)
     return FileResponse(OUTPUT_FILE, media_type="audio/mpeg")
 
 
