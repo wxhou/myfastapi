@@ -1,6 +1,7 @@
 import os
 import edge_tts
 from uuid import uuid4
+from random import randint
 from typing import Optional
 from anyio import Path
 from sqlalchemy import select
@@ -66,6 +67,7 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
 @router.get("/text/audio", summary="文本转语音")
 async def text_to_audio(text: str = Query(..., example='你好哟，我是智能语音助手，小布', max_length=500),
                         lang: str = Query(default='zh', title="选择语言", description='zh中文|en英文', pattern=r'zh|en'),
+                        model: str = Query(default=None, title='选择模型', description='edge|pyttsx3', pattern='edge|pyttsx3'),
                         redis: AsyncRedis = Depends(get_redis)):
 
     VOICE = settings.EDGE_VOICE_LANG[lang]
@@ -84,7 +86,7 @@ async def text_to_audio(text: str = Query(..., example='你好哟，我是智能
     communicate = edge_tts.Communicate(text, VOICE)
     await communicate.save(OUTPUT_FILE)
     logger.info("OUTPUT_FILE: {}".format(os.path.basename(OUTPUT_FILE)))
-    await redis.set(VOICE + text, OUTPUT_FILE, ex=24*60*60)
+    await redis.set(VOICE + text, OUTPUT_FILE, ex=randint(6*24*60*60, 7*24*60*60))
     return FileResponse(OUTPUT_FILE, media_type="audio/mpeg")
 
 

@@ -55,5 +55,8 @@ beat_schedule = {
         'args': ('world',),
 
     },
-
+    "delete-old-text2audio": {
+        'task': 'app.api.tasks.delete_old_text2audio',
+        'schedule': crontab(hour=9, minute=30, day_of_week=1)
+    }
 }

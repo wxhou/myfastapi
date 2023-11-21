@@ -1,10 +1,11 @@
 from celery import Celery
 from redbeat.schedulers import RedBeatSchedulerEntry
-from app.settings import settings, celery_settings
+from app.core import celery_conf
+from app.settings import settings
 
 
 celery = Celery(settings.PROJECT_NAME)
-celery.config_from_object(celery_settings)
+celery.config_from_object(celery_conf)
 
 # shell
 # celery -A  app.core.celery_app.celery worker -l info | debug

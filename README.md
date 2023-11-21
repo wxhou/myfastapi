@@ -91,14 +91,14 @@ https://hellowac.github.io/alembic_doc/zh/_front_matter.html
 #### 简单示例
 https://www.jianshu.com/p/942e270baf65
 
-如果迁移文件夹不存在是，执行这个命令
+如果迁移文件夹不存在，执行这个命令
 ```shell
 alembic init alembic
 ```
 
 将当前的模型生成迁移文件
 ```shell
-alembic revision --autogenerate -m "first" 将当前模型中的状态生成迁移文件
+alembic revision --autogenerate -m "first"
 ```
 
 
