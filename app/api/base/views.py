@@ -78,6 +78,7 @@ async def text_to_audio(text: str = Query(..., example='你好哟，我是智能
     res = await redis.get(VOICE + text)
     if res and os.path.exists(res.decode()):
         logger.info("VOICE IS: {}".format(res))
+        await redis.expire(VOICE + text, randint(6*24*60*60, 7*24*60*60))
         return FileResponse(res, media_type="audio/mpeg")
 
     FILE_NAME = f"{uuid4()}.mp3"
