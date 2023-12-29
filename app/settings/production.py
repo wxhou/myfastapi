@@ -19,9 +19,9 @@ class ProductionSettings(BaseSettings):
     PER_PAGE_NUMBER: int = 15
     PROFILING_ENABLED: bool=False
 
-    # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
+    # SQLALCHEMY_DATABASE_ASYNC_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = "mysql+asyncmy://root:root1234@127.0.0.1:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_DATABASE_ASYNC_URL: str = "mysql+asyncmy://root:root1234@127.0.0.1:3306/db_weblog?charset=utf8"
     # MySQL(同步)
     SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@127.0.0.1:3306/db_weblog?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20

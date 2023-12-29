@@ -42,7 +42,7 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) 
     return encoded_jwt
 
 
-async def decrypt_access_token(token: str)-> Union[str, Any]:
+def decrypt_access_token(token: str)-> Union[str, Any]:
     """ 解密token """
     if not token:
         raise JWTError
@@ -56,7 +56,7 @@ async def decrypt_access_token(token: str)-> Union[str, Any]:
     return username, uid
 
 
-async def decrypt_refresh_token(token: str)-> Union[str, Any]:
+def decrypt_refresh_token(token: str)-> Union[str, Any]:
     """ 解密token """
     if not token:
         raise JWTError

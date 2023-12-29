@@ -21,7 +21,7 @@ async def get_current_user(db: AsyncSession = Depends(get_db),
     is_token_alive = await redis.exists("weblog_access_token_{}".format(token))
     if not is_token_alive:
         raise TokenExpiredError
-    username, uid = await decrypt_access_token(token)
+    username, uid = decrypt_access_token(token)
     token_data = TokenData(username=username)
     obj = await db.scalar(select(BaseUser).where(BaseUser.id==uid,
                                                  BaseUser.username == token_data.username,

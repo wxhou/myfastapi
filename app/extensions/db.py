@@ -2,12 +2,22 @@
 
 from asyncio import current_task
 from sqlalchemy.sql.dml import Update, Delete
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session, async_sessionmaker
 from app.settings import settings
 
 
-engine = create_async_engine(
-    url=settings.ASYNC_SQLALCHEMY_DATABASE_URL,
+engine = create_engine(
+    url=settings.SQLALCHEMY_DATABASE_ASYNC_URL,
+    pool_size=settings.SQLALCHEMY_POOL_SIZE,
+    echo=settings.SQLALCHEMY_ECHO
+)
+session = sessionmaker(engine)
+
+
+async_engine = create_async_engine(
+    url=settings.SQLALCHEMY_DATABASE_ASYNC_URL,
     pool_size=settings.SQLALCHEMY_POOL_SIZE,
     echo=settings.SQLALCHEMY_ECHO,
     future=True
@@ -17,13 +27,13 @@ class AsyncRoutingSession(AsyncSession):
     """读写分离"""
     def get_bind(self, mapper=None, clause=None, **kw):
         if self._flushing or isinstance(clause, (Update, Delete)):
-            return engine
+            return async_engine
         else:
-            return engine
+            return async_engine
 
 
 async_session_factory = async_sessionmaker(
-    bind=engine,
+    bind=async_engine,
     expire_on_commit=False # 防止提交后属性过期
 )
 

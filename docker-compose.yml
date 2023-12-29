@@ -1,10 +1,64 @@
 version: '3'
+
+networks:
+  backend_network:
+
 services:
-    myfastapi:
-      build: .
+    api:
+      build:
+        context: .
+        args:
+          my_weblog_env: ${MY_WEBLOG_ENV}
       container_name: myfastapi
+      command: gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 300
+      env_file:
+        - .env
+      logging:
+        driver: json-file
+        options:
+          max-size: 10m
+          max-file: "10"
+      depends_on:
+        - redis_server
+      volumes:
+        - ${LOG_VOLUMES_DIR}:/myfastapi/logs
       ports:
-        - "8199:8199"
+        - "8199:8000"
+      networks:
+        - backend_network
       restart: always
-      environment:
-        - MY_WEBLOG_ENV=development
+
+    celery_worker:
+      build:
+        context: .
+        args:
+          my_weblog_env: ${MY_WEBLOG_ENV}
+      command: celery -A app.core.celery_app.celery worker -B --loglevel info
+      container_name: celery_worker
+      env_file:
+        - .env
+      logging:
+        driver: json-file
+        options:
+          max-size: 10m
+          max-file: "5"
+      depends_on:
+        - redis_server
+      networks:
+        - backend_network
+      restart: always
+      stop_signal: TERM  # 容器终止信号，TERM信号平滑退出
+
+    redis_server:
+      image: redis:6.2.2
+      container_name: myfastapiredis
+      volumes:
+        - ${DATA_VOLUMES_DIR}/redis:/data # 通过挂载给redis数据备份
+      logging:
+        driver: json-file
+        options:
+          max-size: 10m
+          max-file: "1"
+      networks:
+        - backend_network
+      restart: always

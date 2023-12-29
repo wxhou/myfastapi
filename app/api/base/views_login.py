@@ -1,5 +1,4 @@
 from datetime import timedelta
-from tempfile import NamedTemporaryFile
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, Request, File, UploadFile
 from fastapi.responses import JSONResponse
@@ -51,7 +50,7 @@ async def login_refresh_token(
 ):
     """登录接口"""
 
-    username, uid = await decrypt_refresh_token(data.refresh_token)
+    username, uid = decrypt_refresh_token(data.refresh_token)
     _key_name = 'weblog_login_temporary'
     res = await redis.get_pickle(_key_name)
     if res:

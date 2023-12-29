@@ -7,21 +7,12 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from starlette_csrf import CSRFMiddleware
-from starlette.authentication import AuthCredentials, AuthenticationBackend, SimpleUser
-from starlette.middleware.authentication import AuthenticationMiddleware
 from pyinstrument import Profiler
 from pyinstrument.renderers.html import HTMLRenderer
 from pyinstrument.renderers.speedscope import SpeedscopeRenderer
 
 from app.settings import settings
-from app.extensions.db import async_session
-from app.utils.logger import logger
-from app.common.error import UserNotExist, TokenExpiredError
-from app.common.response import ErrCode, response_err
-from app.common.security import decrypt_access_token
-from app.api.base.schemas import TokenData
-from app.api.user.model import BaseUser
+
 
 # 权限验证 https://www.cnblogs.com/mazhiyong/p/13433214.html
 # 得到真实ip https://stackoverflow.com/questions/60098005/fastapi-starlette-get-client-real-ip

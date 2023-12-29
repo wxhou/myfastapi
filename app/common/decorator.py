@@ -2,7 +2,7 @@ import sys, asyncio
 from functools import wraps
 from app.utils.times import sleep
 from asgiref.sync import sync_to_async, async_to_sync # NO DEL
-from app.extensions.redis import redis
+from app.extensions.redis import redis_client
 
 
 def sync_run_async(func):
@@ -30,19 +30,21 @@ def sync_run_async(func):
 
 
 def singe_task(lock_name: str, seconds: int=60*60):
-    """只运行一次任务"""
+    """只运行一次任务
+    APScheduler专用函数
+    """
     def rlock(func):
         if asyncio.iscoroutinefunction(func):
             @wraps(func)
             async def wrapper(*args, **kwargs):
-                with redis.lock(lock_name, blocking_timeout=seconds):
+                with redis_client.lock(lock_name, blocking_timeout=seconds):
                     ret = await func(*args, **kwargs)
                     return ret
             return wrapper
         else:
             @wraps(func)
             def wrapper(*args, **kwargs):
-                with redis.lock(lock_name, blocking_timeout=seconds):
+                with redis_client.lock(lock_name, blocking_timeout=seconds):
                     return func(*args, **kwargs)
             return wrapper
     return rlock

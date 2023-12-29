@@ -1,22 +1,35 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, applications
+from fastapi.openapi.docs import get_swagger_ui_html
 from app.settings import settings
+from app.utils.logger import logger
 
+
+def swagger_monkey_patch(*args, **kwargs):
+    """
+    Wrap the function which is generating the HTML for the /docs endpoint and
+    overwrite the default values for the swagger js and css.
+    """
+    return get_swagger_ui_html(
+        *args, **kwargs,
+        swagger_js_url="https://cdn.staticfile.org/swagger-ui/5.9.0/swagger-ui-bundle.min.js",
+        swagger_css_url="https://cdn.staticfile.org/swagger-ui/5.9.0/swagger-ui.min.css")
+
+applications.get_swagger_ui_html = swagger_monkey_patch
 
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Load
-    from app.core.exceptions import register_exceptions
+    logger.info("Load Start Event!")
     from app.extensions import register_extensions
     from app.api.router import register_router
-    register_exceptions(app)
-    await register_extensions(app)
+    register_extensions(app)
     register_router(app)
     yield
     # Clean
-    await app.state.redis.close()  # 关闭 redis
+    logger.info("Clean End Event!")
 
 
 app = FastAPI(
@@ -33,8 +46,10 @@ app = FastAPI(
 )
 
 from app.core.middleware import register_middleware
+from app.core.exceptions import register_exceptions
 
 register_middleware(app)
+register_exceptions(app)
 
 if __name__ == '__main__':
     import uvicorn

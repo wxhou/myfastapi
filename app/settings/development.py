@@ -9,34 +9,34 @@ class DevelopmentSettings(BaseSettings):
     PROJECT_NAME: ClassVar = 'weblog'
     BASEDIR: str = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     DEBUG: bool = True
-    SERVER_HOST: str = '127.0.0.1'
     PORT: int = 8199
     RELOAD: bool = True
-    SECRET_KEY: str = 's2JNHjKeZCj5b2brh4so34'
+    SECRET_KEY: str = os.getenv('SECRET_KEY')
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: List[str] = ['*']
     PER_PAGE_NUMBER: int = 15
     PROFILING_ENABLED: bool=True
 
-    # ASYNC_SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
+    REDIS_CONF: ClassVar = os.getenv("REDIS_CONF")
+    # SQLALCHEMY_DATABASE_ASYNC_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
     # MySQL(异步)
-    ASYNC_SQLALCHEMY_DATABASE_URL: str = f"mysql+asyncmy://root:yunjingtest@192.168.0.100:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_DATABASE: ClassVar = os.getenv("SQLALCHEMY_DATABASE")
+    SQLALCHEMY_DATABASE_ASYNC_URL: str = f"mysql+asyncmy://{SQLALCHEMY_DATABASE}?charset=utf8"
     # MySQL(同步)
-    SQLALCHEMY_DATABASE_URL: str = f"mysql+pymysql://root:yunjingtest@192.168.0.100:3306/db_weblog?charset=utf8"
+    SQLALCHEMY_DATABASE_URL: str = f"mysql+pymysql://{SQLALCHEMY_DATABASE}?charset=utf8"
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
 
     # Redis
-    REDIS_URL: str = f"redis://{SERVER_HOST}:6379/2"
-    REDIS_SOCKETIO_URL: str = f"redis://{SERVER_HOST}:6379/3"
+    REDIS_URL: str = f"{REDIS_CONF}/2"
+    REDIS_SOCKETIO_URL: str = f"{REDIS_CONF}/3"
     # MongoDB
-    MONGO_URL: str = f'mongodb://admin:123456@{SERVER_HOST}:27017'
+    MONGO_URL: str = os.getenv('MONGO_URL', 'mongodb://admin:123456@127.0.0.1:27017')
 
     # celery
-    CELERY_SECURITY_KEY: str = "'R9NrIpN5zbMpbcuzNL75BU'"
-    CELERY_BROKER_URL: str = f"redis://{SERVER_HOST}:6379/6"
-    CELERY_RESULT_BACKEND: str = f"db+mysql+pymysql://root:yunjingtest@192.168.0.100:3306/db_weblog?charset=utf8"
-    # CELERY_RESULT_BACKEND: str = f"redis://{SERVER_HOST}:6379/7"
+    CELERY_SECURITY_KEY: str = "R9NrIpN5zbMpbcuzNL75BU"
+    CELERY_BROKER_URL: str = f"{REDIS_CONF}/6"
+    CELERY_RESULT_BACKEND: str = 'db+' + SQLALCHEMY_DATABASE_URL
 
     # JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8
@@ -47,7 +47,7 @@ class DevelopmentSettings(BaseSettings):
     JWT_TOKEN_TYPE: str = 'Bearer'
 
     # MINIO
-    MINIO_HOST: str = f"{SERVER_HOST}:9000"
+    MINIO_HOST: str = f"127.0.0.1:9000"
     MINIO_ACCESS_KEY: str = "admin"
     MINIO_SECRET_KEY: str = "admin123"
 

@@ -1,6 +1,6 @@
 from typing import AsyncGenerator
 import motor.motor_asyncio
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Depends
 from slowapi import Limiter
 from slowapi.util import get_ipaddr
 from pymongo import MongoClient
@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.extensions.db import async_session
 from app.extensions.redis import AsyncRedis
 from app.settings import settings
-from .db import async_session
-from .redis import init_redis_pool, redis
+from .db import async_session, session
+from .redis import init_redis_pool, redis_client
 from .websocket import manager as websocket
 
 
@@ -19,20 +19,24 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_redis(request: Request) -> AsyncRedis:
+async def get_redis() -> AsyncRedis:
     """获取redis连接"""
-    return await request.app.state.redis
+    async with await init_redis_pool() as redis:
+        redis
 
-async def get_mongo(request: Request) -> MongoClient:
+
+def get_mongo() -> MongoClient:
     """获取MongoDB链接"""
-    return request.app.state.mongo
+    return motor.motor_asyncio.AsyncIOMotorClient(settings.MONGO_URL)
 
 
 limiter = Limiter(key_func=get_ipaddr)
 
 
 
-async def register_extensions(app: FastAPI):
-    app.state.mongo = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGO_URL)
-    app.state.redis = await init_redis_pool()
+def register_extensions(app: FastAPI,
+                        redis: AsyncRedis = Depends(get_redis),
+                        mongo: MongoClient = Depends(get_mongo)):
+    app.state.mongo = redis
+    app.state.redis = mongo
     app.state.limiter = limiter

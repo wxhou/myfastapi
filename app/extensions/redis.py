@@ -1,4 +1,5 @@
 from typing import Any
+from redis import Redis as SyncRedis
 from aioredis import Redis as _AsyncRedis
 from app.common.resolve import load_object, dump_object
 from app.utils.logger import logger
@@ -21,12 +22,14 @@ class AsyncRedis(_AsyncRedis):
 
 
 async def init_redis_pool() -> AsyncRedis:
-    redis = await AsyncRedis.from_url(url=settings.REDIS_URL,
-                                   encoding=settings.GLOBAL_ENCODING)
+    redis = await AsyncRedis.from_url(
+        url=settings.REDIS_URL,
+        encoding=settings.GLOBAL_ENCODING)
     return redis
 
 
 
-from redis import Redis as SYNC_REDIS
-from redis import ConnectionPool
-redis = SYNC_REDIS(connection_pool=ConnectionPool.from_url(settings.REDIS_URL), decode_responses=True)
+redis_client = SyncRedis.from_url(
+    url=settings.REDIS_URL,
+    encoding=settings.GLOBAL_ENCODING
+)

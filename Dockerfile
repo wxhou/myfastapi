@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9.5
 
 LABEL author="wxhou"
 
@@ -8,14 +8,13 @@ RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 WORKDIR /myfastapi
 
-ENV MY_WEBLOG_ENV=development
+ARG my_weblog_env
+
+ENV http_proxy=
+ENV https_proxy=
+ENV TZ=Asia/Shanghai
+ENV MY_WEBLOG_ENV=${my_weblog_env}
 
 COPY . .
 
-SHELL ["/bin/bash", "-c"]
-
-RUN mkdir logs && mkdir upload && mkdir -p alembic/versions
-
-EXPOSE 8199
-
-CMD gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8199
+RUN bash -c "if [ ! -d 'logs' ]; then mkdir logs; fi"

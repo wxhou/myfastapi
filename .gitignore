@@ -140,6 +140,9 @@ cython_debug/
 **/versions
 upload/
 *.out
+.api-version
 cert/
 poetry.lock
 backup/
+datastore/
+.DS_Store

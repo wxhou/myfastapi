@@ -1,6 +1,9 @@
 import os
 from typing import Dict
 from functools import lru_cache
+from dotenv import load_dotenv
+load_dotenv()
+
 from app.settings.development import DevelopmentSettings
 from app.settings.testing import TestingSettings
 from app.settings.production import ProductionSettings
@@ -9,7 +12,7 @@ from app.settings.production import ProductionSettings
 @lru_cache()
 def get_settings():
     """获取配置信息"""
-    env = os.environ.get('MY_WEBLOG_ENV', None)
+    env = os.getenv('MY_WEBLOG_ENV', None)
     env_config: Dict = {
         "development": DevelopmentSettings(),
         "testing": TestingSettings(),
