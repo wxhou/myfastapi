@@ -17,51 +17,52 @@ class DevelopmentSettings(BaseSettings):
     PER_PAGE_NUMBER: int = 15
     PROFILING_ENABLED: bool=True
 
-    REDIS_CONF: ClassVar = os.getenv("REDIS_CONF")
-    # SQLALCHEMY_DATABASE_ASYNC_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
-    # MySQL(异步)
     SQLALCHEMY_DATABASE: ClassVar = os.getenv("SQLALCHEMY_DATABASE")
+    # MySQL(异步)
     SQLALCHEMY_DATABASE_ASYNC_URL: str = f"mysql+asyncmy://{SQLALCHEMY_DATABASE}?charset=utf8"
     # MySQL(同步)
-    SQLALCHEMY_DATABASE_URL: str = f"mysql+pymysql://{SQLALCHEMY_DATABASE}?charset=utf8"
+    SQLALCHEMY_DATABASE_SYNC_URL: str = f"mysql+pymysql://{SQLALCHEMY_DATABASE}?charset=utf8"
+    SQLALCHEMY_POOL_RECYCLE: int = 60 * 30
+    SQLALCHEMY_POOL_PRE_PING: bool = True
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
 
     # Redis
-    REDIS_URL: str = f"{REDIS_CONF}/2"
-    REDIS_SOCKETIO_URL: str = f"{REDIS_CONF}/3"
+    REDIS_URL: str = os.getenv('REDIS_URL')
+    REDIS_SOCKETIO_URL: str = os.getenv('REDIS_SOCKETIO_URL')
     # MongoDB
-    MONGO_URL: str = os.getenv('MONGO_URL', 'mongodb://admin:123456@127.0.0.1:27017')
+    MONGO_URL: str = os.getenv('MONGO_URL')
 
     # celery
-    CELERY_SECURITY_KEY: str = "R9NrIpN5zbMpbcuzNL75BU"
-    CELERY_BROKER_URL: str = f"{REDIS_CONF}/6"
-    CELERY_RESULT_BACKEND: str = 'db+' + SQLALCHEMY_DATABASE_URL
+    CELERY_SECURITY_KEY: str = os.getenv('CELERY_SECURITY_KEY')
+    CELERY_BROKER_URL: str = os.getenv('CELERY_BROKER_URL')
+    CELERY_RESULT_BACKEND: str = os.getenv('CELERY_RESULT_BACKEND')
+    CELERY_REDBEAT_REDIS_URL: str = os.getenv('CELERY_REDBEAT_REDIS_URL')
 
     # JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     ALGORITHM: str = "HS256"
-    JWT_SECRET_KEY: str = "DXaPkfReer04uwIQU06Enl"
-    JWT_REFRESH_SECRET_KEY: str = "o7Ooj6lswdtXUtfuSnjvQS"
-    JWT_TOKEN_TYPE: str = 'Bearer'
+    JWT_SECRET_KEY: str = os.getenv('JWT_SECRET_KEY')
+    JWT_REFRESH_SECRET_KEY: str = os.getenv('JWT_REFRESH_SECRET_KEY')
+    JWT_TOKEN_TYPE: str = os.getenv('JWT_TOKEN_TYPE')
 
     # MINIO
-    MINIO_HOST: str = f"127.0.0.1:9000"
-    MINIO_ACCESS_KEY: str = "admin"
-    MINIO_SECRET_KEY: str = "admin123"
+    MINIO_HOST: str = os.getenv('MINIO_HOST')
+    MINIO_ACCESS_KEY: str = os.getenv('MINIO_ACCESS_KEY')
+    MINIO_SECRET_KEY: str = os.getenv('MINIO_SECRET_KEY')
 
     # alipay
-    ALIPAY_SERVER_URL: str = "https://openapi.alipaydev.com/gateway.do"
-    ALIPAY_APP_ID: str = ''
-    ALIPAY_APP_PRIVATE_KEY: str = ''
-    ALIPAY_PUBLIC_KEY: str = ''
+    ALIPAY_SERVER_URL: str = os.getenv('ALIPAY_SERVER_URL')
+    ALIPAY_APP_ID: str = os.getenv('ALIPAY_APP_ID')
+    ALIPAY_APP_PRIVATE_KEY: str = os.getenv('ALIPAY_APP_PRIVATE_KEY')
+    ALIPAY_PUBLIC_KEY: str = os.getenv('ALIPAY_PUBLIC_KEY')
 
     # email
-    MAIL_SERVER: str = 'smtp.126.com'
-    MAIL_PORT: int = 25
-    MAIL_USERNAME: str = 'twxhou@126.com'
-    MAIL_PASSWORD: str = 'GQWJDUKVWNOJLPOH'
+    MAIL_SERVER: str = os.getenv('MAIL_SERVER')
+    MAIL_PORT: int = os.getenv('MAIL_PORT')
+    MAIL_USERNAME: str = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD')
 
     LOGGER_LEVEL: int = logging.DEBUG
     LOGGER_SERVER_FILE: str = './logs/server.log'
@@ -70,7 +71,7 @@ class DevelopmentSettings(BaseSettings):
     PAY_LOGGER_FILE: str = './logs/weblog_pay.log'
 
     # upload
-    UPLOAD_MEDIA_FOLDER: str = os.path.join(BASEDIR, 'upload')
+    UPLOAD_MEDIA_FOLDER: ClassVar = os.path.join(BASEDIR, 'upload')
     MAX_CONTENT_LENGTH: int = 50 * 1024 * 1024
     ALLOWED_IMAGE_EXTENSIONS: Set[str] = {'.png', '.jpg', '.jpeg'}
     ALLOWED_AUDIO_EXTENSIONS: Set[str] = {'.mp3'}
@@ -78,7 +79,7 @@ class DevelopmentSettings(BaseSettings):
     ALLOWED_EXTENSIONS: Set[str] = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_VIDEO_EXTENSIONS | ALLOWED_AUDIO_EXTENSIONS
 
     # swagger
-    SERVERS: Optional[List] = None
+    SERVERS: Optional[List] = os.getenv('SWAGGER_SERVERS', None)
     SWAGGER_LOGIN: str = "/login/"
     SWAGGER_DOCS_URL: str = '/docs'
     SWAGGER_REDOC_URL: str = '/redocs'

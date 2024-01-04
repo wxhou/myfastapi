@@ -11,7 +11,7 @@ from app.api.model import Base
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_SYNC_URL)
 
 def include_object(object, name, type_, reflected, compare_to):
     if type_ == "table" and reflected and compare_to is None:

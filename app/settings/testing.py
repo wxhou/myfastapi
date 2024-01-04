@@ -12,51 +12,60 @@ class TestingSettings(BaseSettings):
     DEBUG: bool = True
     PORT: int = 8199
     RELOAD: bool = True
-    SECRET_KEY: str = 'WeH0a!lIsBx7xYxUpaM5Wb'
+    SECRET_KEY: str = os.getenv('SECRET_KEY')
     GLOBAL_ENCODING: str = 'utf-8'
     CORS_ORIGINS: Sequence[str] = ['*']
     PER_PAGE_NUMBER: int = 15
     PROFILING_ENABLED: bool=True
 
-    # SQLALCHEMY_DATABASE_ASYNC_URL = 'sqlite+aiosqlite:///./sql_app.db?check_same_thread=False'
+    SQLALCHEMY_DATABASE: ClassVar = os.getenv("SQLALCHEMY_DATABASE")
     # MySQL(异步)
-    SQLALCHEMY_DATABASE_ASYNC_URL: str = "mysql+asyncmy://root:root1234@localhost:3306/db_weblog"
+    SQLALCHEMY_DATABASE_ASYNC_URL: str = f"mysql+asyncmy://{SQLALCHEMY_DATABASE}?charset=utf8"
     # MySQL(同步)
-    SQLALCHEMY_DATABASE_URL: str = "mysql+pymysql://root:root1234@localhost:3306/db_weblog"
+    SQLALCHEMY_DATABASE_SYNC_URL: str = f"mysql+pymysql://{SQLALCHEMY_DATABASE}?charset=utf8"
+    SQLALCHEMY_POOL_RECYCLE: int = 60 * 30
+    SQLALCHEMY_POOL_PRE_PING: bool = True
     SQLALCHEMY_POOL_SIZE: int = 20
     SQLALCHEMY_ECHO: bool = True
-    REDIS_URL: str = "redis://localhost:26379/12"
-    REDIS_SOCKETIO_URL: str = "redis://localhost:26379/13"
 
-    MONGO_URL: str = 'mongodb://admin:123456@127.0.0.1:27017'
+    # Redis
+    REDIS_URL: str = os.getenv('REDIS_URL')
+    REDIS_SOCKETIO_URL: str = os.getenv('REDIS_SOCKETIO_URL')
+    # MongoDB
+    MONGO_URL: str = os.getenv('MONGO_URL')
 
-    CELERY_SECURITY_KEY: str = "'XBDGwqmFoTE4m2F$y3ZX#6'"
-    CELERY_BROKER_URL: str = "redis://localhost:26379/12"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:26379/11"
+    # celery
+    CELERY_SECURITY_KEY: str = os.getenv('CELERY_SECURITY_KEY')
+    CELERY_BROKER_URL: str = os.getenv('CELERY_BROKER_URL')
+    CELERY_RESULT_BACKEND: str = os.getenv('CELERY_RESULT_BACKEND')
+    CELERY_REDBEAT_REDIS_URL: str = os.getenv('CELERY_REDBEAT_REDIS_URL')
 
+    # JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     ALGORITHM: str = "HS256"
-    JWT_SECRET_KEY: str = "DXaPkfReer04uwIQU06Enl"
-    JWT_REFRESH_SECRET_KEY: str = "o7Ooj6lswdtXUtfuSnjvQS"
-    JWT_TOKEN_TYPE: str = 'Bearer'
+    JWT_SECRET_KEY: str = os.getenv('JWT_SECRET_KEY')
+    JWT_REFRESH_SECRET_KEY: str = os.getenv('JWT_REFRESH_SECRET_KEY')
+    JWT_TOKEN_TYPE: str = os.getenv('JWT_TOKEN_TYPE')
+
     # MINIO
-    MINIO_HOST: str = "192.168.0.174:9000"
-    MINIO_ACCESS_KEY: str = "admin"
-    MINIO_SECRET_KEY: str = "admin123"
+    MINIO_HOST: str = os.getenv('MINIO_HOST')
+    MINIO_ACCESS_KEY: str = os.getenv('MINIO_ACCESS_KEY')
+    MINIO_SECRET_KEY: str = os.getenv('MINIO_SECRET_KEY')
 
     # alipay
-    ALIPAY_SERVER_URL: str = "https://openapi.alipay.com/gateway.do"
-    ALIPAY_APP_ID: str = ''
-    ALIPAY_APP_PRIVATE_KEY: str = ''
-    ALIPAY_PUBLIC_KEY: str = ''
+    ALIPAY_SERVER_URL: str = os.getenv('ALIPAY_SERVER_URL')
+    ALIPAY_APP_ID: str = os.getenv('ALIPAY_APP_ID')
+    ALIPAY_APP_PRIVATE_KEY: str = os.getenv('ALIPAY_APP_PRIVATE_KEY')
+    ALIPAY_PUBLIC_KEY: str = os.getenv('ALIPAY_PUBLIC_KEY')
 
     # email
-    MAIL_SERVER: str = 'smtp.126.com'
-    MAIL_PORT: int = 25
-    MAIL_USERNAME: str = 'twxhou@126.com'
-    MAIL_PASSWORD: str = 'GQWJDUKVWNOJLPOH'
+    MAIL_SERVER: str = os.getenv('MAIL_SERVER')
+    MAIL_PORT: int = os.getenv('MAIL_PORT')
+    MAIL_USERNAME: str = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD')
 
+    # logger
     LOGGER_LEVEL: int = logging.DEBUG
     LOGGER_SERVER_FILE: str = './logs/server.log'
     LOGGER_ERROR_FILE: str = './logs/error.log'
@@ -64,7 +73,7 @@ class TestingSettings(BaseSettings):
     PAY_LOGGER_FILE: str = './logs/weblog_pay.log'
 
     # upload
-    UPLOAD_MEDIA_FOLDER: str = os.path.join(BASEDIR, 'upload')
+    UPLOAD_MEDIA_FOLDER: ClassVar = os.path.join(BASEDIR, 'upload')
     MAX_CONTENT_LENGTH: int = 50 * 1024 * 1024
     ALLOWED_IMAGE_EXTENSIONS: Set[str] = {'.png', '.jpg', '.jpeg'}
     ALLOWED_AUDIO_EXTENSIONS: Set[str] = {'.mp3'}
@@ -72,7 +81,7 @@ class TestingSettings(BaseSettings):
     ALLOWED_EXTENSIONS: Set[str] = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_VIDEO_EXTENSIONS | ALLOWED_AUDIO_EXTENSIONS
 
 
-    SERVERS: List[Dict[str, str]] = [{"url":"https://xx.xxx.com/weblog"}]
+    SERVERS: List[Dict[str, str]] = [{"url": os.getenv('SWAGGER_SERVERS')}]
     SWAGGER_LOGIN: str = f"/{PROJECT_NAME}/login/"
     SWAGGER_DOCS_URL: str = f'/{PROJECT_NAME}/docs'
     SWAGGER_REDOC_URL: str = f'/{PROJECT_NAME}/redocs'
