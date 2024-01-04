@@ -59,7 +59,7 @@ beat_schedule: Dict[str, Dict] = {
 
     },
     "delete-old-text2audio": {
-        'task': 'app.api.tasks.delete_old_text2audio',
+        'task': 'app.api.tasks.text2audio_delete_task',
         'schedule': crontab(hour=9, minute=30, day_of_week=1)
     }
 }

@@ -11,7 +11,7 @@ def hello_celery(name):
 
 
 @celery.task
-def delete_old_text2audio():
+def text2audio_delete_task():
     days_threshold = 7
 
     threshold_date = now() - timedelta(days=days_threshold)

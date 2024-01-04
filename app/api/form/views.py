@@ -1,9 +1,6 @@
-import time
-from math import ceil
-from datetime import timedelta
 from bson.objectid import ObjectId
 from sqlalchemy import func, or_, select, update
-from fastapi import APIRouter, Depends, Request, Query, Body, Security
+from fastapi import APIRouter, Depends, Query, Body, Security
 from app.extensions import get_db, get_redis, get_mongo, AsyncSession, AsyncRedis, MongoClient
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
@@ -40,18 +37,17 @@ async def template_insert(
 @router_form_admin.post('/design/', summary='模板设计')
 async def template_design(
     content: dict,
-    request: Request,
+    template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),
     redis: AsyncRedis = Depends(get_redis),
-    mg_client: MongoClient = Depends(get_mongo),
-    template_id: int = Query(description='模板ID'),
+    mongo: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_design'])
 ):
     """表单设计"""
     template_obj = await db.scalar(select(FormTemplate).where(FormTemplate.id==template_id, FormTemplate.status==0))
     if template_obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    database = mg_client.t_form_template
+    database = mongo.t_form_template
     form_collection = database.get_collection(template_obj.college)
 
     def get_content_columns(input_dict):
@@ -95,10 +91,10 @@ async def template_design(
 
 @router_form_admin.get('/info/', summary='模板详情')
 async def template_info(
+    template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),
     redis: AsyncRedis = Depends(get_redis),
-    mg_client: MongoClient = Depends(get_mongo),
-    template_id: int = Query(description='模板ID'),
+    mongo: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_info'])
 ):
     """表单设计"""
@@ -114,7 +110,7 @@ async def template_info(
     if fv_obj is None:
         result['content'] = None
         return response_ok(data=result)
-    database = mg_client.t_form_template
+    database = mongo.t_form_template
     form_collection = database.get_collection(template_obj.college)
     fv_content = await form_collection.find_one({"_id": ObjectId(fv_obj.object_id)})
     fv_content['_id'] = str(fv_content['_id'])
@@ -124,10 +120,10 @@ async def template_info(
 
 @router_form_admin.post('/publish/', summary='模板发布')
 async def template_publish(
-    db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
     template_id: int = Body(description='模板ID', ge=1),
     version_id: int = Body(description='版本ID', ge=1),
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_info'])
 ):
     """表单发布"""

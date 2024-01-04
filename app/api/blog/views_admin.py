@@ -1,9 +1,8 @@
-from math import ceil
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, Security
-from app.settings import settings
 from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.user.model import BaseUser
@@ -17,7 +16,6 @@ router_blog_admin = APIRouter()
 
 @router_blog_admin.get('/category/list/', summary='文章分类列表')
 async def category_list(
-    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: BaseUser = Security(get_current_active_user, scopes=['category_list'])
 ):
@@ -27,15 +25,16 @@ async def category_list(
 
 
 @router_blog_admin.post('/post/insert/', summary='新建文章')
-async def post_insert(request: Request,
-                      args: PostInsert,
-                      db: AsyncSession = Depends(get_db),
-                      current_user: BaseUser = Security(get_current_active_user, scopes=['post_insert'])):
+async def post_insert(
+    args: PostInsert,
+    db: AsyncSession = Depends(get_db),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['post_insert'])
+):
     """新建文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==args.category_id))
     if cate_obj is None:
         return response_err(ErrCode.QUERY_NOT_EXISTS)
-    obj = Post(title=args.title, body=args.body,
+    obj = Post(description=args.title, body=args.body,
             category_id=args.category_id,
             is_publish=args.is_publish,
             user_id=current_user.id)
@@ -45,11 +44,12 @@ async def post_insert(request: Request,
 
 
 @router_blog_admin.put('/post/update/', summary='更新文章')
-async def post_update(request: Request,
-                      post: PostUpdate,
-                      db: AsyncSession = Depends(get_db),
-                      post_id: int = Query(title="文章ID", ge=1),
-                      current_user: BaseUser = Security(get_current_active_user, scopes=['post_update'])):
+async def post_update(
+    post: PostUpdate,
+    db: AsyncSession = Depends(get_db),
+    post_id: int = Query(description="文章ID", ge=1),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['post_update'])
+):
     """更新文章"""
     cate_obj = await db.scalar(select(Category).filter(Category.id==post.category_id, Category.status==0))
     if cate_obj is None:
@@ -63,14 +63,14 @@ async def post_update(request: Request,
 
 
 @router_blog_admin.get('/post/list/', summary="文章列表")
-async def post_list(request: Request,
-                    page: int = Query(default=1, ge=1),
-                    page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
-                    title: str = Query(default=None),
-                    is_publish: bool = Query(default=None),
-                    is_comment: bool = Query(default=None),
-                    db: AsyncSession = Depends(get_db),
-                    current_user: BaseUser = Security(get_current_active_user, scopes=['post_list'])):
+async def post_list(
+    title: str = Query(default=None),
+    is_publish: bool = Query(default=None),
+    is_comment: bool = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+    paginate: PageNumberPagination = Depends(),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['post_list'])
+):
     """文章列表"""
     query_filter = [Post.status==0, Post.user_id==current_user.id]
     if title:
@@ -79,18 +79,16 @@ async def post_list(request: Request,
         query_filter.append(Post.is_publish==is_publish)
     if is_comment:
         query_filter.append(Post.is_comment==is_comment)
-    objs = (await db.scalars(select(Post).filter(*query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
-    _count = await db.scalar(select(func.count()).filter(*query_filter))
-    _pages = int(ceil(_count / float(page_size)))
-    return response_ok(data=[obj.to_dict() for obj in objs],
-                       total=_count, pages=_pages)
+    result = await paginate(Post, query_filter)
+    return response_ok(**result)
 
 
 @router_blog_admin.get('/post/info/', summary='文章详情')
-async def post_info(request: Request,
-                    db: AsyncSession = Depends(get_db),
-                    redis: AsyncRedis = Depends(get_redis),
-                    post_id: int = Query(title="文章ID", ge=1)):
+async def post_info(
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    post_id: int = Query(description="文章ID", ge=1)
+):
     """文章详情"""
     query_filter = [Post.id==post_id, Post.status==0]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
@@ -101,10 +99,11 @@ async def post_info(request: Request,
 
 
 @router_blog_admin.get('/post/publish/', summary="文章发布")
-async def post_publish(request: Request,
-                       db: AsyncSession = Depends(get_db),
-                       post_id: int = Query(title="文章ID"),
-                       current_user=Security(get_current_active_user, scopes=['post_publish'])):
+async def post_publish(
+    db: AsyncSession = Depends(get_db),
+    post_id: int = Query(description="文章ID"),
+    current_user=Security(get_current_active_user, scopes=['post_publish'])
+):
     """文章发布"""
     query_filter = [Post.id==post_id, Post.status==0, Post.user_id==current_user.id]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
@@ -116,14 +115,12 @@ async def post_publish(request: Request,
 
 
 @router_blog_admin.get('/post/top/', summary='热门文章')
-async def post_top(request: Request,
-                page: int = Query(default=1, ge=1),
-                page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
-                title: str = Query(default=None),
-                order_type: int = Query(default=1, gt=0, le=3),
-                db: AsyncSession = Depends(get_db),
-                redis: AsyncRedis = Depends(get_redis)
-                ):
+async def post_top(
+    title: str = Query(default=None),
+    order_type: int = Query(default=1, gt=0, le=3),
+    paginate: PageNumberPagination = Depends(),
+    redis: AsyncRedis = Depends(get_redis)
+):
     """热门文章"""
     query_filter = [Post.status==0, Post.is_publish.is_(True)]
     scores = await redis.zrevrange("weblog_post_top", 0, -1)
@@ -137,18 +134,16 @@ async def post_top(request: Request,
         _order_by = func.rand()
     if title:
         query_filter.append(Post.title.ilike(f"%{title}%"))
-    objs = await db.scalars(select(Post).filter(*query_filter).order_by(_order_by))
-    _count = await db.scalar(select(func.count()).filter(*query_filter))
-    _pages = int(ceil(_count / float(page_size)))
-    return response_ok(data=[obj.to_dict() for obj in objs],
-                       total=_count, pages=_pages)
+    result = await paginate(Post, query_filter)
+    return response_ok(**result)
 
 
 @router_blog_admin.delete('/post/delete/', summary="文章删除")
-async def post_delete(request: Request,
-                       db: AsyncSession = Depends(get_db),
-                       post_id: int = Query(title='文章ID', ge=1),
-                       current_user: BaseUser = Security(get_current_active_user, scopes=['post_publish'])):
+async def post_delete(
+    db: AsyncSession = Depends(get_db),
+    post_id: int = Query(description='文章ID', ge=1),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['post_publish'])
+):
     """文章删除"""
     query_filter = [Post.id==post_id, Post.status==0, Post.user_id==current_user.id]
     post_obj = await db.scalar(select(Post).filter(*query_filter))
@@ -161,11 +156,11 @@ async def post_delete(request: Request,
 
 @router_blog_admin.post('/post/comment/', summary='新增评论')
 async def post_comment_insert(
-                request: Request,
-                comment:CommentInsert,
-                db: AsyncSession = Depends(get_db),
-                redis: AsyncRedis = Depends(get_redis),
-                current_user = Security(get_current_active_user)):
+    comment: CommentInsert,
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user = Security(get_current_active_user)
+):
     """文章评论"""
     post_obj = await db.scalar(select(Post).filter(Post.status==0, Post.id==comment.post_id,
                                         Post.is_comment.is_(True), Post.is_publish.is_(True)))
@@ -183,11 +178,12 @@ async def post_comment_insert(
 
 @router_blog_admin.get('/post/comment/list/', summary='评论列表')
 async def post_comment_list(
-                request: Request,
-                post_id: int = Query(ge=1, title='文章ID'),
-                comment_id: int = Query(ge=1, title='评论ID'),
-                db: AsyncSession = Depends(get_db),
-                current_user: BaseUser = Security(get_current_active_user)):
+    request: Request,
+    post_id: int = Query(ge=1, description='文章ID'),
+    comment_id: int = Query(ge=1, description='评论ID'),
+    db: AsyncSession = Depends(get_db),
+    current_user: BaseUser = Security(get_current_active_user)
+):
     """文章评论列表"""
     post_obj = await db.scalar(select(Post).filter(Post.status==0, Post.id==post_id,
                                         Post.is_comment.is_(True), Post.is_publish.is_(True)))

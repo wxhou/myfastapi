@@ -5,7 +5,8 @@ from random import randint
 from typing import Optional
 from anyio import Path
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, Request, Query, File, UploadFile, Form, Header
+from fastapi import APIRouter, Depends, Request, BackgroundTasks
+from fastapi import Query, File, UploadFile, Form, Header
 from fastapi.responses import FileResponse
 from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.settings import settings
@@ -17,17 +18,20 @@ from app.api.user.model import BaseUser, BasePermission
 from .model import UploadModel
 from .schemas import InputText
 from .auth import get_current_active_user
-from .tasks import verify_upload_file_is_exists
+from .tasks import upload_file_task, verify_file_exist_task
 
 
 router = APIRouter()
 
 
 @router.post("/upload/", summary='上传文件')
-async def create_upload_file(db: AsyncSession = Depends(get_db),
-                             file: UploadFile = File(),
-                             md5 = Form(..., description="文件MD5值"),
-                             current_user: BaseUser = Depends(get_current_active_user)):
+async def create_upload_file(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(description='文件'),
+    md5 = Form(..., description="文件MD5值"),
+    db: AsyncSession = Depends(get_db),
+    current_user: BaseUser = Depends(get_current_active_user)
+):
     """上传文件"""
     obj = await db.scalar(select(UploadModel).where(UploadModel.uniqueId==md5, UploadModel.status==0))
     if obj is not None:
@@ -40,17 +44,9 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
     if not os.path.exists(root_path):
         os.makedirs(root_path)
     save_file = os.path.join(root_path, new_fname)
-    # 异步上传文件1
-    # async with aiofiles.open(save_file, 'wb+') as fp:
-    #     while content := await file.read(1024):
-    #         logger.info(content)
-    #         await fp.write(content)
-    # 异步上传文件2
-    await Path(save_file).write_bytes(await file.read())
 
-    # 同步上传文件
-    # with open(save_file, 'wb+') as buffer:
-    #     buffer.write(await file.read())
+    background_tasks.add_task(upload_file_task, file, save_file)
+    await Path(save_file).write_bytes(await file.read())
     # 对比文件MD5
     obj = UploadModel(fileUrl='/upload' + save_file.split(settings.UPLOAD_MEDIA_FOLDER)[1],
                       uniqueId=md5,
@@ -59,16 +55,18 @@ async def create_upload_file(db: AsyncSession = Depends(get_db),
                       uid=current_user.id)
     db.add(obj)
     await db.commit()
-    verify_upload_file_is_exists.apply_async(args=(md5, save_file), eta=now(utc=1) + timedelta(seconds=60))
+    verify_file_exist_task.apply_async(args=(md5, save_file), eta=now(utc=1) + timedelta(seconds=60))
     return response_ok(data=obj.to_dict(exclude={'status', 'uniqueId', 'uid'}))
 
 
 
 @router.get("/text/audio", summary="文本转语音")
-async def text_to_audio(text: str = Query(..., example='你好哟，我是智能语音助手，小布', max_length=500),
-                        lang: str = Query(default='zh', title="选择语言", description='zh中文|en英文', pattern=r'zh|en'),
-                        model: str = Query(default=None, title='选择模型', description='edge|pyttsx3', pattern='edge|pyttsx3'),
-                        redis: AsyncRedis = Depends(get_redis)):
+async def text_to_audio(
+    text: str = Query(..., example='你好哟，我是智能语音助手，小布', max_length=500),
+    lang: str = Query(default='zh', description="选择语言\nzh中文|en英文", pattern=r'zh|en'),
+    model: str = Query(default=None, description='选择模型\nedge|pyttsx3', pattern=r'edge|pyttsx3'),
+    redis: AsyncRedis = Depends(get_redis)
+):
 
     VOICE = settings.EDGE_VOICE_LANG[lang]
 
@@ -92,8 +90,10 @@ async def text_to_audio(text: str = Query(..., example='你好哟，我是智能
 
 
 @router.get("/routes", summary="所有路由", deprecated=True)
-async def api_routes(request: Request,
-                     db: AsyncSession = Depends(get_db)):
+async def api_routes(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
     result = []
     number = 1
     for route in request.app.routes:
@@ -110,5 +110,7 @@ async def api_routes(request: Request,
 
 
 @router.get("/sync", summary="同步路由", deprecated=True)
-def sync_routes(user_agent: Optional[str] = Header(...)):
+def sync_routes(
+    user_agent: Optional[str] = Header(...)
+):
     return response_ok(data=user_agent)

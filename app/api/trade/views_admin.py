@@ -1,10 +1,9 @@
-from math import ceil
-from datetime import timedelta
-from sqlalchemy import func, or_, select, update
-from fastapi import APIRouter, Depends, Request, Query, Security, Form
+from sqlalchemy import select, update
+from fastapi import APIRouter, Depends, Request, Query, Security
 from fastapi.responses import Response
 from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.settings import settings
+from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.utils.randomly import random_str
@@ -14,40 +13,39 @@ from app.api.goods.model import Goods
 from app.api.base.auth import get_current_active_user
 from .model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
 from .schemas import ShoppingChartInsert, ShoppingOrderInsert
-from .tasks import update_inventory, update_cart
+from .tasks import update_inventory_task, update_cart_task
 
 
 router_trade_admin = APIRouter()
 
 
 @router_trade_admin.get('/shopping/chart/', summary='购物车列表')
-async def trade_shopping_list(request: Request,
-        db: AsyncSession = Depends(get_db),
-        page: int = Query(default=1, ge=1),
-        page_size: int = Query(default=settings.PER_PAGE_NUMBER, ge=1),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_list'])):
+async def trade_shopping_list(
+    paginate: PageNumberPagination = Depends(),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_list'])
+):
     """购物车列表"""
     query_filter = [ShoppingCart.status == 0, ShoppingCart.user_id==current_user.id]
-    objs = (await db.scalars(select(ShoppingCart).where(*query_filter).offset(page_size * (page - 1)).limit(page_size))).all()
+    result = await paginate(ShoppingCart, query_filter)
+
     result_data = []
-    for obj in objs:
-        goods_obj = await db.scalar(select(Goods).where(Goods.id==obj.goods_id, Goods.status==0))
+    for data in result['data']:
+        goods_obj = await paginate.db.scalar(select(Goods).where(Goods.id==data['goods_id'], Goods.status==0))
         items = {
             "goods": goods_obj.to_dict(),
-            "goods_num": obj.goods_num
+            "goods_num": data['goods_num']
         }
         result_data.append(items)
-    _count = await db.scalar(select(func.count()).filter(*query_filter))
-    pages = int(ceil(_count / float(page_size)))
-    return response_ok(data=result_data, total=_count, pages=pages)
+    return response_ok(data=result_data, total=result['total'], pages=result['pages'])
 
 
 @router_trade_admin.post('/shopping/insert/', summary='购物车新增商品')
 async def trade_shopping_insert(request: Request,
-        args: ShoppingChartInsert,
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_insert'])):
+    args: ShoppingChartInsert,
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_insert'])
+):
     """购物车新增"""
     _key_name = f"goods_num_{args.goods_id}"
     rs1_num = await redis.get(_key_name)
@@ -68,16 +66,17 @@ async def trade_shopping_insert(request: Request,
     db.add(obj)
     await db.commit()
     await redis.decr(_key_name, args.goods_num)
-    update_inventory.delay([{"goods_id": args.goods_id, "goods_num": -args.goods_num}])
+    update_inventory_task.delay([{"goods_id": args.goods_id, "goods_num": -args.goods_num}])
     return response_ok()
 
 
 @router_trade_admin.delete('/shopping/delete/', summary='购物车删除商品')
 async def trade_shopping_delete(request: Request,
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        goos_id: int = Query(title='商品ID', ge=1),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_delete'])):
+    goos_id: int = Query(description='商品ID', ge=1),
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_delete'])
+):
     """购物车删除"""
     good_num = await db.scalar(select(ShoppingCart.goods_num).where(ShoppingCart.user_id==current_user.id,
                                                                     ShoppingCart.goods_id==args.goods_id))
@@ -89,16 +88,17 @@ async def trade_shopping_delete(request: Request,
         await db.execute(sql.values(status=-1))
     await db.commit()
     await redis.incr(f"goods_num_{args.goods_id}", 1)
-    update_inventory.delay([{"goods_id": args.goods_id, "goods_num": 1}])
+    update_inventory_task.delay([{"goods_id": args.goods_id, "goods_num": 1}])
     return response_ok()
 
 
 @router_trade_admin.post('/order/insert/', summary='新增订单')
 async def trade_order_insert(request: Request,
-        args: ShoppingOrderInsert,
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_insert'])):
+    args: ShoppingOrderInsert,
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_insert'])
+):
     """新增订单"""
     obj = ShoppingOrder(user_id=current_user.id,
                 order_sn=random_str(),
@@ -114,16 +114,17 @@ async def trade_order_insert(request: Request,
         ]
     )
     await db.commit()
-    update_cart.delay(args.goods, current_user.id)
+    update_cart_task.delay(args.goods, current_user.id)
     return response_ok(data={"id": obj.id, "order_sn": obj.order_sn})
 
 
 @router_trade_admin.get('/order/info/', summary='订单详情')
 async def trade_order_info(request: Request,
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        order_id : int = Query(description='订单ID'),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])):
+    order_id : int = Query(description='订单ID'),
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])
+):
     """详情订单"""
     obj = await db.scalar(select(ShoppingOrder).where(ShoppingOrder.id==order_id,
                                                       ShoppingOrder.user_id==current_user.id,
@@ -148,10 +149,11 @@ async def trade_order_info(request: Request,
 
 @router_trade_admin.get('/order/pay/', summary='订单支付')
 async def trade_order_pay(request: Request,
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        order_id : int = Query(description='订单ID'),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])):
+    order_id : int = Query(description='订单ID'),
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])
+):
     """详情订单"""
     # https://blog.csdn.net/tonny7501/article/details/103029757
     obj = await db.scalar(select(ShoppingOrder).where(ShoppingOrder.id==order_id,
@@ -190,10 +192,11 @@ async def trade_order_notice(data: dict):
 
 @router_trade_admin.delete('/order/delete/', summary='删除订单')
 async def trade_order_delete(request: Request,
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        order_id: int = Query(title='订单ID', ge=1),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_delete'])):
+    order_id: int = Query(description='订单ID', ge=1),
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_delete'])
+):
     """删除订单"""
     obj = await db.scalar(select(ShoppingOrder).where(ShoppingOrder.id==args.order_id,
                                                       ShoppingOrder.user_id==current_user.id,
@@ -206,6 +209,6 @@ async def trade_order_delete(request: Request,
     await db.commit()
     shop_order_objs = await db.scalars(select(ShoppingOrderGoods).where(
         ShoppingOrderGoods.order_id==args.order_id, ShoppingOrderGoods.status==0))
-    update_inventory.delay([{"goods_id": obj.goods_id, "goods_num": -obj.goods_num}
+    update_inventory_task.delay([{"goods_id": obj.goods_id, "goods_num": -obj.goods_num}
                             for obj in shop_order_objs])
     return response_ok()

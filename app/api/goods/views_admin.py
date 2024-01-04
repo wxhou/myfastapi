@@ -1,8 +1,7 @@
 import json
 from celery.schedules import crontab
-from sqlalchemy import func, or_, select, update
-from fastapi import APIRouter, Depends, Request, Query, Security
-from app.settings import settings
+from sqlalchemy import or_, select, update
+from fastapi import APIRouter, Depends, Query, Security
 from app.common.pagation import PageNumberPagination
 from app.core.celery_app import redis_scheduler_entry
 from app.common.response import ErrCode, response_ok, response_err
@@ -13,16 +12,18 @@ from app.api.user.model import BaseUser
 from app.api.base.auth import get_current_active_user
 from .model import Goods, GoodsCategory
 from .schemas import GoodsInsert, GoodsUpdate
-from .tasks import add_goods_click_num
+from .tasks import add_goods_click_task
 
 
 
 router_goods_admin = APIRouter()
 
+
 @router_goods_admin.get('/category/', summary='商品分类列表')
-async def goods_category_list(request: Request,
-                        db: AsyncSession = Depends(get_db),
-                        current_user: BaseUser = Security(get_current_active_user)):
+async def goods_category_list(
+    db: AsyncSession = Depends(get_db),
+    current_user: BaseUser = Security(get_current_active_user)
+):
     """商品分类列表"""
     query_filter = [GoodsCategory.status == 0]
     objs = await db.scalars(select(GoodsCategory).filter(*query_filter))
@@ -31,28 +32,28 @@ async def goods_category_list(request: Request,
 
 
 @router_goods_admin.get('/list/', summary='商品列表')
-async def goods_list(request: Request,
-        db: AsyncSession = Depends(get_db),
-        page: int = Query(1, ge=1, description="Page number"),
-        page_size: int = Query(settings.PER_PAGE_NUMBER, ge=1, le=10000, description="Page size"),
-        search: str = Query(default=None)):
+async def goods_list(
+    search: str = Query(default=None),
+    paginate: PageNumberPagination = Depends(),
+):
     """商品列表"""
     query_filter = [Goods.status == 0]
     if search:
         query_filter.append(or_(Goods.goods_name.ilike(f'%{search}%'), Goods.goods_sn.ilike(f"{search}")))
-    res = await PageNumberPagination(db, page, page_size)(Goods, query_filter)
+    res = await paginate(Goods, query_filter)
     return response_ok(**res)
 
 
 @router_goods_admin.get('/info/', summary='商品详情')
-async def goods_info(request: Request,
-                    db: AsyncSession = Depends(get_db),
-                    redis: AsyncRedis = Depends(get_redis),
-                    goods_id: int = Query(..., description='商品ID')):
+async def goods_info(
+    goods_id: int = Query(..., description='商品ID'),
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis)
+):
     obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
-    add_goods_click_num.delay(goods_id)
+    add_goods_click_task.delay(goods_id)
     await websocket.broadcast(json.dumps({'data': 'foobar'}))
     return response_ok(data=obj.to_dict())
 
@@ -60,13 +61,13 @@ async def goods_info(request: Request,
 
 @router_goods_admin.post('/insert/', summary='新建商品')
 async def goods_insert(
-        request: Request,
-        goods: GoodsInsert,
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['goods_insert'])):
+    goods: GoodsInsert,
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['goods_insert'])
+):
     """更新用户信息"""
-    args = goods.dict(exclude_none=True)
+    args = goods.model_dump(exclude_none=True)
     args['goods_sn'] = random_str()
     obj = Goods(**args)
     db.add(obj)
@@ -80,14 +81,14 @@ async def goods_insert(
 
 @router_goods_admin.put('/update/', summary='更新商品')
 async def goods_update(
-        request: Request,
-        goods: GoodsUpdate,
-        goods_id: int = Query(default=True, ge=1, title='商品ID'),
-        db: AsyncSession = Depends(get_db),
-        redis: AsyncRedis = Depends(get_redis),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['goods_update'])):
+    goods: GoodsUpdate,
+    goods_id: int = Query(default=True, ge=1, description='商品ID'),
+    db: AsyncSession = Depends(get_db),
+    redis: AsyncRedis = Depends(get_redis),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['goods_update'])
+):
     """更新用户信息"""
-    args = goods.dict(exclude_none=True)
+    args = goods.model_dump(exclude_none=True)
     obj: Goods = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
         return response_err(ErrCode.GOODS_NOT_FOUND)
@@ -100,10 +101,10 @@ async def goods_update(
 
 @router_goods_admin.delete('/delete/', summary='删除商品')
 async def goods_delete(
-        request: Request,
-        db: AsyncSession = Depends(get_db),
-        goods_id: int = Query(ge=1, title='商品ID'),
-        current_user: BaseUser = Security(get_current_active_user, scopes=['goods_delete'])):
+    goods_id: int = Query(ge=1, description='商品ID'),
+    db: AsyncSession = Depends(get_db),
+    current_user: BaseUser = Security(get_current_active_user, scopes=['goods_delete'])
+):
     """更新用户信息"""
     await db.execute(update(Goods).where(Goods.id==goods_id, Goods.status==0).values(status=-1))
     await db.commit()

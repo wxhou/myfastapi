@@ -2,7 +2,7 @@ import os
 from typing import Dict
 from functools import lru_cache
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv('.env')
 
 from app.settings.development import DevelopmentSettings
 from app.settings.testing import TestingSettings

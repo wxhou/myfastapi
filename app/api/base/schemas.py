@@ -11,7 +11,7 @@ class Token(BaseModel):
     errcode: int
 
 class RefreshToken(BaseModel):
-    refresh_token: str = Field(title='刷新token')
+    refresh_token: str = Field(description='刷新token')
 
 class TokenData(BaseModel):
     """token data"""
@@ -20,4 +20,4 @@ class TokenData(BaseModel):
 
 class InputText(BaseModel):
     """输入文本"""
-    text: str = Field(max_length=2048, title='内容')
+    text: str = Field(max_length=2048, description='内容')
