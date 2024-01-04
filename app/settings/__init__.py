@@ -1,4 +1,4 @@
-import os
+import os, logging
 from typing import Dict
 from functools import lru_cache
 from dotenv import load_dotenv
@@ -13,15 +13,15 @@ from app.settings.production import ProductionSettings
 def get_settings():
     """获取配置信息"""
     env = os.getenv('MY_WEBLOG_ENV', None)
+    logging.warning(" WEBLOG_ENV is %s" % env)
     env_config: Dict = {
-        "development": DevelopmentSettings(),
-        "testing": TestingSettings(),
-        "production": ProductionSettings()
+        "development": DevelopmentSettings,
+        "testing": TestingSettings,
+        "production": ProductionSettings
     }
     if env is None or env not in env_config:
         raise EnvironmentError("MY_WEBLOG_ENV is Undefined!")
-    print(env)
-    return env_config[env]
+    return env_config[env]()
 
 
 settings = get_settings()

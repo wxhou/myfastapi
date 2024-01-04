@@ -79,7 +79,7 @@ class DevelopmentSettings(BaseSettings):
     ALLOWED_EXTENSIONS: Set[str] = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_VIDEO_EXTENSIONS | ALLOWED_AUDIO_EXTENSIONS
 
     # swagger
-    SERVERS: Optional[List] = os.getenv('SWAGGER_SERVERS', None)
+    SERVERS: Optional[List] = None
     SWAGGER_LOGIN: str = "/login/"
     SWAGGER_DOCS_URL: str = '/docs'
     SWAGGER_REDOC_URL: str = '/redocs'

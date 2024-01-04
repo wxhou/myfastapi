@@ -53,4 +53,6 @@ register_exceptions(app)
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host='0.0.0.0', port=8199)
+    uvicorn.run("weblog:app", host='0.0.0.0', port=settings.PORT,
+                reload=settings.RELOAD,
+                reload_excludes=['env', 'venv', 'alembic', 'vscode'])

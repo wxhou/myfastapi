@@ -22,7 +22,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def get_redis() -> AsyncRedis:
     """获取redis连接"""
     async with await init_redis_pool() as redis:
-        redis
+        yield redis
 
 
 def get_mongo() -> MongoClient:
@@ -37,6 +37,6 @@ limiter = Limiter(key_func=get_ipaddr)
 def register_extensions(app: FastAPI,
                         redis: AsyncRedis = Depends(get_redis),
                         mongo: MongoClient = Depends(get_mongo)):
-    app.state.mongo = redis
-    app.state.redis = mongo
+    app.state.mongo = mongo
+    app.state.redis = redis
     app.state.limiter = limiter
