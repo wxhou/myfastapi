@@ -107,10 +107,3 @@ async def api_routes(
         db.add(obj)
     await db.commit()
     return response_ok(data=result)
-
-
-@router.get("/sync", summary="同步路由", deprecated=True)
-def sync_routes(
-    user_agent: Optional[str] = Header(...)
-):
-    return response_ok(data=user_agent)
