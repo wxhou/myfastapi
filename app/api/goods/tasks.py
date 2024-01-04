@@ -8,7 +8,7 @@ from .model import Goods
 logger = get_task_logger(__name__)
 
 
-@celery.task(queue='transient')
+@celery.task(queue='weblog_transient')
 def add_goods_click_task(obj_id):
     """增加商品点击数"""
     with session() as db:

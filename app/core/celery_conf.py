@@ -28,12 +28,13 @@ broker_transport_options: Dict[str, int] = {
     'max_retries': 3
 }
 
-task_default_queue: str = 'celery'
-task_default_routing_key: str = task_default_queue
+task_default_queue: str = 'weblog'
+ttask_default_exchange: str = 'weblog'
+task_default_routing_key: str = 'weblog.key'
 task_queues: Tuple[Queue] = (
     Queue(task_default_queue, routing_key=task_default_routing_key),
-    Queue('transient', Exchange('transient', delivery_mode=1), # delivery_mode=1不会写入磁盘
-          routing_key='transient', durable=False), # task.apply_async((2,3), queue='transient', ignore_result=True)
+    Queue('weblog_transient', Exchange('weblogtransient', delivery_mode=1), # delivery_mode=1不会写入磁盘
+          routing_key='weblog.transient', durable=False), # task.apply_async((2,3), queue='transient', ignore_result=True)
 )
 imports: Tuple[str] = (
     'app.api.tasks',
