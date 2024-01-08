@@ -1,8 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from fastapi import Request, Depends, Security
-from fastapi.security import SecurityScopes, OAuth2PasswordBearer
+from fastapi import Depends, Security
+from fastapi.security import SecurityScopes
 from app.settings import settings
+from app.core.oauth2 import CustomOAuth2PasswordBearer
 from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.common.security import verify_password, decrypt_access_token
 from app.common.error import UserNotExist, UserNotActive, PermissionError, TokenExpiredError
@@ -12,7 +12,10 @@ from .schemas import TokenData
 
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.SWAGGER_LOGIN)
+oauth2_scheme = CustomOAuth2PasswordBearer(
+    tokenUrl=settings.SWAGGER_LOGIN,
+    scheme_name=settings.JWT_TOKEN_TYPE
+)
 
 
 async def get_current_user(db: AsyncSession = Depends(get_db),
