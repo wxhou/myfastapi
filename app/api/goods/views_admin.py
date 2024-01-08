@@ -9,7 +9,7 @@ from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis, limiter,
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.api.user.model import BaseUser
-from app.api.base.auth import get_current_active_user
+from app.api.user.auth import get_current_active_user
 from .model import Goods, GoodsCategory
 from .schemas import GoodsInsert, GoodsUpdate
 from .tasks import add_goods_click_task

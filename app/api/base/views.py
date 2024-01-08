@@ -11,13 +11,12 @@ from fastapi.responses import FileResponse
 from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
-from app.common.decorator import async_to_sync
 from app.utils.logger import logger
 from app.utils.times import dt_strftime, now, timedelta
 from app.api.user.model import BaseUser, BasePermission
 from .model import UploadModel
 from .schemas import InputText
-from .auth import get_current_active_user
+from ..user.auth import get_current_active_user
 from .tasks import upload_file_task, verify_file_exist_task
 
 

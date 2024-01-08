@@ -6,7 +6,7 @@ from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
 from app.api.user.model import BaseUser
-from app.api.base.auth import get_current_active_user
+from app.api.user.auth import get_current_active_user
 from .model import Category, Post, Comment
 from .schemas import PostInsert, PostUpdate, CommentInsert
 

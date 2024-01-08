@@ -7,7 +7,7 @@ include .env
 
 all:
 run:
-	nohup ./env/bin/gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199 --reload &
+	nohup ./env/bin/gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199&
 
 run2:
 	nohup ./env/bin/gunicorn weblog:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8199 --reload >/dev/null 2>&1 &
@@ -17,6 +17,20 @@ compose:
 
 compose2:
 	docker-compose up --env-file .env --build -d
+
+# DB migration
+
+dbinit:
+	alembic init alembic
+
+dbrevision:
+	alembic revision --autogenerate -m "update"
+
+dbupgrade:
+	alembic upgrade head
+
+dbdowngrade:
+	alembic downgrade head
 
 
 kill:

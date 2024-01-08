@@ -23,9 +23,7 @@ applications.get_swagger_ui_html = swagger_monkey_patch
 async def lifespan(app: FastAPI):
     # Load
     logger.info("Load Start Event!")
-    from app.extensions import register_extensions
     from app.api.router import register_router
-    register_extensions(app)
     register_router(app)
     yield
     # Clean

@@ -4,7 +4,7 @@ from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
 from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
-from app.api.base.auth import get_current_active_user
+from app.api.user.auth import get_current_active_user
 from app.api.user.model import BaseUser
 from .model import DeviceInfo
 from .schemas import DeviceInsert, DeviceUpdate

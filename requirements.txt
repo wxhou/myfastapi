@@ -8,7 +8,6 @@ alipay-sdk-python==3.6.584
 amqp==5.1.1
 annotated-types==0.6.0
 anyio==3.7.1
-asgiref==3.6.0
 async-timeout==4.0.2
 asyncio-redis==0.16.0
 asyncmy==0.2.8
@@ -107,8 +106,10 @@ tqdm==4.66.1
 typer==0.9.0
 typing_extensions==4.8.0
 tzdata==2023.3
+ua-parser==0.18.0
 ulid-py==1.1.0
 urllib3==2.0.6
+user-agents==2.2.0
 uvicorn==0.20.0
 uvloop==0.17.0
 vine==5.1.0

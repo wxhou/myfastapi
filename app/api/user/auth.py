@@ -14,6 +14,7 @@ from .schemas import TokenData
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.SWAGGER_LOGIN)
 
+
 async def get_current_user(db: AsyncSession = Depends(get_db),
                            redis: AsyncRedis = Depends(get_redis),
                            token: str = Depends(oauth2_scheme)):

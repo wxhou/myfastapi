@@ -2,6 +2,23 @@ from typing import Optional
 from pydantic import BaseModel, Field, EmailStr
 
 
+class Token(BaseModel):
+    """ token """
+    access_token: str
+    refresh_token: str
+    token_type: str
+    data: dict
+    errcode: int
+
+class RefreshToken(BaseModel):
+    refresh_token: str = Field(description='刷新token')
+
+class TokenData(BaseModel):
+    """token data"""
+    username: Optional[str] = None
+
+
+
 class UserRegister(BaseModel):
     """注册用户"""
     username: str = Field(description='用户名', min_length=1, max_length=16)

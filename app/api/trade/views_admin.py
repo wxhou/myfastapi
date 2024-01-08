@@ -10,7 +10,7 @@ from app.utils.randomly import random_str
 from app.utils.AliPay import ALIPAY, AlipayTradePagePayModel, AlipayTradePagePayRequest, verify_with_rsa
 from app.api.user.model import BaseUser, BaseUserAddress
 from app.api.goods.model import Goods
-from app.api.base.auth import get_current_active_user
+from app.api.user.auth import get_current_active_user
 from .model import ShoppingCart, ShoppingOrder, ShoppingOrderGoods
 from .schemas import ShoppingChartInsert, ShoppingOrderInsert
 from .tasks import update_inventory_task, update_cart_task

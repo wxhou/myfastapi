@@ -21,7 +21,7 @@ class PageNumberPagination(object):
         return {"total": _total, "pages": _pages}
 
     async def __call__(self, model, query_filter=None, order_by=None):
-        if not query_filter is None:
+        if query_filter is None:
             query_filter = [model.status==0]
         if order_by is None:
             order_by = model.id.desc()

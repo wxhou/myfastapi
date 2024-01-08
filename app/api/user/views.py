@@ -6,7 +6,7 @@ from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
 from app.utils.logger import logger
-from app.api.base.auth import get_current_active_user
+from .auth import get_current_active_user
 from .model import BaseUser, BaseUserCollect, BaseUserAddress
 from .tasks import send_register_email_task
 from .schemas import UserRegister, UserModify, UserAddressUpdate

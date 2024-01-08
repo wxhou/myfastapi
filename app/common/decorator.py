@@ -1,32 +1,43 @@
+from typing import Callable
 import sys, asyncio
 from functools import wraps
 from app.utils.times import sleep
-from asgiref.sync import sync_to_async, async_to_sync # NO DEL
-from app.extensions.redis import redis_client
+from app.extensions.cache import redis_client
 
 
-def sync_run_async(func):
+def sync_run_async(func: Callable):
     """同步中运行异步函数
     : celery
     """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if asyncio.iscoroutinefunction(func):
-            if sys.platform == 'win32':
-                return async_to_sync(func)(*args, **kwargs) # QA Fail
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+        if not asyncio.iscoroutinefunction(func):
+            return func(*args, **kwargs)
+        # if sys.platform == 'win32':
+            # return async_to_sync(func)(*args, **kwargs) # QA Fail
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        else:
             task = loop.create_task(func(*args, **kwargs))
             loop.run_until_complete(task)
             return task.result()
-        else:
-            return func(*args, **kwargs)
-
     return wrapper
+
+
+class Singleton(type):
+    """一个单例
+    # https://zhuanlan.zhihu.com/p/37534850
+    """
+
+    def __call__(cls, *args, **kwargs):
+        if not hasattr(cls, "_instances"):
+            cls._instances = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances
+
 
 
 def singe_task(lock_name: str, seconds: int=60*60):

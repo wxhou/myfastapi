@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from app.extensions.websocket import manager
+from app.extensions import websocket_manager
 
 
 router_message_admin = APIRouter()
@@ -52,12 +52,12 @@ async def index():
 
 @router_message_admin.websocket('/ws/{client_id}')
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    await manager.connect(websocket, client_id)
+    await websocket_manager.connect(websocket, client_id)
     try:
         while 1:
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+            await websocket_manager.send_personal_message(f"You wrote: {data}", websocket)
+            await websocket_manager.broadcast(f"Client #{client_id} says: {data}")
     except WebSocketDisconnect:
-        manager.disconnect(websocket, client_id)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        websocket_manager.disconnect(websocket, client_id)
+        await websocket_manager.broadcast(f"Client #{client_id} left the chat")
