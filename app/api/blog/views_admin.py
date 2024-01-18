@@ -1,7 +1,7 @@
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, Request, Query, Security
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.extensions import get_db, get_redis, AsyncSession, aioredis
 from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -86,7 +86,7 @@ async def post_list(
 @router_blog_admin.get('/post/info/', summary='文章详情')
 async def post_info(
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     post_id: int = Query(description="文章ID", ge=1)
 ):
     """文章详情"""
@@ -119,7 +119,7 @@ async def post_top(
     title: str = Query(default=None),
     order_type: int = Query(default=1, gt=0, le=3),
     paginate: PageNumberPagination = Depends(),
-    redis: AsyncRedis = Depends(get_redis)
+    redis: aioredis.Redis = Depends(get_redis)
 ):
     """热门文章"""
     query_filter = [Post.status==0, Post.is_publish.is_(True)]
@@ -158,7 +158,7 @@ async def post_delete(
 async def post_comment_insert(
     comment: CommentInsert,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user = Security(get_current_active_user)
 ):
     """文章评论"""

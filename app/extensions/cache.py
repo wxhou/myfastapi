@@ -1,35 +1,15 @@
-from typing import Any
-from redis import Redis as SyncRedis
-from aioredis import Redis as _AsyncRedis
-from app.common.resolve import load_object, dump_object
-from app.utils.logger import logger
+from redis import Redis
+import redis.asyncio as aioredis
 from app.settings import settings
 
 
-class AsyncRedis(_AsyncRedis):
-    """自定义Redis"""
-
-    async def get_pickle(self, key) -> Any:
-        res = await self.get(key)
-        return load_object(res)
-
-    async def set_pickle(self, key, value, timeout=None, **kwargs):
-        dump = dump_object(value)
-        result = await self.set(key, value=dump, ex=timeout, **kwargs)
-        return result
-
-# 参考: https://github.com/grillazz/fastapi-redis/tree/main/app
+redis = aioredis.from_url(
+    url=settings.REDIS_URL,
+    encoding=settings.GLOBAL_ENCODING
+)
 
 
-async def init_redis_pool() -> AsyncRedis:
-    redis = await AsyncRedis.from_url(
-        url=settings.REDIS_URL,
-        encoding=settings.GLOBAL_ENCODING)
-    return redis
-
-
-
-redis_client = SyncRedis.from_url(
+redis_client = Redis.from_url(
     url=settings.REDIS_URL,
     encoding=settings.GLOBAL_ENCODING
 )

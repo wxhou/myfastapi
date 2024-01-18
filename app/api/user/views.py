@@ -1,7 +1,7 @@
 from datetime import timedelta
 from sqlalchemy import or_, select, update
 from fastapi import APIRouter, Depends, Request, Query, Path, Security
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.extensions import get_db, get_redis, AsyncSession, aioredis
 from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import set_password, create_access_token
@@ -20,7 +20,7 @@ async def user_register(
     request: Request,
     user: UserRegister,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis)
+    redis: aioredis.Redis = Depends(get_redis)
 ):
     """用户注册"""
     obj = await db.execute(select(BaseUser).where(or_(BaseUser.username == user.username,
@@ -45,7 +45,7 @@ async def user_register(
 async def user_active(
     token :str = Path(description="激活用户token"),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis)
+    redis: aioredis.Redis = Depends(get_redis)
 ):
     """用户激活"""
     _uid = await redis.get(f"user_register_{token}")

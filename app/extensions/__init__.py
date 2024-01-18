@@ -2,13 +2,14 @@ from typing import AsyncGenerator
 from slowapi import Limiter
 from slowapi.util import get_ipaddr
 from .db import async_session, session, AsyncSession
-from .cache import init_redis_pool, redis_client, AsyncRedis
-from .mongo import get_mongo, MongoClient
-from .websocket import websocket_manager
+from .cache import redis, aioredis, redis_client, Redis
+from .mongo import mongo, mongo_client, MongoClient
+from .websocket import WebsocketManager
 from .scheduler import job_scheduler
 
 
 limiter = Limiter(key_func=get_ipaddr)
+websocket_manager = WebsocketManager()
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -16,13 +17,11 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         yield session
 
+def get_mongo() -> MongoClient:
+    """获取MongoDB链接"""
+    return mongo
 
-async def get_redis() -> AsyncRedis:
+
+def get_redis() -> aioredis.Redis:
     """获取redis连接"""
-    async with await init_redis_pool() as redis:
-        yield redis
-
-
-def register_extensions(app):
-    """注册插件"""
-    pass
+    return redis

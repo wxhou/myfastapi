@@ -8,7 +8,7 @@ from sqlalchemy import select
 from fastapi import APIRouter, Depends, Request, BackgroundTasks
 from fastapi import Query, File, UploadFile, Form, Header
 from fastapi.responses import FileResponse
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.extensions import get_db, get_redis, AsyncSession, aioredis
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -64,7 +64,7 @@ async def text_to_audio(
     text: str = Query(..., example='你好哟，我是智能语音助手，小布', max_length=500),
     lang: str = Query(default='zh', description="选择语言\nzh中文|en英文", pattern=r'zh|en'),
     model: str = Query(default=None, description='选择模型\nedge|pyttsx3', pattern=r'edge|pyttsx3'),
-    redis: AsyncRedis = Depends(get_redis)
+    redis: aioredis.Redis = Depends(get_redis)
 ):
 
     VOICE = settings.EDGE_VOICE_LANG[lang]

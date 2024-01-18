@@ -1,7 +1,7 @@
 from sqlalchemy import select, update
 from fastapi import APIRouter, Depends, Request, Query, Security
 from fastapi.responses import Response
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.extensions import get_db, get_redis, AsyncSession, aioredis
 from app.settings import settings
 from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
@@ -43,7 +43,7 @@ async def trade_shopping_list(
 async def trade_shopping_insert(request: Request,
     args: ShoppingChartInsert,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_insert'])
 ):
     """购物车新增"""
@@ -74,7 +74,7 @@ async def trade_shopping_insert(request: Request,
 async def trade_shopping_delete(request: Request,
     goos_id: int = Query(description='商品ID', ge=1),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['trade_shopping_delete'])
 ):
     """购物车删除"""
@@ -96,7 +96,7 @@ async def trade_shopping_delete(request: Request,
 async def trade_order_insert(request: Request,
     args: ShoppingOrderInsert,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_insert'])
 ):
     """新增订单"""
@@ -122,7 +122,7 @@ async def trade_order_insert(request: Request,
 async def trade_order_info(request: Request,
     order_id : int = Query(description='订单ID'),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])
 ):
     """详情订单"""
@@ -151,7 +151,7 @@ async def trade_order_info(request: Request,
 async def trade_order_pay(request: Request,
     order_id : int = Query(description='订单ID'),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_info'])
 ):
     """详情订单"""
@@ -194,7 +194,7 @@ async def trade_order_notice(data: dict):
 async def trade_order_delete(request: Request,
     order_id: int = Query(description='订单ID', ge=1),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['trade_order_delete'])
 ):
     """删除订单"""

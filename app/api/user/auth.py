@@ -3,7 +3,7 @@ from fastapi import Depends, Security
 from fastapi.security import SecurityScopes
 from app.settings import settings
 from app.core.oauth2 import CustomOAuth2PasswordBearer
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.extensions import get_db, get_redis, AsyncSession, aioredis
 from app.common.security import verify_password, decrypt_access_token
 from app.common.error import UserNotExist, UserNotActive, PermissionError, TokenExpiredError
 from app.utils.logger import logger
@@ -19,7 +19,7 @@ oauth2_scheme = CustomOAuth2PasswordBearer(
 
 
 async def get_current_user(db: AsyncSession = Depends(get_db),
-                           redis: AsyncRedis = Depends(get_redis),
+                           redis: aioredis.Redis = Depends(get_redis),
                            token: str = Depends(oauth2_scheme)):
     """获取当前登录用户"""
     is_token_alive = await redis.exists("weblog_access_token_{}".format(token))
@@ -37,7 +37,7 @@ async def get_current_user(db: AsyncSession = Depends(get_db),
 async def get_current_active_user(
     security_scopes: SecurityScopes,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Depends(get_current_user)):
     """
     获取激活用户

@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError
 from aioredis.exceptions import ConnectionError
 from app.common.response import ErrCode, response_err
 from app.common.error import UserNotExist, UserNotActive, PermissionError, DeviceNotFound, TokenExpiredError
+from app.extensions import limiter
 from app.utils.logger import logger
 
 
@@ -18,7 +19,7 @@ def register_exceptions(app: FastAPI):
         """请求过多处理"""
         logger.error(request.url)
         response = response_err(ErrCode.TOO_MANY_REQUEST, detail=f"Rate limit exceeded: {exc.detail}")
-        response = request.app.state.limiter._inject_headers(
+        response = limiter._inject_headers(
             response, request.state.view_rate_limit
         )
         return response

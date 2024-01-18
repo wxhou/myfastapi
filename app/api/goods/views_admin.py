@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query, Security
 from app.common.pagation import PageNumberPagination
 from app.core.celery_app import redis_scheduler_entry
 from app.common.response import ErrCode, response_ok, response_err
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis, limiter, websocket
+from app.extensions import get_db, get_redis, AsyncSession, aioredis, limiter, websocket
 from app.utils.logger import logger
 from app.utils.randomly import random_str
 from app.api.user.model import BaseUser
@@ -48,7 +48,7 @@ async def goods_list(
 async def goods_info(
     goods_id: int = Query(..., description='商品ID'),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis)
+    redis: aioredis.Redis = Depends(get_redis)
 ):
     obj = await db.scalar(select(Goods).where(Goods.id==goods_id, Goods.status==0))
     if obj is None:
@@ -63,7 +63,7 @@ async def goods_info(
 async def goods_insert(
     goods: GoodsInsert,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['goods_insert'])
 ):
     """更新用户信息"""
@@ -84,7 +84,7 @@ async def goods_update(
     goods: GoodsUpdate,
     goods_id: int = Query(default=True, ge=1, description='商品ID'),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['goods_update'])
 ):
     """更新用户信息"""

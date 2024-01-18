@@ -4,7 +4,7 @@ import httpx
 import traceback
 from user_agents import parse
 from fastapi import Depends, Request
-from app.extensions import get_redis, AsyncRedis
+from app.extensions import get_redis, aioredis
 from app.utils.logger import logger
 
 
@@ -51,7 +51,7 @@ async def get_ipv4_address(ipv4, _redis):
 
 async def get_client_info(
     request: Request,
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
 ):
     """获取客户端的信息
     """

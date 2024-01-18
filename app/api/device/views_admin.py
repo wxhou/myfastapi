@@ -1,6 +1,6 @@
 from sqlalchemy import select, update
 from fastapi import APIRouter, Query, Body, Security, Depends
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.extensions import get_db, get_redis, AsyncSession, aioredis
 from app.common.pagation import PageNumberPagination
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger

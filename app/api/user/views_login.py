@@ -3,7 +3,7 @@ from sqlalchemy import select
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from app.extensions import get_db, get_redis, AsyncSession, AsyncRedis
+from app.extensions import get_db, get_redis, AsyncSession, aioredis
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.common.security import create_access_token, create_refresh_token, decrypt_refresh_token
@@ -20,7 +20,7 @@ router_login = APIRouter(tags=['Login'])
 @router_login.post('/login/', response_model=Token, summary='登录')
 async def login_access_token(
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
     """登录接口"""
@@ -45,7 +45,7 @@ async def login_access_token(
 async def login_refresh_token(
     data: RefreshToken,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
 ):
     """登录接口"""
 
@@ -69,7 +69,7 @@ async def login_refresh_token(
 
 @router_login.api_route('/logout/', methods=['GET', 'POST'], summary='退出登录')
 async def logout(
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     token: str = Depends(oauth2_scheme)
 ):
     """退出登录"""

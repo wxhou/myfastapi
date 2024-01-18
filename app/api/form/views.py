@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 from sqlalchemy import func, or_, select, update
 from fastapi import APIRouter, Depends, Query, Body, Security
-from app.extensions import get_db, get_redis, get_mongo, AsyncSession, AsyncRedis, MongoClient
+from app.extensions import get_db, get_redis, get_mongo, AsyncSession, aioredis, MongoClient
 from app.settings import settings
 from app.common.response import ErrCode, response_ok, response_err
 from app.utils.logger import logger
@@ -19,7 +19,7 @@ router_form_admin = APIRouter()
 async def template_insert(
     args: TemplateInsert,
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_insert'])
 ):
     """新建模板"""
@@ -39,7 +39,7 @@ async def template_design(
     content: dict,
     template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     mongo: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_design'])
 ):
@@ -93,7 +93,7 @@ async def template_design(
 async def template_info(
     template_id: int = Query(description='模板ID'),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     mongo: MongoClient = Depends(get_mongo),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_info'])
 ):
@@ -123,7 +123,7 @@ async def template_publish(
     template_id: int = Body(description='模板ID', ge=1),
     version_id: int = Body(description='版本ID', ge=1),
     db: AsyncSession = Depends(get_db),
-    redis: AsyncRedis = Depends(get_redis),
+    redis: aioredis.Redis = Depends(get_redis),
     current_user: BaseUser = Security(get_current_active_user, scopes=['template_info'])
 ):
     """表单发布"""
