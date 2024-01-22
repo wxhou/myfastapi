@@ -1,5 +1,5 @@
 import os, logging
-from typing import Dict
+from typing import Dict, Union
 from functools import lru_cache
 from dotenv import load_dotenv
 load_dotenv('.env')
@@ -24,7 +24,7 @@ def get_settings():
     return env_config[env]()
 
 
-settings = get_settings()
+settings: Union[DevelopmentSettings, TestingSettings, ProductionSettings] = get_settings()
 
 if __name__ == '__main__':
     print(settings.BASEDIR)

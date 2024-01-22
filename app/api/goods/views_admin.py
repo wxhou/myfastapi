@@ -3,7 +3,7 @@ from celery.schedules import crontab
 from sqlalchemy import or_, select, update
 from fastapi import APIRouter, Depends, Query, Security
 from app.common.pagation import PageNumberPagination
-from app.core.celery_app import redis_scheduler_entry
+from app.core.celery_app import RedisSchedulerEntry
 from app.common.response import ErrCode, response_ok, response_err
 from app.extensions import get_db, get_redis, AsyncSession, aioredis, limiter, websocket
 from app.utils.logger import logger
@@ -74,8 +74,7 @@ async def goods_insert(
     await db.commit()
     if _num := args.get("goods_num"):
         await redis.set(f"goods_num_{args['id']}", _num)
-    await redis_scheduler_entry.save('hellogoods', 'app.api.goods.tasks.hello_goods',
-                                      crontab(), args=(obj.id,))
+    RedisSchedulerEntry('hellogoods').save('app.api.goods.tasks.add_goods_click_task', crontab(), [obj.id])
     return response_ok(data={"id": obj.id})
 
 
@@ -108,4 +107,5 @@ async def goods_delete(
     """更新用户信息"""
     await db.execute(update(Goods).where(Goods.id==goods_id, Goods.status==0).values(status=-1))
     await db.commit()
+    RedisSchedulerEntry("hellogoods").delete()
     return response_ok()

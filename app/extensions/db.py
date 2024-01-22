@@ -9,7 +9,7 @@ from app.settings import settings
 
 
 engine = create_engine(
-    url=settings.SQLALCHEMY_DATABASE_ASYNC_URL,
+    url=settings.SQLALCHEMY_DATABASE_SYNC_URL,
     pool_size=settings.SQLALCHEMY_POOL_SIZE,
     echo=settings.SQLALCHEMY_ECHO
 )
