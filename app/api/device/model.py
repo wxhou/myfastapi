@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, Integer, SmallInteger, DateTime, Boolean, Text
+from sqlalchemy import Column, String, Integer, SmallInteger, DateTime, Boolean, Enum
 from app.api.model import Base
+from app.api.enums import DeviceType
 
 
 class DeviceInfo(Base):
@@ -11,7 +12,7 @@ class DeviceInfo(Base):
     device_register_code = Column(String(32))  # 设备注册码 注册时自动生成
     device_name = Column(String(64))  # 设备名称
     device_code = Column(String(64), nullable=False)  # 设备唯一编号
-    device_type = Column(SmallInteger, nullable=False, index=True)  # 设备类型  1:竖屏 2:横屏 3:广告横屏 4:广告竖屏
+    device_type = Column(Enum(DeviceType), nullable=False, index=True)  # 设备类型  1:竖屏 2:横屏 3:广告横屏 4:广告竖屏
     device_position = Column(String(64))  # 设备位置
     device_screen_type = Column(SmallInteger, nullable=False) # 屏幕类型 1竖屏  2横屏
     device_screen_number = Column(String(64))  # 设备屏幕编号

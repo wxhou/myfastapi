@@ -1,11 +1,12 @@
 from typing import Optional, Union, List, Literal
 from pydantic import BaseModel, Field, IPvAnyNetwork
+from app.api.enums import DeviceType
 
 
 class DeviceInsert(BaseModel):
     """新建设备"""
     device_name: str = Field(description='设备名称', max_length=32)
-    device_type: Literal[1,2,3] = Field(description='设备分类\n1触摸屏2广告机')
+    device_type: DeviceType = Field(description='设备分类\n1触摸屏2广告机')
     device_number: Optional[str] = Field(default=None, description='设备编号', max_length=64)
     device_position: Optional[str] = Field(default=None, description='设备位置', max_length=64)
     device_screen_type: Literal[1,2] = Field(description='屏幕分类\n1竖屏2横屏')
@@ -18,7 +19,7 @@ class DeviceInsert(BaseModel):
 class DeviceUpdate(BaseModel):
     """更新设备"""
     device_name: str = Field(default=None, description='设备名称', max_length=32)
-    device_type: Literal[1,2] = Field(default=None, description='设备分类\n1竖屏2横屏')
+    device_type: DeviceType = Field(default=None, description='设备分类\n1竖屏2横屏')
     device_position: Optional[str] = Field(default=None, description='设备位置', max_length=64)
     device_number: Optional[str] = Field(default=None, description='设备编号', max_length=64)
     device_screen_number: Optional[str] = Field(default=None, description='设备屏幕编号', max_length=64)
